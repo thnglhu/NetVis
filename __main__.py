@@ -20,11 +20,11 @@ if __name__ == '__main__':
     graph.vs['color'] = 'red'
     graph.fit_canvas(canvas)
 
-    # shortest_paths = graph.get_shortest_paths(0, to=1102)[0]
+    shortest_paths = graph.get_shortest_paths(0, to=1102)[0]
 
-#    for idx in shortest_paths:
-#        graph.vs[idx]['color'] = 'blue'
-#        graph.vs[idx]['tag'] = 'vertex-highlight'
+    for idx in shortest_paths:
+        graph.vs[idx]['color'] = 'blue'
+        graph.vs[idx]['tag'] = 'vertex-highlight'
 
     # canvas.lift('vertex')
     # canvas.lower('edge')

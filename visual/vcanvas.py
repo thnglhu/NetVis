@@ -1,6 +1,8 @@
 import tkinter as tk
 import numpy as np
 from mathplus.geometry import *
+
+
 class Canvas(tk.Canvas):
     def __init__(self, master=None, cnf=dict(), **kwargs):
         tk.Canvas.__init__(self, master, cnf, **kwargs)
@@ -12,24 +14,26 @@ class Canvas(tk.Canvas):
         self.__scan_obj = None
         self.__focus_object = None
         self.__target = None
-        self.bind("<Button-2>", self.__motion_init)
-        self.bind("<B2-Motion>", self.__motion)
+        # self.bind("<Button-2>", self.__motion_init)
+        # self.bind("<B2-Motion>", self.__motion)
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
         self.bind("<Double-Button-1>", self.__focus)
         self.bind("<Button-1>", self.__motion2_init)
         self.bind("<B1-Motion>", self.__motion2)
+
     def clear(self, *args):
         if args:
             pass
         else:
             tk.Canvas.delete(self, "all")
+
     def create_mapped_circle(self, base, *args, **kw):
         x, y, radius = args
         position = self.__convert_position(x, y)
         object = self.__objects.get(base)
         if object is None:
-            #if point_is_inside_rect(position, [-radius, -radius], self.__size + [radius, radius]):
+            # if point_is_inside_rect(position, [-radius, -radius], self.__size + [radius, radius]):
             self.__objects[base] = tk.Canvas.create_oval(self, *(position - radius), *(position + radius), **kw)
             self.__invert_objects[self.__objects[base],] = base
         else:
@@ -43,8 +47,8 @@ class Canvas(tk.Canvas):
         position_B = self.__convert_position(x, y)
         object = self.__objects.get(base)
         if object is None:
-            #top_left, bottom_right = [0, 0], self.__size
-            #if     point_is_inside_rect(position_A, top_left, bottom_right) \
+            # top_left, bottom_right = [0, 0], self.__size
+            # if     point_is_inside_rect(position_A, top_left, bottom_right) \
             #    or point_is_inside_rect(position_B, top_left, bottom_right) \
             #    or segments_are_collided_rect(position_A, position_B, top_left, bottom_right):
             self.__objects[base] = tk.Canvas.create_line(self, *position_A, *position_B, **kw)
@@ -64,7 +68,8 @@ class Canvas(tk.Canvas):
         top_left = np.array(top_left)
         bottom_right = np.array(bottom_right)
         size = bottom_right - top_left
-        if (size == 0).any(): self.__scale = 1
+        if (size == 0).any():
+            self.__scale = 1
         else:
             scale = self.__size / size
             self.__scale = max(min(scale), 1)
@@ -99,40 +104,27 @@ class Canvas(tk.Canvas):
         self.tag_raise('vertex')
         self.tag_raise('edge-highlight')
         self.tag_raise('vertex-highlight')
+
     def __pivot(self):
         return self.canvasx(0), self.canvasy(0)
 
-    def __motion_init(self, event):
-        self.last = event.x, event.y
-
-    def __motion(self, event):
-        new = event.x, event.y
-        self.scan_mark(*self.last)
-        self.scan_dragto(*new, gain=1)
-        self.last = new
-
     def __scroll(self, event):
-        self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1/1.2)
+        self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
         temp = self.find_withtag(tk.CURRENT)
         if temp != self.__scan_obj: obj = self.__invert_objects.get(temp, None)
-            # if obj: obj.visual()
-
-        #if temp == self.__scan_obj:
-            #print(temp, self.__invert_objects.get(temp, None))
-            #print(self.gettags(tk.CURRENT))
-
-            #self.itemconfig(self.__scan_obj, fill="red")
         self.__scan_obj = temp
+
     def __focus(self, event):
         self.__focus_object and self.__focus_object.unfocus(self)
         self.__focus_object = None
         if self.__scan_obj:
             self.__focus_object = self.__invert_objects.get(self.__scan_obj, None)
             self.__focus_object and self.__focus_object.focus(self)
+
     def __motion2_init(self, event):
-        self.last2 = np.array((event.x, event.y))
+        self.last = np.array((event.x, event.y))
         if self.__scan_obj:
             self.__target = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vgraph as vg
@@ -143,10 +135,11 @@ class Canvas(tk.Canvas):
     def __motion2(self, event):
         new = event.x, event.y
         if self.__target:
-            # print()
-            # vector = self.last2 - new
-            # print(vector)
-            vector = self.__invert_position(*new) - self.__invert_position(*self.last2)
+            vector = self.__invert_position(*new) - self.__invert_position(*self.last)
             self.__target.motion(self, *vector)
-            self.last2 = np.array(new)
-
+            self.last = np.array(new)
+        else:
+            new = event.x, event.y
+            self.scan_mark(*self.last)
+            self.scan_dragto(*new, gain=1)
+            self.last = new
