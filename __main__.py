@@ -22,17 +22,17 @@ if __name__ == '__main__':
 
     shortest_paths = graph.get_shortest_paths(0, to=1102)[0]
 
-    for idx in shortest_paths:
-        graph.vs[idx]['color'] = 'blue'
-        graph.vs[idx]['tag'] = 'vertex-highlight'
+    # graph.convex_hull(shortest_paths)
+
 
     # canvas.lift('vertex')
     # canvas.lower('edge')
     # canvas.lift('vertex-highlight')
 
-    graph.display(canvas)
     graph.load()
     graph.display(canvas)
+    # graph.load()
+    # graph.display(canvas)
 
    # root = tk.Tk()
    # root.geometry("400x300")
