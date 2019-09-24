@@ -125,7 +125,7 @@ class Canvas(tk.Canvas):
     def __focus(self, event):
         need_fix = False
         if self.__focus_object:
-            self.__focus_object.unfocus(self)
+            self.__focus_object.blur(self)
             need_fix = True
         self.__focus_object = None
         if self.__scan_obj:
