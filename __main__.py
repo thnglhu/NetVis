@@ -1,5 +1,6 @@
 from visual import vgraph, vcanvas
 import tkinter as tk
+import test
 
 if __name__ == '__main__':
 
@@ -12,7 +13,7 @@ if __name__ == '__main__':
 
     root = tk.Tk()
 
-    canvas = vcanvas.Canvas(root, width=1024, height=1024)
+    canvas = vcanvas.Canvas(root, width=700, height=700)
     canvas.pack()
 
     # from threading import Thread
@@ -20,19 +21,20 @@ if __name__ == '__main__':
     graph.vs['color'] = 'red'
     graph.fit_canvas(canvas)
 
-    shortest_paths = graph.get_shortest_paths(0, to=1102)[0]
+    test.test(graph)
+    path = graph.get_shortest_paths(0, 1102)[0]
+    test.highlight_shortest_path(graph, path)
+    # graph.convex_hull(shortest_paths)
 
-    for idx in shortest_paths:
-        graph.vs[idx]['color'] = 'blue'
-        graph.vs[idx]['tag'] = 'vertex-highlight'
 
     # canvas.lift('vertex')
     # canvas.lower('edge')
     # canvas.lift('vertex-highlight')
 
-    graph.display(canvas)
     graph.load()
     graph.display(canvas)
+    # graph.load()
+    # graph.display(canvas)
 
    # root = tk.Tk()
    # root.geometry("400x300")
