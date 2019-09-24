@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     root = tk.Tk()
 
-    canvas = vcanvas.Canvas(root, width=700, height=700)
+    canvas = vcanvas.Canvas(root, width=800, height=700)
     canvas.pack()
 
     # from threading import Thread
