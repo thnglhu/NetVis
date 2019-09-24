@@ -22,7 +22,7 @@ if __name__ == '__main__':
     graph.fit_canvas(canvas)
 
     test.test(graph)
-    path = graph.get_shortest_paths(0, 1102)[0]
+    path = graph.get_shortest_paths(0, 1105)[0]
     test.highlight_shortest_path(graph, path)
     # graph.convex_hull(shortest_paths)
 
