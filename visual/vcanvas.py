@@ -36,7 +36,6 @@ class Canvas(tk.Canvas):
         position = self.__convert_position(x, y)
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is None:
-            # if point_is_inside_rect(position, [-radius, -radius], self.__size + [radius, radius]):
             self.__graph_objects[base] = tk.Canvas.create_oval(self, *(position - radius), *(position + radius), **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
         else:
@@ -50,10 +49,6 @@ class Canvas(tk.Canvas):
         end_b = self.__convert_position(x, y)
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is None:
-            # top_left, bottom_right = [0, 0], self.__size
-            # if     point_is_inside_rect(end_a, top_left, bottom_right) \
-            #    or point_is_inside_rect(end_b, top_left, bottom_right) \
-            #    or segments_are_collided_rect(end_a, end_b, top_left, bottom_right):
             self.__graph_objects[base] = tk.Canvas.create_line(self, *end_a, *end_b, **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
         else:
@@ -146,7 +141,12 @@ class Canvas(tk.Canvas):
         if self.__scan_obj:
             self.__target = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vgraph as vg
-            if not isinstance(self.__target, vg.Vertex): self.__target = None
+            if not isinstance(self.__target, vg.Vertex):
+                self.__target = None
+            else:
+                print(self.coords(self.__scan_obj))
+                print(self.__target.attributes['x'], self.__target.attributes['y'])
+                print()
         else:
             self.__target = None
 
