@@ -8,9 +8,9 @@ class Canvas(tk.Canvas):
         tk.Canvas.__init__(self, master, cnf, **kwargs)
         if cnf is None:
             cnf = dict()
-        self._init_subclass(cnf, **kwargs)
+        self.__init_subclass(cnf, **kwargs)
 
-    def _init_subclass(self, cnf, **kwargs):
+    def __init_subclass(self, cnf=None, **kwargs):
         self.__scale = 1.0
         self.__angle = 0.0
         self.__size = np.array([kwargs['width'], kwargs['height']])
@@ -19,11 +19,14 @@ class Canvas(tk.Canvas):
         self.__scan_obj = None
         self.__focus_object = None
         self.__target = None
+        self.__movable = False
+        self.subscriber = dict()
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
         self.bind("<Double-Button-1>", self.__focus)
         self.bind("<Button-1>", self.__motion_init)
         self.bind("<B1-Motion>", self.__motion)
+        self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
         if args:
@@ -71,13 +74,17 @@ class Canvas(tk.Canvas):
     def scale_to_fit(self, top_left, bottom_right):
         top_left = np.array(top_left)
         bottom_right = np.array(bottom_right)
+        top_left[0], bottom_right[0] = sorted((top_left[0], bottom_right[0]))
+        top_left[1], bottom_right[1] = sorted((top_left[1], bottom_right[1]))
         size = bottom_right - top_left
+        print(size)
         if (size == 0).any():
             self.__scale = 1
         else:
             scale = self.__size / size
             self.__scale = max(min(scale), 1)
         self.center_to((bottom_right + top_left) / 2)
+        self.reallocate()
 
     def center_to(self, raw_pos):
         center = self.__convert_position(*raw_pos)
@@ -101,6 +108,9 @@ class Canvas(tk.Canvas):
         pivot2 = pos2 + vector
         self.scan_mark(0, 0)
         self.scan_dragto(*(pivot - pivot2).astype(int), gain=1)
+        self.reallocate()
+
+    def reallocate(self):
         for canvas_object in self.__graph_objects:
             canvas_object.display(self)
         self.fix_order()
@@ -143,21 +153,35 @@ class Canvas(tk.Canvas):
             from visual import vgraph as vg
             if not isinstance(self.__target, vg.Vertex):
                 self.__target = None
-            else:
-                print(self.coords(self.__scan_obj))
-                print(self.__target.attributes['x'], self.__target.attributes['y'])
-                print()
         else:
             self.__target = None
 
     def __motion(self, event):
         new = event.x, event.y
-        if self.__target:
+        if self.__movable and self.__target:
             vector = self.__invert_position(*new) - self.__invert_position(*self.last)
             self.__target.motion(self, *vector)
-            self.last = np.array(new)
         else:
             new = event.x, event.y
             self.scan_mark(*self.last)
             self.scan_dragto(*new, gain=1)
-            self.last = new
+        self.last = np.array(new)
+        x = self.subscriber.get('label_x')
+        y = self.subscriber.get('label_y')
+        if x and y:
+            x.labelText, y.labelText = new
+
+    def __resize(self, event):
+        self.__size[0] = event.width
+        self.__size[1] = event.height
+        self.reallocate()
+
+    @staticmethod
+    def convert(canvas):
+        if isinstance(canvas, Canvas):
+            raise NotImplementedError
+        canvas.__class__ = Canvas
+        height = canvas.winfo_height()
+        width = canvas.winfo_width()
+        canvas.__init_subclass(width=width, height=height)
+        return canvas
