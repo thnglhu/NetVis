@@ -4,6 +4,7 @@ from collections.abc import Iterable
 
 import igraph as ig
 import numpy as np
+import operator
 from scipy.spatial import ConvexHull
 
 
@@ -76,8 +77,12 @@ class Graph(ig.Graph):
         # self.hulls = [Hull(vertices)]
 
     def add_vertices(self, n):
+        # TODO add vertices
         super().add_vertices(n)
 
+    def get_vs(self, **kwargs):
+        seq = ItemSequence(self.vertices, *self.vertices)
+        return seq.select(**kwargs)
 
     @staticmethod
     def convert(igraph):
@@ -93,7 +98,8 @@ class Graph(ig.Graph):
 
 
 class ItemSequence:
-    def __init__(self, *items):
+    def __init__(self, pool, *items):
+        self.pool = pool
         self.items = items
 
     def __setitem__(self, key, value):
@@ -108,6 +114,41 @@ class ItemSequence:
             result.append(item[key])
         return result
 
+    def select_from_indices(self, indices):
+        items = []
+        for index in indices:
+            items.append(self.pool[index])
+        return ItemSequence(self.pool, *items)
+
+    def select(self, **kwargs):
+        result = self
+        operators = {
+            "lt": operator.lt,\
+            "gt": operator.gt,\
+            "le": operator.le,\
+            "ge": operator.ge,\
+            "eq": operator.eq,\
+            "ne": operator.ne,\
+            "in": lambda a, b: a in b,\
+            "notin": lambda a, b: a not in b}
+        for key, value in kwargs.items():
+            if "_" not in key or key.rindex("_") == 0:
+                key += "_eq"
+            att, _, op = key.rpartition("_")
+            try:
+                func = operators[op]
+            except KeyError:
+                att, func = key, operators["eq"]
+            if att[0] == "_":
+                pass
+                raise NotImplementedError
+                # values = getattr(self.graph, att[1:])(self)
+            else:
+                values = result[att]
+            indices = [i for i, v in enumerate(values) if func(v, value)]
+            result = result.select_from_indices(indices)
+        return result
+
 
 class CanvasItem(ABC):
     def __init__(self):
@@ -115,6 +156,9 @@ class CanvasItem(ABC):
 
     def __getitem__(self, key):
         return self.attributes[key]
+
+    def __setitem__(self, key, value):
+        self.attributes[key] = value
 
     @abstractmethod
     def load(self): pass

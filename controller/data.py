@@ -13,6 +13,9 @@ class Controller:
             Controller.__instance = Controller()
         return Controller.__instance
 
+    def get_graph(self):
+        return self.__graph
+
     def load(self, instance, canvas, **kwargs):
         # TODO add more type
         self.__canvas = canvas

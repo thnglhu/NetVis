@@ -48,6 +48,9 @@ def destroy_window():
     top_level.destroy()
     top_level = None
 
+def test():
+    # controller.filter(target="vertex", criteria=("GeoLocation", ""))
+    pass
 
 
 

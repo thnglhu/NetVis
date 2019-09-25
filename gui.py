@@ -99,8 +99,7 @@ class top_level:
                 label="Exit")
 
         self.canvas_frame = tk.Frame(top)
-        self.canvas_frame.place(relx=0.01, rely=0.015, relheight=0.963
-                , relwidth=0.688)
+        self.canvas_frame.place(relx=0.01, rely=0.015, relheight=0.963, relwidth=0.688)
         self.canvas_frame.configure(relief='groove')
         self.canvas_frame.configure(borderwidth="2")
         self.canvas_frame.configure(relief="groove")
@@ -109,7 +108,7 @@ class top_level:
         self.canvas_frame.configure(highlightcolor="black")
 
         self.canvas = tk.Canvas(self.canvas_frame)
-        self.canvas.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0)
+        self.canvas.place(relx=0.5, rely=0.5, relheight=1.0, relwidth=1.0, anchor=tk.CENTER)
         self.canvas.configure(background="#d9d9d9")
         self.canvas.configure(highlightbackground="#d9d9d9")
         self.canvas.configure(highlightcolor="black")
@@ -120,8 +119,7 @@ class top_level:
         self.canvas.configure(takefocus="0")
 
         self.data_frame = tk.LabelFrame(top)
-        self.data_frame.place(relx=0.713, rely=0.0, relheight=0.978
-                , relwidth=0.273)
+        self.data_frame.place(relx=0.713, rely=0.0, relheight=0.978, relwidth=0.273)
         self.data_frame.configure(relief='groove')
         self.data_frame.configure(foreground="black")
         self.data_frame.configure(text='''Data''')
@@ -129,25 +127,9 @@ class top_level:
         self.data_frame.configure(highlightbackground="#d9d9d9")
         self.data_frame.configure(highlightcolor="black")
 
-        self.Frame1 = tk.Frame(top)
-        self.Frame1.place(relx=0.0, rely=1.0, relheight=0.037, relwidth=1.001)
-        self.Frame1.configure(relief='groove')
-        self.Frame1.configure(borderwidth="2")
-        self.Frame1.configure(relief="groove")
-        self.Frame1.configure(background="#d9d9d9")
-        self.Frame1.configure(highlightbackground="#d9d9d9")
-        self.Frame1.configure(highlightcolor="black")
-
-        self.fra51_lab66 = tk.Label(self.Frame1)
-        self.fra51_lab66.place(relx=0.01, rely=0.0, height=11, width=34)
-        self.fra51_lab66.configure(activebackground="#f9f9f9")
-        self.fra51_lab66.configure(activeforeground="black")
-        self.fra51_lab66.configure(background="#d9d9d9")
-        self.fra51_lab66.configure(disabledforeground="#a3a3a3")
-        self.fra51_lab66.configure(foreground="black")
-        self.fra51_lab66.configure(highlightbackground="#d9d9d9")
-        self.fra51_lab66.configure(highlightcolor="black")
-        self.fra51_lab66.configure(text='''x:''')
+        self.button = tk.Button(self.data_frame)
+        self.button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.button.configure(command=gui_support.test)
 
 if __name__ == '__main__':
     vp_start_gui()
