@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 # Abstract base class (ABC)
 
 import igraph as ig
@@ -7,17 +8,18 @@ from scipy.spatial import ConvexHull
 
 
 def read(filename, *args, **kwargs):
-    igraph = ig.read(filename, *args, **kwargs)
-    Graph.convert(igraph)
-    return igraph
+    graph = ig.read(filename, *args, **kwargs)
+    Graph.convert(graph)
+    return graph
 
 
 class Graph(ig.Graph):
     def __init__(self, *args, **kwargs):
-        ig.Graph.__init__(self, *args, **kwargs)
-        self._init_subclass()
+        super().__init__(*args, **kwargs)
+        self.__init_subclass()
 
-    def _init_subclass(self):
+    def __init_subclass(self):
+
         def shorten(element, attributes, *key_default):
             for pair in key_default:
                 element[pair[0]] = attributes.get(pair[0], pair[1]) or pair[1]
@@ -36,6 +38,7 @@ class Graph(ig.Graph):
             shorten(e, ea, *zip(keys, defaults))
         self.edges = list(map(lambda e: Edge(e, self), self.es))
         # self.hulls = []
+        self.__backup = self.copy()
         self.load()
         # self.threads = [None] * 10
 
@@ -47,40 +50,39 @@ class Graph(ig.Graph):
         # for hull in self.hulls: hull.display(canvas)
         canvas.fix_order()
 
-        # def display_vertices(i, n):
-        #    for v in self.vertices[i::n]: v.display(canvas)
-        # for i, thread in enumerate(self.threads):
-        #    if thread is not None: thread.join()
-        #    thread = th.Thread(target=display_vertices, args=(i, len(self.threads)))
-        #    thread.start()
-
     def fit_canvas(self, canvas):
         vertices = [[], []]
         try:
             vertices[0] = self.vs['x']
-        except:
+        except AttributeError:
             vertices[0] = [0] * len(self.vs)
         try:
             vertices[1] = self.vs['y']
-        except:
+        except AttributeError:
             vertices[1] = [0] * len(self.vs)
         top_left = min(vertices[0]), min(vertices[1])
         bottom_right = max(vertices[0]), max(vertices[1])
         canvas.scale_to_fit(top_left, bottom_right)
 
     def load(self):
-        for v in self.vertices: v.load();
-        for e in self.edges: e.load()
+        for v in self.vertices:
+            v.load();
+        for e in self.edges:
+            e.load()
         # for h in self.hulls: h.load()
 
     def convex_hull(self, indices):
         vertices = list(map(lambda index: self.vertices[index], indices))
         # self.hulls = [Hull(vertices)]
 
-    @classmethod
-    def convert(cls, igraph):
+    def add_vertices(self, n):
+        super().add_vertices(n)
+
+
+    @staticmethod
+    def convert(igraph):
         igraph.__class__ = Graph
-        igraph._init_subclass()
+        igraph.__init_subclass()
         return igraph
 
     @classmethod
@@ -90,7 +92,30 @@ class Graph(ig.Graph):
         return igraph
 
 
+class ItemSequence:
+    def __init__(self, *items):
+        self.items = items
+
+    def __setitem__(self, key, value):
+        import itertools as it
+        values = it.cycle(value) if isinstance(value, Iterable) else it.repeat(value, len(self.items))
+        for item in self.items:
+            item[key] = next(values)
+
+    def __getitem__(self, key):
+        result = list()
+        for item in self.items:
+            result.append(item[key])
+        return result
+
+
 class CanvasItem(ABC):
+    def __init__(self):
+        self.attributes = dict()
+
+    def __getitem__(self, key):
+        return self.attributes[key]
+
     @abstractmethod
     def load(self): pass
 
@@ -105,8 +130,8 @@ class CanvasItem(ABC):
 
 class Vertex(CanvasItem):
     def __init__(self, ig_vertex):
+        super().__init__()
         self.ig_vertex = ig_vertex
-        self.attributes = dict()
         self.link_edges = set()
 
     def load(self):
@@ -115,8 +140,8 @@ class Vertex(CanvasItem):
 
     def display(self, canvas):
         att = self.attributes
-        canvas.create_mapped_circle(self, att['x'], att['y'], att['size'], width=att['width'], fill=att['color'],
-                                    tag=list(att['tag']), activewidth=att['width'] + 2)
+        canvas.create_mapped_circle(self, att['x'], att['y'], att['size'], width=att['width']+0.5, fill=att['color'],
+                                    tag=list(att['tag']), activewidth=att['width'] + 2.5)
 
     def visual(self):
         pass
@@ -151,11 +176,11 @@ class Vertex(CanvasItem):
 
 class Edge(CanvasItem):
     def __init__(self, ig_edge, graph):
+        super().__init__()
         self.ig_edge = ig_edge
         self.points = tuple(map(lambda v: graph.vertices[v], ig_edge.tuple))
         self.points[0].subscribe(self)
         self.points[1].subscribe(self)
-        self.attributes = dict()
 
     def load(self):
         for key in self.ig_edge.attribute_names():
@@ -179,7 +204,9 @@ class Edge(CanvasItem):
         att['color'] = self.ig_edge['focus_color']
         att['tag'].add('highlight')
         self.display(canvas)
-        canvas.center_to(((self.a + self.x) / 2, (self.b + self.y) / 2))
+        a, b, x, y = self.packed_points()
+        canvas.scale_to_fit((a, b), (x, y))
+        # canvas.center_to(((a + x) / 2, (b + y) / 2))
 
     def blur(self, canvas):
         att = self.attributes

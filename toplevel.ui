@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<interface>
+  <object class="tk.Toplevel" id="toplevel">
+    <property name="height">512</property>
+    <property name="resizable">none</property>
+    <property name="width">512</property>
+    <child>
+      <object class="tk.Frame" id="Frame_1">
+        <property name="height">200</property>
+        <property name="width">200</property>
+        <layout>
+          <property name="column">0</property>
+          <property name="propagate">True</property>
+          <property name="row">0</property>
+        </layout>
+      </object>
+    </child>
+  </object>
+</interface>
