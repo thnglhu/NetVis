@@ -39,7 +39,8 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
-    print(w.__class__)
+    import test
+    test.super_test(w.canvas)
 
 
 def destroy_window():

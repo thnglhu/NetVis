@@ -41,3 +41,12 @@ def highlight_shortest_path(g2, path):
         print(e.tuple)
         e['tag'].add('highlight')
         e['width'] = 10
+
+def super_test(canvas):
+    import tkinter as tk
+    # canvas.pack()
+    global photo
+    photo = tk.PhotoImage(file="resource//images//pc.png")
+    print(photo.width())
+    canvas.create_arc(0, 0, 100, 100)
+    canvas.create_image(100-photo.width()/2, 100-photo.height()/2, image=photo, anchor=tk.CENTER)

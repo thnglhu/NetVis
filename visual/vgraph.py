@@ -27,10 +27,16 @@ class Graph(ig.Graph):
 
         for i, v in enumerate(self.vs):
             va = v.attributes()
-            keys = ['x', 'y', 'size', 'width', 'color', 'tag', 'index', 'state', 'focus_color']
-            defaults = [0, 0, 10, 2, 'red', {'vertex'}, i, 'normal', 'pink']
+            keys = ['x', 'y', 'size', 'width', 'color', 'tag', 'index', 'state', 'focus_color', 'device']
+            defaults = [0, 0, 10, 2, 'red', {'vertex'}, i, 'normal', 'pink', 'PC']
             shorten(v, va, *zip(keys, defaults))
-        self.vertices = list(map(lambda v: Vertex(v), self.vs))
+
+        from . import vnetwork
+        classification = dict()
+        classification['PC'] = vnetwork.PC
+        classification['switch'] = vnetwork.Swith
+        classification['router'] = vnetwork.Router
+        self.vertices = list(map(lambda vertex: classification[vertex['device']](vertex), self.vs))
 
         for i, e in enumerate(self.es):
             ea = e.attributes()
@@ -67,7 +73,7 @@ class Graph(ig.Graph):
 
     def load(self):
         for v in self.vertices:
-            v.load();
+            v.load()
         for e in self.edges:
             e.load()
         # for h in self.hulls: h.load()
@@ -163,16 +169,25 @@ class CanvasItem(ABC):
     @abstractmethod
     def load(self): pass
 
+    @abstractmethod
     def display(self, canvas): pass
 
+    @abstractmethod
+    def reallocate(self, canvas): pass
+
+    @abstractmethod
+    def reconfigure(self, canvas): pass
+
+    @abstractmethod
     def focus(self, canvas): pass
 
+    @abstractmethod
     def blur(self, canvas): pass
 
     def motion(self, canvas, delta_x, delta_y): pass
 
 
-class Vertex(CanvasItem):
+class Vertex(CanvasItem, ABC):
     def __init__(self, ig_vertex):
         super().__init__()
         self.ig_vertex = ig_vertex
@@ -182,28 +197,15 @@ class Vertex(CanvasItem):
         for key in self.ig_vertex.attribute_names():
             self.attributes[key] = self.ig_vertex[key]
 
-    def display(self, canvas):
-        att = self.attributes
-        canvas.create_mapped_circle(self, att['x'], att['y'], att['size'], width=att['width']+0.5, fill=att['color'],
-                                    tag=list(att['tag']), activewidth=att['width'] + 2.5)
-
     def visual(self):
         pass
         # print("Vectex: ", self.x, self.y, self.size, self.color, self.width)
 
     def focus(self, canvas):
-        att = self.attributes
-        att['color'] = att['focus_color']
-        att['tag'].add('highlight')
-        self.display(canvas)
-        canvas.center_to((att['x'], att['y']))
+        pass
 
     def blur(self, canvas):
-        att = self.attributes
-        att['color'] = self.ig_vertex['color']
-        att['focus_size'] = self.ig_vertex['size']
-        att['tag'].remove('highlight')
-        self.display(canvas)
+        pass
 
     def graph(self):
         return self.ig_vertex.graph
@@ -211,8 +213,9 @@ class Vertex(CanvasItem):
     def motion(self, canvas, delta_x, delta_y):
         self.attributes['x'] += delta_x
         self.attributes['y'] += delta_y
-        self.display(canvas)
-        for edge in self.link_edges: edge.display(canvas)
+        self.reallocate(canvas)
+        for edge in self.link_edges:
+            edge.display(canvas)
 
     def subscribe(self, edge):
         self.link_edges.add(edge)
@@ -238,6 +241,13 @@ class Edge(CanvasItem):
     def display(self, canvas):
         att = self.attributes
         canvas.create_mapped_line(self, *self.packed_points(), width=att['width'], fill=att['color'], tag=list(att['tag']), activewidth=att['width'] + 1)
+
+    def reallocate(self, canvas):
+        canvas.coords_mapped(self, *self.packed_points())
+
+    def reconfigure(self, canvas):
+        att = self.attributes
+        canvas.itemconfig_mapped(self, width=att['width'], fill=att['color'], tag=list(att['tag']), activewidth=att['width'] + 1)
 
     def visual(self):
         att = self.attributes

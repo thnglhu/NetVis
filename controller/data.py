@@ -19,7 +19,16 @@ class Controller:
     def load(self, instance, canvas, **kwargs):
         # TODO add more type
         self.__canvas = canvas
-        print(kwargs.get("extension"))
+        vcanvas.Canvas.convert(canvas)
+        self.__graph = vgraph.Graph.Full(10)
+        vs = self.__graph.get_vs()
+        self.__graph.load()
+        print(vs.items)
+        vs['x'] = [1, -3]
+        vs['y'] = [1, 3, 5, 7, 5]
+        self.__graph.fit_canvas(canvas)
+        self.__graph.display(canvas)
+        return
         if kwargs.get("extension", "graphml") == "graphml":
             self.__graph = vgraph.read(instance)
             vcanvas.Canvas.convert(canvas)
