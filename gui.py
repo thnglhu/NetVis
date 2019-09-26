@@ -21,6 +21,7 @@ except ImportError:
 
 import gui_support
 
+
 def vp_start_gui():
     '''Starting point when module is the main routine.'''
     global val, w, root
@@ -29,25 +30,38 @@ def vp_start_gui():
     gui_support.init(root, top)
     root.mainloop()
 
+
 w = None
+
+
 def create_top_level(root, *args, **kwargs):
-    '''Starting point when module is imported by another program.'''
+    """
+    Starting point when module is imported by another program.
+    :param root:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     global w, w_win, rt
     rt = root
     w = tk.Toplevel (root)
     top = top_level (w)
     gui_support.init(w, top, *args, **kwargs)
-    return (w, top)
+    return w, top
+
 
 def destroy_top_level():
     global w
     w.destroy()
     w = None
 
+
 class top_level:
     def __init__(self, top=None):
-        '''This class configures and populates the toplevel window.
-           top is the toplevel containing window.'''
+        """
+            This class configures and populates the toplevel window.
+           top is the toplevel containing window.
+        """
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
         _fgcolor = '#000000'  # X11 color: 'black'
         _compcolor = '#d9d9d9' # X11 color: 'gray85'
@@ -130,6 +144,7 @@ class top_level:
         self.button = tk.Button(self.data_frame)
         self.button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.button.configure(command=gui_support.test)
+
 
 if __name__ == '__main__':
     vp_start_gui()
