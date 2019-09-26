@@ -4,7 +4,6 @@ import tkinter as tk
 import numpy as np
 from abc import ABC, abstractmethod
 
-
 class VVertex(vg.Vertex, ABC):
 
     def __init__(self, ig_vertex):
@@ -17,20 +16,17 @@ class VVertex(vg.Vertex, ABC):
 
     def load(self):
         super().load()
-        att = self.attributes
-        print("+", att)
-        att['size'] = np.array((att['image'].width(), att['image'].height()))
+        # att = self.attributes
 
     def display(self, canvas):
         att = self.attributes
-        position = np.array((att['x'], att['y']))
-        print(att['size'])
-        canvas.create_mapped_image(self, *(position - att['size']/2), image=att['image'])
+        print(att)
+        canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'])
 
     def reallocate(self, canvas):
         att = self.attributes
         position = np.array((att['x'], att['y']))
-        canvas.coords_mapped(self, *(position - att['size']/2))
+        canvas.coords_mapped(self, att['x'], att['y'])
 
     def reconfigure(self, canvas):
         att = self.attributes
@@ -45,7 +41,7 @@ class PC(VVertex):
         att['size'] = att['image'].width(), att['image'].height()
 
 
-class Swith(VVertex):
+class Switch(VVertex):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("switch")
@@ -59,3 +55,7 @@ class Router(VVertex):
         att['size'] = att['image'].width(), att['image'].height()
 
 
+classification = dict()
+classification['pc'] = PC
+classification['switch'] = Switch
+classification['router'] = Router

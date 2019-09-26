@@ -146,7 +146,6 @@ class Canvas(tk.Canvas):
     def fix_order(self):
         self.tag_raise('edge')
         self.tag_raise('vertex')
-        self.tag_raise('highlight')
 
     def __pivot(self):
         return self.canvasx(0), self.canvasy(0)
