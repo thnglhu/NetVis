@@ -598,7 +598,7 @@ class top_level:
         self.top_panel.configure(background="#ffffff")
 
         # ---------------------------Top Panel: Open-------------------------#
-        self.add_file_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/add_file.png")
+        self.add_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/add_file.png")
         self.add_file_button = tk.Button(self.top_panel)
         self.add_file_button.place(
             anchor=tk.CENTER,
@@ -611,7 +611,7 @@ class top_level:
             command=gui_support.open_file)
 
         # ---------------------------Top Panel: New-------------------------#
-        self.new_file_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/new_file.png")
+        self.new_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/new_file.png")
         self.new_file_button = tk.Button(self.top_panel)
         self.new_file_button.place(
             anchor=tk.CENTER,
@@ -625,7 +625,7 @@ class top_level:
             command=gui_support.create_new_file())
 
         # ---------------------------Top Panel: Save-------------------------#
-        self.save_file_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/save_file.png")
+        self.save_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/save_file.png")
         self.save_file_button = tk.Button(self.top_panel)
         self.save_file_button.place(
             anchor=tk.CENTER,
@@ -641,7 +641,7 @@ class top_level:
         self.separator.place(relx=0.115, rely=0.1, width=4, height=27)
 
         # ---------------------------Top Panel: Print-------------------------#
-        self.print_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/print.png")
+        self.print_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/print.png")
         self.print_button = tk.Button(self.top_panel)
         self.print_button.place(
             anchor=tk.CENTER,
@@ -657,7 +657,7 @@ class top_level:
         self.separator.place(relx=0.185, rely=0.1, width=4, height=27)
 
         # ---------------------------Top Panel: Search-------------------------#
-        self.search_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/search.png")
+        self.search_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/search.png")
         self.search_button = tk.Button(self.top_panel)
         self.search_button.place(
             anchor=tk.CENTER,
@@ -680,7 +680,7 @@ class top_level:
         self.separator.place(relx=0.38,rely=0.1,width=4, height=27)
 
         # ---------------------------Top Panel: Zoom In-------------------------#
-        self.zoom_in_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/zoom_in.png")
+        self.zoom_in_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/zoom_in.png")
         self.zoom_in_button = tk.Button(self.top_panel)
         self.zoom_in_button.place(
             anchor=tk.CENTER,
@@ -693,7 +693,7 @@ class top_level:
             command=gui_support.zoom_in)
 
         # ---------------------------Top Panel: Zoom Out-------------------------#
-        self.zoom_out_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/zoom_out.png")
+        self.zoom_out_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/zoom_out.png")
         self.zoom_out_button = tk.Button(self.top_panel)
         self.zoom_out_button.place(
             anchor=tk.CENTER,
@@ -709,7 +709,7 @@ class top_level:
         self.separator.place(relx=0.488, rely=0.1, width=4, height=27)
 
         # ---------------------------Top Panel: Node Properties-------------------------#
-        self.node_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/node_properties.png")
+        self.node_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/node_properties.png")
         self.node_properties_button = tk.Button(self.top_panel)
         self.node_properties_button.place(
             anchor=tk.CENTER,
@@ -722,7 +722,7 @@ class top_level:
             command=gui_support.select_node_properties)
 
         # ---------------------------Top Panel: Edge Properties-------------------------#
-        self.edge_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/edge_properties.png")
+        self.edge_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/edge_properties.png")
         self.edge_properties_button = tk.Button(self.top_panel)
         self.edge_properties_button.place(
             anchor=tk.CENTER,
@@ -738,7 +738,7 @@ class top_level:
         self.separator.place(relx=0.6, rely=0.1, width=4, height=27)
 
         # ---------------------------Top Panel: Filter-------------------------#
-        self.filter_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/filter.png")
+        self.filter_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/filter.png")
         self.filter_button = tk.Button(self.top_panel)
         self.filter_button.place(
             anchor=tk.CENTER,
@@ -753,7 +753,7 @@ class top_level:
         self.separator.place(relx=0.68, rely=0.1, width=4, height=27)
 
         # ---------------------------Top Panel: Settings-------------------------#
-        self.settings_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/settings.png")
+        self.settings_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/settings.png")
         self.settings_button = tk.Button(self.top_panel)
         self.settings_button.place(
             anchor=tk.CENTER,
@@ -768,7 +768,7 @@ class top_level:
         self.separator.place(relx=0.94, rely=0.1, width=4, height=27)
 
         # ---------------------------Top Panel: Help-------------------------#
-        self.help_image = ImageTk.PhotoImage(file="/Users/dat311998/Desktop/Icons/help.png")
+        self.help_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/help.png")
         self.help_button = tk.Button(self.top_panel)
         self.help_button.place(
             anchor=tk.CENTER,
