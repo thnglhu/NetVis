@@ -23,6 +23,7 @@ except ImportError:
 
 import gui_support
 from PIL import ImageTk, Image
+from tkinter import StringVar
 
 
 def vp_start_gui():
@@ -53,6 +54,60 @@ def destroy_top_level():
     w = None
 
 
+class CreateToolTip(object):
+    """
+    create a tooltip for a given widget
+    """
+    def __init__(self, widget, text='widget info'):
+        self.waittime = 500     #miliseconds
+        self.wraplength = 180   #pixels
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<ButtonPress>", self.leave)
+        self.id = None
+        self.tw = None
+
+    def enter(self, event=None):
+        self.schedule()
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(self.waittime, self.showtip)
+
+    def unschedule(self):
+        id = self.id
+        self.id = None
+        if id:
+            self.widget.after_cancel(id)
+
+    def showtip(self, event=None):
+        x = y = 0
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 20
+        # creates a toplevel window
+        self.tw = tk.Toplevel(self.widget)
+        # Leaves only the label and removes the app window
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                       background="#ffffff", relief='solid', borderwidth=1,
+                       wraplength = self.wraplength)
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tw
+        self.tw= None
+        if tw:
+            tw.destroy()
+
+
 class top_level:
     def __init__(self, top=None):
         # This class configures and populates the toplevel window. top is the toplevel containing window.
@@ -64,7 +119,7 @@ class top_level:
 
         top.geometry("1024x680+623+25")
         top.title("PocketNet")
-        top.configure(background="#ffffff")
+        top.configure(background="#F0F0F0")
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
         # FULLSCREEN
@@ -576,7 +631,7 @@ class top_level:
             relheight=0.90,
             relwidth=0.24)
         self.control_panel.configure(
-            background="#ffffff",
+            background="#F0F0F0",
             takefocus="0")
 
         # ---------------------------Data Panel-------------------------#
@@ -586,7 +641,7 @@ class top_level:
             rely=0.055,
             relheight=0.90,
             relwidth=0.19)
-        self.data_panel.configure(background="#ffffff")
+        self.data_panel.configure(background="#F0F0F0")
 
         # ---------------------------Top Panel-------------------------#
         self.top_panel = tk.Frame(top)
@@ -595,7 +650,7 @@ class top_level:
             rely=0.005,
             relheight=0.05,
             relwidth=0.99)
-        self.top_panel.configure(background="#ffffff")
+        self.top_panel.configure(background="#F0F0F0")
 
         # ---------------------------Top Panel: Open-------------------------#
         self.add_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/add_file.png")
@@ -610,6 +665,8 @@ class top_level:
             image=self.add_file_image,
             command=gui_support.open_file)
 
+        add_file_tooltip = CreateToolTip(self.add_file_button, "Open a graph. The file extension should be GraphML, GDF or GEXF")
+
         # ---------------------------Top Panel: New-------------------------#
         self.new_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/new_file.png")
         self.new_file_button = tk.Button(self.top_panel)
@@ -623,6 +680,8 @@ class top_level:
             borderwidth=0.0,
             image=self.new_file_image,
             command=gui_support.create_new_file())
+
+        add_file_tooltip = CreateToolTip(self.new_file_button,"Create an empty GraphML file")
 
         # ---------------------------Top Panel: Save-------------------------#
         self.save_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/save_file.png")
@@ -640,6 +699,8 @@ class top_level:
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.115, rely=0.1, width=4, height=27)
 
+        add_file_tooltip = CreateToolTip(self.save_file_button, "Save the file")
+
         # ---------------------------Top Panel: Print-------------------------#
         self.print_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/print.png")
         self.print_button = tk.Button(self.top_panel)
@@ -655,6 +716,8 @@ class top_level:
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.185, rely=0.1, width=4, height=27)
+
+        add_file_tooltip = CreateToolTip(self.print_button, "Print the file")
 
         # ---------------------------Top Panel: Search-------------------------#
         self.search_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/search.png")
@@ -679,6 +742,8 @@ class top_level:
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.38,rely=0.1,width=4, height=27)
 
+        add_file_tooltip = CreateToolTip(self.search_button, "Enter the node's name to search for it")
+
         # ---------------------------Top Panel: Zoom In-------------------------#
         self.zoom_in_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/zoom_in.png")
         self.zoom_in_button = tk.Button(self.top_panel)
@@ -691,6 +756,8 @@ class top_level:
         self.zoom_in_button.configure(
             image=self.zoom_in_image,
             command=gui_support.zoom_in)
+
+        add_file_tooltip = CreateToolTip(self.zoom_in_button, "Zoom in")
 
         # ---------------------------Top Panel: Zoom Out-------------------------#
         self.zoom_out_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/zoom_out.png")
@@ -708,6 +775,8 @@ class top_level:
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.488, rely=0.1, width=4, height=27)
 
+        add_file_tooltip = CreateToolTip(self.zoom_out_button, "Zoom out")
+
         # ---------------------------Top Panel: Node Properties-------------------------#
         self.node_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/node_properties.png")
         self.node_properties_button = tk.Button(self.top_panel)
@@ -720,6 +789,8 @@ class top_level:
         self.node_properties_button.configure(
             image=self.node_properties_image,
             command=gui_support.select_node_properties)
+
+        add_file_tooltip = CreateToolTip(self.node_properties_button, "Edit a node's properties such as device type, label, color, connectivity,... ")
 
         # ---------------------------Top Panel: Edge Properties-------------------------#
         self.edge_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/edge_properties.png")
@@ -737,6 +808,8 @@ class top_level:
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.6, rely=0.1, width=4, height=27)
 
+        add_file_tooltip = CreateToolTip(self.edge_properties_button, "Edit an edge's properties such as bandwidth, throughput, delay, label, connectivity,...")
+
         # ---------------------------Top Panel: Filter-------------------------#
         self.filter_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/filter.png")
         self.filter_button = tk.Button(self.top_panel)
@@ -751,6 +824,8 @@ class top_level:
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.68, rely=0.1, width=4, height=27)
+
+        add_file_tooltip = CreateToolTip(self.filter_button, "Filter nodes, edges with specific features")
 
         # ---------------------------Top Panel: Settings-------------------------#
         self.settings_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/settings.png")
@@ -767,6 +842,8 @@ class top_level:
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.94, rely=0.1, width=4, height=27)
 
+        add_file_tooltip = CreateToolTip(self.settings_button, "Settings")
+
         # ---------------------------Top Panel: Help-------------------------#
         self.help_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/help.png")
         self.help_button = tk.Button(self.top_panel)
@@ -779,18 +856,226 @@ class top_level:
         self.help_button.configure(
             image=self.help_image)
 
+        add_file_tooltip = CreateToolTip(self.help_button, "Help")
+
         # ---------------------------Control Panel: Title-------------------------#
-        self.control_panel_title = tk.Label(self.control_panel, text="Control Panel", font=("Verdana", 12, "bold"))
+        self.control_panel_title = tk.Label(self.control_panel, text="Control Panel", font=("Helvetica", 14, "bold"))
         self.control_panel_title.place(
             anchor=tk.CENTER,
-            relx=0.5,
+            relx=0.16,
             rely=0.05)
+
+        self.control_panel_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
 
+        # ---------------------------Control Panel: Node-------------------------#
+        self.node_title = tk.Label(self.control_panel, text="Node", font=("Helvetica", 14, "bold"))
+        self.node_title.place(
+            anchor=tk.CENTER,
+            relx=0.12,
+            rely=0.095)
+
+        self.node_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.11, width=280, height=4)
+
+        # ---------------------------Control Panel: Node: Add a node-------------------------#
+        self.add_node_title = tk.Label(self.control_panel, text="Add Node:", font=("Helvetica", 14))
+        self.add_node_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.14)
+
+        self.add_node_title.configure(bg="#F0F0F0")
+
+        self.node_type = StringVar()
+        self.add_node_combobox = ttk.Combobox(self.control_panel, state='readonly', textvariable=self.node_type)
+        self.add_node_combobox['values'] = ("Computer", "Hub", "Repeater", "Modem", "Bridge", "Router")
+        self.add_node_combobox.current(0)
+        self.add_node_combobox.place(
+            anchor='w',
+            relx=0.4,
+            rely=0.14)
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.18)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.22)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.26)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.3)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.34)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.37, width=280, height=4)
+
+        # ---------------------------Control Panel: Edge-------------------------#
+        self.edge_title = tk.Label(self.control_panel, text="Edge", font=("Helvetica", 14, "bold"))
+        self.edge_title.place(
+            anchor=tk.CENTER,
+            relx=0.12,
+            rely=0.395)
+
+        self.edge_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.41, width=280, height=4)
+
+        # ---------------------------Control Panel: Edge: Add an edge-------------------------#
+        self.add_edge_title = tk.Label(self.control_panel, text="Add Edge:", font=("Helvetica", 14))
+        self.add_edge_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.44)
+
+        self.add_edge_title.configure(bg="#F0F0F0")
+
+        self.edge_type = StringVar()
+        self.add_edge_combobox = ttk.Combobox(self.control_panel, state='readonly', textvariable=self.edge_type)
+        self.add_edge_combobox['values'] = ("Wired", "Wireless")
+        self.add_edge_combobox.current(0)
+        self.add_edge_combobox.place(
+            anchor='w',
+            relx=0.4,
+            rely=0.44)
+
+        # ---------------------------Control Panel: Edge: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.48)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Edge: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.52)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Edge: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.56)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Edge: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.6)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.63, width=280, height=4)
+
+        # ---------------------------Control Panel: Analyze-------------------------#
+        self.analyze_title = tk.Label(self.control_panel, text="Analyze", font=("Helvetica", 14, "bold"))
+        self.analyze_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.655)
+
+        self.analyze_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.675, width=280, height=4)
+
+        # ---------------------------Control Panel: Analyze: Show Bottleneck-------------------------#
+        self.bottleneck_title = tk.Label(self.control_panel, text="Show Bottleneck:", font=("Helvetica", 14))
+        self.bottleneck_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.71)
+
+        self.bottleneck_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.75)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.79)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.83)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.87)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
         # ---------------------------Data Panel: Title-------------------------#
-        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Verdana", 12, "bold"))
+        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Helvetica", 14, "bold"))
         self.data_panel_title.place(
             anchor=tk.CENTER,
             relx=0.5,
@@ -799,6 +1084,7 @@ class top_level:
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
 
+        self.data_panel_title.configure(bg="#F0F0F0")
 
         top.configure(menu=self.menubar)
 
