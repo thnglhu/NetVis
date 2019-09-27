@@ -4,6 +4,7 @@ import tkinter as tk
 import numpy as np
 from abc import ABC, abstractmethod
 
+
 class VVertex(vg.Vertex, ABC):
 
     def __init__(self, ig_vertex):
@@ -21,7 +22,7 @@ class VVertex(vg.Vertex, ABC):
     def display(self, canvas):
         att = self.attributes
         print(att)
-        canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'])
+        canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'], tag=tuple(att['tag']))
 
     def reallocate(self, canvas):
         att = self.attributes
@@ -31,7 +32,7 @@ class VVertex(vg.Vertex, ABC):
     def reconfigure(self, canvas):
         att = self.attributes
         self.reallocate(canvas)
-        canvas.itemconfig_mapped(self, image=att['image'])
+        canvas.itemconfig_mapped(self, image=att['image'], tag=tuple(att['tag']))
 
 
 class PC(VVertex):

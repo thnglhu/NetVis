@@ -253,7 +253,7 @@ class Edge(CanvasItem):
                                   *self.packed_points(),
                                   width=att['width'],
                                   fill=att['color'],
-                                  tag=list(att['tag']),
+                                  tag=tuple(att['tag']),
                                   activewidth=att['width'] + 1)
 
     def reallocate(self, canvas):
@@ -264,7 +264,7 @@ class Edge(CanvasItem):
         canvas.itemconfig_mapped(self,
                                  width=att['width'],
                                  fill=att['color'],
-                                 tag=list(att['tag']),
+                                 tag=tuple(att['tag']),
                                  activewidth=att['width'] + 1)
 
     def visual(self):
@@ -273,16 +273,12 @@ class Edge(CanvasItem):
 
     def focus(self, canvas):
         att = self.attributes
-        att['color'] = self.ig_edge['focus_color']
-        att['tag'].add('highlight')
         self.display(canvas)
         a, b, x, y = self.packed_points()
         canvas.scale_to_fit((a, b), (x, y))
 
     def blur(self, canvas):
         att = self.attributes
-        att['tag'].remove('highlight')
-        att['color'] = self.ig_edge['color']
         self.display(canvas)
 
     def graph(self):

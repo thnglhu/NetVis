@@ -25,11 +25,12 @@ class Controller:
         g.add_vertex(type='pc', name='pc2', x=0, y=-10)
         g.add_vertex(type='pc', name='pc3', x=0, y=10)
         g.add_vertex(type='switch', name='switch', x=10, y=0)
-        g.add_edge('switch', 'pc1')
-        g.add_edge('switch', 'pc2')
-        g.add_edge('switch', 'pc3')
+        g.add_edge('switch', 'pc1', width=10)
+        g.add_edge('switch', 'pc2', width=10)
+        g.add_edge('switch', 'pc3', width=10)
         # g.load()
         g.fit_canvas(canvas)
+        canvas.tag_raise('vertex')
         g.display(canvas)
         return
         if kwargs.get("extension", "graphml") == "graphml":
