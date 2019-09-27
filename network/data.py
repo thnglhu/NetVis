@@ -2,11 +2,13 @@ import ipaddress as ipa
 
 
 class ARP:
-    def __init__(self, source, target, request=True, func=None):
+    def __init__(self, source, target, func=None):
         self.source = source
         self.target = target
-        self.request = request
         self.func = func
+
+    def reply(self):
+        return ARP(self.target, self.source, self.func)
 
 
 class Segment:
@@ -25,4 +27,9 @@ class Frame:
     def __init__(self, source, target, packet):
         self.source = source
         self.target = target
-        self.segment = packet
+        self.packet = packet
+
+
+class BroadcastFrame(Frame):
+    def __init__(self, source, packet):
+        super().__init__(source, None, packet)

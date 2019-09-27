@@ -1,5 +1,4 @@
 import ipaddress as ipa
-# from . import data
 import data
 
 
@@ -16,32 +15,45 @@ class PC:
             target = self.interface.get('default_gateway')
         if target in self.arp_table:
             mac_target = self.arp_table[target]
+            frame = data.Frame(mac_source, mac_target, packet)
+            self.interface['switch'].receive(self, frame)
         else:
-            raise NotImplementedError
-        frame = data.Frame(mac_source, mac_target, packet)
-        self.interface['switch'].receive(frame)
+            def func():
+                self.send(segment, target)
+            arp = data.ARP(self.interface['ip_address'], target, func)
+            frame = data.BroadcastFrame(self.interface['mac_address'], arp)
+            self.interface['switch'].receive(self, frame)
 
-    def receive(self, frame):
-        print(self, frame)
+    def receive(self, source, frame):
+        packet = frame.packet
+        if isinstance(frame, data.BroadcastFrame):
+            if isinstance(packet, data.ARP):
+                if packet.target == self.interface['ip_address']:
+                    reply = packet.reply()
+                    frame = data.Frame(self.interface['mac_address'], frame.source, reply)
+                    source.receive(self, frame)
+                else:
+                    print('Drop', frame)
+        else:
+            if isinstance(packet, data.ARP):
+                if packet.target is self.interface['ip_address']:
+                    self.arp_table[packet.source] = frame.source
+                    packet.func()
 
-    def connect(self, switch):
+    def connect(self, device):
         if 'switch' in self.interface:
             self.interface['switch'].unsubscribe()
-        switch.subscribe(self)
-        self.interface['switch'] = switch
+        device.subscribe(self)
+        self.interface['switch'] = device
 
 
 class Switch:
-    def __init__(self):
-        self.mac_table = dict()
+    def __init__(self, **kwargs):
+        self.mac_table = kwargs.get('mac_table') or dict()
         self.devices = list()
 
     def subscribe(self, device):
         self.devices.append(device)
-        """
-        test only
-        """
-        self.mac_table[device.interface['mac_address']] = device
 
     def unsubscribe(self, device):
         if device not in self.devices:
@@ -52,10 +64,14 @@ class Switch:
                 self.mac_table.pop(_mac)
                 break
 
-    def receive(self, data):
-        if data.target in self.mac_table:
-            print('forward')
-            self.mac_table[data.target].receive(data)
+    def receive(self, source, frame):
+        self.mac_table[frame.source] = source
+        if frame.target in self.mac_table:
+            self.mac_table[frame.target].receive(self, frame)
+        elif frame.target is None:
+            for device in self.devices:
+                if device is not source:
+                    device.receive(self, frame)
 
 
 class Router:
@@ -95,11 +111,18 @@ if __name__ == '__main__':
         ipa.ip_address('192.168.0.2'): 'aa.aa.aa.aa.aa.bb',
         ipa.ip_address('192.168.0.1'): 'aa.aa.aa.aa.aa.aa'
     }
-    pc1 = PC(interface1, arp_table=arp_table1)
-    pc2 = PC(interface2, arp_table=arp_table2)
+    pc1 = PC(interface1)
+    pc2 = PC(interface2)
     switch = Switch()
-    router = Router(interface0, arp_table=arp_table0)
+    router = Router(interface0)
     pc1.connect(switch)
     pc2.connect(switch)
+    print(pc1.arp_table)
+    print(pc2.arp_table)
+    print(switch.devices)
+    print(switch.mac_table)
     pc1.send(None, ipa.ip_address('192.168.0.3'))
-
+    print(pc1.arp_table)
+    print(pc2.arp_table)
+    print(switch.devices)
+    print(switch.mac_table)
