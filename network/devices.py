@@ -115,6 +115,7 @@ class Router:
             interface.params = [interface]
             print(interface.receive)
         self.arp_table = kwargs.get('arp_table') or dict()
+        self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
 
     def __receive(self, source, frame, interface):
@@ -138,15 +139,16 @@ class Router:
                     def func():
                         for forward_interface in self.interfaces:
                             if packet.target in forward_interface.ip_network:
-                                if packet.target in self.arp_table:
-                                    print('send frame')
-                                    forward_frame = data.Frame(forward_interface.mac_address, self.arp_table[packet.target], packet)
-                                    forward_interface.switch.receive(forward_interface, forward_frame)
-                                else:
-                                    print('send arp')
-                                    arp = data.ARP(forward_interface.ip_address, packet.target, func)
-                                    forward_frame = data.BroadcastFrame(forward_interface.mac_address, arp)
-                                    forward_interface.switch.receive(forward_interface, forward_frame)
+                                if forward_interface.switch:
+                                    if packet.target in self.arp_table:
+                                        print('send frame')
+                                        forward_frame = data.Frame(forward_interface.mac_address, self.arp_table[packet.target], packet)
+                                        forward_interface.switch.receive(forward_interface, forward_frame)
+                                    else:
+                                        print('send arp')
+                                        arp = data.ARP(forward_interface.ip_address, packet.target, func)
+                                        forward_frame = data.BroadcastFrame(forward_interface.mac_address, arp)
+                                        forward_interface.switch.receive(forward_interface, forward_frame)
                                 break
                         else:
                             print('Drop')
@@ -196,6 +198,10 @@ if __name__ == '__main__':
         'mac_address': 'aa.aa.aa.aa.aa.22',
         'default_gateway': ipa.ip_address('10.10.0.1')
     }
+    routing_table = {
+        ipa.ip_network('192.168.0.0/24'): interface0,
+        ipa.ip_network('10.10.0.0/24'): iterface20
+    }
     """
     arp_table0 = {
         ipa.ip_address('192.168.0.3'): 'aa.aa.aa.aa.aa.cc',
@@ -234,7 +240,7 @@ if __name__ == '__main__':
     pc22 = PC(i22, name='D')
     switch = Switch(name='switch 0')
     switch2 = Switch(name='switch 1')
-    router = Router(i0, i20, name='router')
+    router = Router(i0, i20, name='router', routing_table=routing_table)
     i0.connect(switch)
     i1.connect(switch)
     i2.connect(switch)
