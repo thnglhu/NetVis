@@ -54,6 +54,18 @@ def destroy_top_level():
     w = None
 
 
+def settings_popup_window():
+    settings_popup = tk.Tk()
+
+    settings_popup.geometry("300x500")
+    settings_popup.title("Settings")
+
+    button = ttk.Button(settings_popup, text="Okay")
+    button.grid(row=1, column=0)
+
+    settings_popup.mainloop()
+
+
 class CreateToolTip(object):
     """
     create a tooltip for a given widget
@@ -117,7 +129,6 @@ class top_level:
         _ana1color = '#d9d9d9'  # X11 color: 'gray85'
         _ana2color = '#ececec'  # Closest X11 color: 'gray92'
 
-        top.geometry("1024x680+623+25")
         top.title("PocketNet")
         top.configure(background="#F0F0F0")
         top.configure(highlightbackground="#d9d9d9")
@@ -623,6 +634,8 @@ class top_level:
             borderwidth="0",
             background="#DCDCDC")
 
+        self.main_canvas.create_rectangle(10, 10, 50, 50, fill="green")
+
         # ---------------------------Control Panel-------------------------#
         self.control_panel = tk.Frame(top)
         self.control_panel.place(
@@ -653,7 +666,7 @@ class top_level:
         self.top_panel.configure(background="#F0F0F0")
 
         # ---------------------------Top Panel: Open-------------------------#
-        self.add_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/add_file.png")
+        self.add_file_image = ImageTk.PhotoImage(file="resource/icons/add_file.png")
         self.add_file_button = tk.Button(self.top_panel)
         self.add_file_button.place(
             anchor=tk.CENTER,
@@ -668,7 +681,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.add_file_button, "Open a graph. The file extension should be GraphML, GDF or GEXF")
 
         # ---------------------------Top Panel: New-------------------------#
-        self.new_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/new_file.png")
+        self.new_file_image = ImageTk.PhotoImage(file="resource/icons/new_file.png")
         self.new_file_button = tk.Button(self.top_panel)
         self.new_file_button.place(
             anchor=tk.CENTER,
@@ -684,7 +697,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.new_file_button,"Create an empty GraphML file")
 
         # ---------------------------Top Panel: Save-------------------------#
-        self.save_file_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/save_file.png")
+        self.save_file_image = ImageTk.PhotoImage(file="resource/icons/save_file.png")
         self.save_file_button = tk.Button(self.top_panel)
         self.save_file_button.place(
             anchor=tk.CENTER,
@@ -702,7 +715,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.save_file_button, "Save the file")
 
         # ---------------------------Top Panel: Print-------------------------#
-        self.print_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/print.png")
+        self.print_image = ImageTk.PhotoImage(file="resource/icons/print.png")
         self.print_button = tk.Button(self.top_panel)
         self.print_button.place(
             anchor=tk.CENTER,
@@ -720,7 +733,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.print_button, "Print the file")
 
         # ---------------------------Top Panel: Search-------------------------#
-        self.search_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/search.png")
+        self.search_image = ImageTk.PhotoImage(file="resource/icons/search.png")
         self.search_button = tk.Button(self.top_panel)
         self.search_button.place(
             anchor=tk.CENTER,
@@ -745,7 +758,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.search_button, "Enter the node's name to search for it")
 
         # ---------------------------Top Panel: Zoom In-------------------------#
-        self.zoom_in_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/zoom_in.png")
+        self.zoom_in_image = ImageTk.PhotoImage(file="resource/icons/zoom_in.png")
         self.zoom_in_button = tk.Button(self.top_panel)
         self.zoom_in_button.place(
             anchor=tk.CENTER,
@@ -760,7 +773,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.zoom_in_button, "Zoom in")
 
         # ---------------------------Top Panel: Zoom Out-------------------------#
-        self.zoom_out_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/zoom_out.png")
+        self.zoom_out_image = ImageTk.PhotoImage(file="resource/icons/zoom_out.png")
         self.zoom_out_button = tk.Button(self.top_panel)
         self.zoom_out_button.place(
             anchor=tk.CENTER,
@@ -778,7 +791,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.zoom_out_button, "Zoom out")
 
         # ---------------------------Top Panel: Node Properties-------------------------#
-        self.node_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/node_properties.png")
+        self.node_properties_image = ImageTk.PhotoImage(file="resource/icons/node_properties.png")
         self.node_properties_button = tk.Button(self.top_panel)
         self.node_properties_button.place(
             anchor=tk.CENTER,
@@ -793,7 +806,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.node_properties_button, "Edit a node's properties such as device type, label, color, connectivity,... ")
 
         # ---------------------------Top Panel: Edge Properties-------------------------#
-        self.edge_properties_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/edge_properties.png")
+        self.edge_properties_image = ImageTk.PhotoImage(file="resource/icons/edge_properties.png")
         self.edge_properties_button = tk.Button(self.top_panel)
         self.edge_properties_button.place(
             anchor=tk.CENTER,
@@ -811,7 +824,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.edge_properties_button, "Edit an edge's properties such as bandwidth, throughput, delay, label, connectivity,...")
 
         # ---------------------------Top Panel: Filter-------------------------#
-        self.filter_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/filter.png")
+        self.filter_image = ImageTk.PhotoImage(file="resource/icons/filter.png")
         self.filter_button = tk.Button(self.top_panel)
         self.filter_button.place(
             anchor=tk.CENTER,
@@ -828,7 +841,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.filter_button, "Filter nodes, edges with specific features")
 
         # ---------------------------Top Panel: Settings-------------------------#
-        self.settings_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/settings.png")
+        self.settings_image = ImageTk.PhotoImage(file="resource/icons/settings.png")
         self.settings_button = tk.Button(self.top_panel)
         self.settings_button.place(
             anchor=tk.CENTER,
@@ -837,7 +850,8 @@ class top_level:
             height=37,
             width=37)
         self.settings_button.configure(
-            image=self.settings_image)
+            image=self.settings_image,
+            command=settings_popup_window)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.94, rely=0.1, width=4, height=27)
@@ -845,7 +859,7 @@ class top_level:
         add_file_tooltip = CreateToolTip(self.settings_button, "Settings")
 
         # ---------------------------Top Panel: Help-------------------------#
-        self.help_image = ImageTk.PhotoImage(file="/Users/dat311998/PycharmProjects/NetVis/resource/icons/help.png")
+        self.help_image = ImageTk.PhotoImage(file="resource/icons/help.png")
         self.help_button = tk.Button(self.top_panel)
         self.help_button.place(
             anchor=tk.CENTER,

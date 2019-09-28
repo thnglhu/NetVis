@@ -21,6 +21,18 @@ def exit_window():
     sys.stdout.flush()
 
 
+def save_popup_window():
+    save_popup = tk.Tk()
+
+    save_popup.geometry("50x50")
+    save_popup.title("Do you want to save?")
+
+    button = ttk.Button(save_popup, text="Yes")
+    button.grid(row=1, column=0)
+
+    save_popup.mainloop()
+
+
 def open_file():
     file = filedialog.askopenfile(
         title="Select file",
