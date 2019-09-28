@@ -33,10 +33,8 @@ class PC:
         packet = data.Packet(source, target, segment)
         mac_source = self.interface.mac_address
         if target not in self.interface.ip_network:
-            print('not in current network')
             print(target, end='')
             target = self.interface.default_gateway
-            print(' target change into the default gateway:', target)
 
         def func():
             if target in self.arp_table:
