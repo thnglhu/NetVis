@@ -7,6 +7,9 @@ class ARP:
         self.target = target
         self.func = func
 
+    def print(self):
+        print(self.source, self.target)
+
     def reply(self):
         return ARP(self.target, self.source, self.func)
 
@@ -22,12 +25,19 @@ class Packet:
         self.target = target
         self.segment = segment
 
+    def print(self):
+        print(self.source, self.target)
+
 
 class Frame:
     def __init__(self, source, target, packet):
         self.source = source
         self.target = target
         self.packet = packet
+
+    def print(self):
+        print(self.source, self.target)
+        self.packet.print()
 
 
 class BroadcastFrame(Frame):
