@@ -172,7 +172,10 @@ class Router:
                 return
             for network in self.routing_table:
                 if frame.packet.ip_target in network:
-                    self.send(self.routing_table[network], frame, canvas)
+                    if frame.packet.ip_target == self.routing_table[network].ip_address:
+                        print('receive something')
+                    else:
+                        self.send(self.routing_table[network], frame, canvas)
                     break
             else:
                 print('drop')

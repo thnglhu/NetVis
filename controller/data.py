@@ -96,15 +96,18 @@ class Controller:
                 'mac_address': 'aa.aa.aa.aa.aa.22',
                 'default_gateway': ipa.ip_address('10.10.0.1')
             }
-            interface31 = {
+            interface30 = {
                 'name': 'interface31',
                 'ip_address': ipa.ip_address('172.16.0.1'),
-                'ip_network': ipa.ip_network('172.16.0.0/20')
+                'ip_network': ipa.ip_network('172.16.0.0/20'),
+                'mac_address': 'aa.aa.aa.aa.aa.22'
             }
-            interface32 = {
+            interface31 = {
                 'name': 'interface32',
                 'ip_address': ipa.ip_address('172.16.0.2'),
-                'ip_network': ipa.ip_network('172.16.0.0/20')
+                'ip_network': ipa.ip_network('172.16.0.0/20'),
+                'mac_address': 'aa.aa.aa.aa.aa.ff',
+                'default_gateway': ipa.ip_address('172.16.0.1')
             }
 
             i1 = dv.Interface(**interface1)
@@ -113,10 +116,13 @@ class Controller:
             i21 = dv.Interface(**interface21)
             i22 = dv.Interface(**interface22)
             i20 = dv.Interface(**interface20)
+            i30 = dv.Interface(**interface30)
+            i31 = dv.Interface(**interface31)
 
             routing_table = {
                 ipa.ip_network('192.168.0.0/24'): i0,
-                ipa.ip_network('10.10.0.0/24'): i20
+                ipa.ip_network('10.10.0.0/24'): i20,
+                ipa.ip_network('172.16.0.0/20'): i30,
             }
 
             # pc1 = Host(i1, name='A')
@@ -127,35 +133,42 @@ class Controller:
             pc21 = g.add_vertex(i21, type='pc', name='C')
             # pc22 = Host(i22, name='D')
             pc22 = g.add_vertex(i22, type='pc', name='D')
+
+            pc31 = g.add_vertex(i31, type='pc', name='E')
+
             # switch = Switch(name='switch 0')
             switch = g.add_vertex(type='switch', name='switch 0')
             # switch2 = Switch(name='switch 1')
             switch2 = g.add_vertex(type='switch', name='switch 1')
             # router = Router(i0, i20, name='router', routing_table=routing_table)
-            router = g.add_vertex(i0, i20, type='router', routing_table=routing_table, name='router')
-
+            router = g.add_vertex(i0, i20, i30, type='router', routing_table=routing_table, name='router')
+            # router2 = g.add_vertex()
             i0.connect(switch)
             i1.connect(switch)
             i2.connect(switch)
             i20.connect(switch2)
             i21.connect(switch2)
             i22.connect(switch2)
+            i30.connect(i31)
 
-            g.add_edge('A', 'switch 0')
+            g.add_edge(pc1.ig_vertex, switch.ig_vertex)
             g.add_edge('B', 'switch 0')
             g.add_edge('C', 'switch 1')
             g.add_edge('D', 'switch 1')
             g.add_edge('switch 0', 'router')
             g.add_edge('switch 1', 'router')
+            g.add_edge('E', 'router')
 
             pc1['x'] = -6
-            pc1['y'] = -10
+            pc1['y'] = -6
             pc2['x'] = -5
-            pc2['y'] = 10
-            pc21['x'] = 6
-            pc21['y'] = -10
+            pc2['y'] = 6
+            pc31['x'] = 0
+            pc31['y'] = 10
+            pc21['x'] = 0
+            pc21['y'] = -6
             pc22['x'] = 7
-            pc22['y'] = 10
+            pc22['y'] = 6
             switch['x'] = -5
             switch2['x'] = 5
 
@@ -163,16 +176,20 @@ class Controller:
             g.display(self.__canvas)
             g.fit_canvas(self.__canvas)
 
-            pc1.send(self.__canvas, ipa.ip_address('10.10.0.3'))
-            pc22.send(self.__canvas, ipa.ip_address('192.168.0.2'))
+            pc1.send(self.__canvas, ipa.ip_address('172.16.0.2'))
+            # pc22.send(self.__canvas, ipa.ip_address('192.168.0.2'))
 
             from time import sleep
             from threading import Thread
 
-            def demo(canvas, ip):
-                sleep(2)
-                pc21.send(canvas, ip)
-            Thread(target=demo, args=(self.__canvas, ipa.ip_address('192.168.0.3'))).start()
+            def demo(pc, ip):
+                from random import uniform
+                sleep(uniform(2, 4))
+                pc.send(self.__canvas, ip)
+            # Thread(target=demo, args=(pc1, ipa.ip_address('10.10.0.2'))).start()
+            # Thread(target=demo, args=(pc2, ipa.ip_address('10.10.0.3'))).start()
+            # Thread(target=demo, args=(pc22, ipa.ip_address('10.10.0.2'))).start()
+            # Thread(target=demo, args=(pc1, ipa.ip_address('10.10.0.2'))).start()
 
 
 

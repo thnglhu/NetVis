@@ -225,7 +225,7 @@ class Vertex(CanvasItem, ABC):
         self.attributes['y'] += delta_y
         self.reallocate(canvas)
         for edge in self.link_edges:
-            edge.display(canvas)
+            edge.reallocate(canvas)
 
     def subscribe(self, edge):
         self.link_edges.add(edge)

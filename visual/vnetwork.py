@@ -89,10 +89,10 @@ class Frame(vg.CanvasItem):
     def __animate(self, canvas):
         att = self.attributes
         while att['percent'] < 100.0:
-            att['percent'] += 5
+            att['percent'] += 1
             self.load()
             self.reallocate(canvas)
-            time.sleep(0.1)
+            time.sleep(0.01)
         if att['percent'] > 100.0:
             att['percent'] = 100.0
             self.load()
