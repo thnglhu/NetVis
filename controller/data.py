@@ -148,13 +148,13 @@ class Controller:
             g.add_edge('switch 0', 'router')
             g.add_edge('switch 1', 'router')
 
-            pc1['x'] = -10
+            pc1['x'] = -6
             pc1['y'] = -10
-            pc2['x'] = -10
+            pc2['x'] = -5
             pc2['y'] = 10
-            pc21['x'] = 10
+            pc21['x'] = 6
             pc21['y'] = -10
-            pc22['x'] = 10
+            pc22['x'] = 7
             pc22['y'] = 10
             switch['x'] = -5
             switch2['x'] = 5
@@ -164,6 +164,15 @@ class Controller:
             g.fit_canvas(self.__canvas)
 
             pc1.send(self.__canvas, ipa.ip_address('10.10.0.3'))
+            pc22.send(self.__canvas, ipa.ip_address('192.168.0.2'))
+
+            from time import sleep
+            from threading import Thread
+
+            def demo(canvas, ip):
+                sleep(2)
+                pc21.send(canvas, ip)
+            Thread(target=demo, args=(self.__canvas, ipa.ip_address('192.168.0.3'))).start()
 
 
 

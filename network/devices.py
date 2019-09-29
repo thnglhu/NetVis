@@ -29,7 +29,6 @@ class Interface:
             print('drop at', self.name)
 
     def send(self, frame, canvas=None):
-        print("interface")
         if canvas:
             my_device = self.device
             other_device = self.other.device
@@ -40,7 +39,6 @@ class Interface:
                     color = 'red'
                 else:
                     color = 'blue'
-                print(color, frame.packet.__class__)
                 f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, fill=color)
                 f.display(canvas)
                 f.start_animation()
@@ -59,15 +57,20 @@ class Host:
     def send(self, canvas, ip_target):
         def function():
             if ip_target in self.arp_table:
+                print(self.name, ip_target, 'is cached')
                 packet = data.Packet(self.interface.ip_address, ip_target)
                 frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
             elif ip_target in self.interface.ip_network:
+                print(self.name, 'is looking for', ip_target)
                 packet = data.ARP(self.interface.ip_address, ip_target, function)
                 frame = data.BroadcastFrame(self.interface.mac_address, packet)
             elif self.interface.default_gateway in self.arp_table:
+                print(self.name, ip_target, 'is outside of the network, now sending to the default gateway',
+                      self.interface.default_gateway)
                 packet = data.Packet(self.interface.ip_address, ip_target)
                 frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
             else:
+                print(self.name, 'is looking for the default gateway', self.interface.default_gateway)
                 packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
                 frame = data.BroadcastFrame(self.interface.mac_address, packet)
             self.interface.send(frame, canvas)
@@ -75,6 +78,7 @@ class Host:
 
     def __receive(self, source, frame, canvas=None):
         self.arp_table[frame.packet.ip_source] = frame.mac_source
+        print(self.name, 'update arp table')
         if frame.packet.ip_target == self.interface.ip_address:
             if isinstance(frame.packet, data.ARP):
                 if frame.packet.is_reply:
@@ -103,7 +107,6 @@ class Hub:
                 self.send(frame, other, canvas)
 
     def send(self, frame, target, canvas=None):
-        print("hub")
         if canvas:
             my_device = self.device
             other_device = target.device
@@ -114,7 +117,6 @@ class Hub:
                     color = 'red'
                 else:
                     color = 'blue'
-                print(color, frame.packet.__class__)
                 f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, fill=color)
                 f.display(canvas)
                 f.start_animation()
@@ -129,11 +131,13 @@ class Switch(Hub):
         super().__init__(**kwargs)
 
     def receive(self, source, frame, canvas=None):
+        print(self.name, 'update mac table')
         self.mac_table[frame.mac_source] = source
         if isinstance(frame, data.BroadcastFrame):
             super().receive(source, frame, canvas)
         else:
             if frame.mac_target in self.mac_table:
+                print(self.name, frame.mac_target, 'is cached')
                 self.send(frame, self.mac_table[frame.mac_target], canvas)
 
 
@@ -150,12 +154,12 @@ class Router:
         self.name = kwargs.get('name')
 
     def __receive(self, source, frame, canvas, receiver):
+        print(self.name, 'update arp table')
         self.arp_table[frame.packet.ip_source] = frame.mac_source
         if frame.packet.ip_target == receiver.ip_address:
             if isinstance(frame.packet, data.ARP):
                 if frame.packet.is_reply:
-                    print(self.name)
-                    print('Mac address of %s is %s' % (frame.packet.ip_source, frame.mac_source))
+                    print(self.name, 'mac address of %s is %s' % (frame.packet.ip_source, frame.mac_source))
                     frame.packet.func()
                 else:
                     reply_arp = frame.packet.reply()
@@ -176,8 +180,10 @@ class Router:
     def send(self, interface, frame, canvas=None):
         def func():
             if frame.packet.ip_target in self.arp_table:
+                print(self.name, frame.packet.ip_target, 'is cached')
                 next_frame = data.Frame(interface.mac_address, self.arp_table[frame.packet.ip_target], frame.packet)
             else:
+                print(self.name, 'is looking for', frame.packet.ip_target)
                 packet = data.ARP(interface.ip_address, frame.packet.ip_target, func)
                 next_frame = data.BroadcastFrame(interface.mac_address, packet)
             interface.send(next_frame, canvas)
