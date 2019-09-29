@@ -1,6 +1,6 @@
 import ipaddress as ipa
 from . import data
-
+from visual import  vnetwork as vn
 
 class Interface:
     device = None
@@ -22,28 +22,30 @@ class Interface:
     def attach_device(self, device):
         self.device = device
 
-    def receive(self, source, frame):
-        print('%s receives from %s' % (self.name, self.other.name))
+    def receive(self, source, frame, canvas=None):
         if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
-            self.attachment(source, frame, *self.params)
+            self.attachment(source, frame, canvas, *self.params)
         else:
             print('drop at', self.name)
 
     def send(self, frame, canvas=None):
-        print('%s sends to %s' % (self.name, self.other.name))
+        print("interface")
         if canvas:
-            from visual import  vnetwork as vn
             my_device = self.device
             other_device = self.other.device
             edges = my_device.link_edges.intersection(other_device.link_edges)
-            print( my_device.link_edges, other_device.link_edges, edges, sep='\n')
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
-                f = vn.Frame(edge, self.other.receive, (self, frame), is_inverted)
+                if isinstance(frame.packet, data.ARP):
+                    color = 'red'
+                else:
+                    color = 'blue'
+                print(color, frame.packet.__class__)
+                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, fill=color)
                 f.display(canvas)
                 f.start_animation()
         else:
-            self.other.receive(self, frame)
+            self.other.receive(self, frame, canvas)
 
 
 class Host:
@@ -71,7 +73,7 @@ class Host:
             self.interface.send(frame, canvas)
         function()
 
-    def __receive(self, source, frame):
+    def __receive(self, source, frame, canvas=None):
         self.arp_table[frame.packet.ip_source] = frame.mac_source
         if frame.packet.ip_target == self.interface.ip_address:
             if isinstance(frame.packet, data.ARP):
@@ -81,7 +83,7 @@ class Host:
                 else:
                     reply_arp = frame.packet.reply()
                     frame = data.Frame(self.interface.mac_address, frame.mac_source, reply_arp)
-                    self.interface.send(frame)
+                    self.interface.send(frame, canvas)
             else:
                 print('receive something')
 
@@ -95,25 +97,29 @@ class Hub:
     def attach(self, other):
         self.others.add(other)
 
-    def receive(self, source, frame):
+    def receive(self, source, frame, canvas=None):
         for other in self.others:
             if other is not source:
-                self.send(frame, other)
+                self.send(frame, other, canvas)
 
     def send(self, frame, target, canvas=None):
-        print('%s sends to %s' % (self.name, target.name))
+        print("hub")
         if canvas:
-            # from visual import vnetwork as vn
             my_device = self.device
             other_device = target.device
             edges = my_device.link_edges.intersection(other_device.link_edges)
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
-                f = vn.Frame(edge, target.receive, (self, frame), is_inverted)
+                if isinstance(frame.packet, data.ARP):
+                    color = 'red'
+                else:
+                    color = 'blue'
+                print(color, frame.packet.__class__)
+                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, fill=color)
                 f.display(canvas)
                 f.start_animation()
         else:
-            target.receive(self, frame)
+            target.receive(self, frame, canvas)
 
 
 class Switch(Hub):
@@ -122,13 +128,13 @@ class Switch(Hub):
         self.others = set()
         super().__init__(**kwargs)
 
-    def receive(self, source, frame):
+    def receive(self, source, frame, canvas=None):
         self.mac_table[frame.mac_source] = source
         if isinstance(frame, data.BroadcastFrame):
-            super().receive(source, frame)
+            super().receive(source, frame, canvas)
         else:
             if frame.mac_target in self.mac_table:
-                self.send(frame, self.mac_table[frame.mac_target])
+                self.send(frame, self.mac_table[frame.mac_target], canvas)
 
 
 class Router:
@@ -143,7 +149,7 @@ class Router:
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
 
-    def __receive(self, source, frame, receiver):
+    def __receive(self, source, frame, canvas, receiver):
         self.arp_table[frame.packet.ip_source] = frame.mac_source
         if frame.packet.ip_target == receiver.ip_address:
             if isinstance(frame.packet, data.ARP):
@@ -154,7 +160,7 @@ class Router:
                 else:
                     reply_arp = frame.packet.reply()
                     frame = data.Frame(receiver.mac_address, frame.mac_source, reply_arp)
-                    receiver.send(frame)
+                    receiver.send(frame, canvas)
             else:
                 print('receive something')
         else:
@@ -162,19 +168,19 @@ class Router:
                 return
             for network in self.routing_table:
                 if frame.packet.ip_target in network:
-                    self.send(self.routing_table[network], frame)
+                    self.send(self.routing_table[network], frame, canvas)
                     break
             else:
                 print('drop')
 
-    def send(self, interface, frame):
+    def send(self, interface, frame, canvas=None):
         def func():
             if frame.packet.ip_target in self.arp_table:
                 next_frame = data.Frame(interface.mac_address, self.arp_table[frame.packet.ip_target], frame.packet)
             else:
                 packet = data.ARP(interface.ip_address, frame.packet.ip_target, func)
                 next_frame = data.BroadcastFrame(interface.mac_address, packet)
-            interface.send(next_frame)
+            interface.send(next_frame, canvas)
         func()
 
 

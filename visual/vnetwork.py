@@ -75,10 +75,7 @@ class Frame(vg.CanvasItem):
     rad = 10
     __thread = None
 
-    def __init__(self, edge, func=None, params=(), is_inverted=False):
-        print()
-        print(self, edge, func, params, is_inverted)
-        print()
+    def __init__(self, edge, func=None, params=(), is_inverted=False, **kwargs):
         super().__init__()
         att = self.attributes
         att['edge'] = edge
@@ -87,6 +84,7 @@ class Frame(vg.CanvasItem):
         self.load()
         self.func = func
         self.params = params
+        self.color = kwargs.get('fill')
 
     def __animate(self, canvas):
         att = self.attributes
@@ -101,6 +99,7 @@ class Frame(vg.CanvasItem):
             self.reallocate(canvas)
         if self.func:
             self.func(*self.params)
+        canvas.remove(self)
 
     def load(self):
         att = self.attributes
@@ -113,7 +112,7 @@ class Frame(vg.CanvasItem):
     def display(self, canvas):
         att = self.attributes
         self.__thread = Thread(target=self.__animate, args=(canvas,))
-        canvas.create_mapped_circle(self, *att['position'], self.rad, fill='red', tag='frame')
+        canvas.create_mapped_circle(self, *att['position'], self.rad, fill=self.color, tag='frame')
 
     def start_animation(self):
         if self.__thread:
