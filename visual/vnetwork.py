@@ -4,6 +4,7 @@ import tkinter as tk
 import numpy as np
 from abc import ABC, abstractmethod
 from threading import Thread
+from network import devices as dv
 import time
 
 
@@ -37,7 +38,7 @@ class VVertex(vg.Vertex, ABC):
         canvas.itemconfig_mapped(self, image=att['image'], tag=tuple(att['tag']))
 
 
-class PC(VVertex):
+class PC(VVertex, ):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("pc")
