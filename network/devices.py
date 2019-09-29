@@ -1,8 +1,10 @@
 import ipaddress as ipa
-import data
+from . import data
 
 
 class Interface:
+    device = None
+
     def __init__(self, **kwargs):
         self.other = None
         self.attachment = None
@@ -17,6 +19,9 @@ class Interface:
     def attach(self, other):
         self.other = other
 
+    def attach_device(self, device):
+        self.device = device
+
     def receive(self, source, frame):
         print('%s receives from %s' % (self.name, self.other.name))
         if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
@@ -24,19 +29,32 @@ class Interface:
         else:
             print('drop at', self.name)
 
-    def send(self, frame):
+    def send(self, frame, canvas=None):
         print('%s sends to %s' % (self.name, self.other.name))
-        self.other.receive(self, frame)
+        if canvas:
+            from visual import  vnetwork as vn
+            my_device = self.device
+            other_device = self.other.device
+            edges = my_device.link_edges.intersection(other_device.link_edges)
+            print( my_device.link_edges, other_device.link_edges, edges, sep='\n')
+            for edge in edges:
+                is_inverted = not edge.points[0] == my_device
+                f = vn.Frame(edge, self.other.receive, (self, frame), is_inverted)
+                f.display(canvas)
+                f.start_animation()
+        else:
+            self.other.receive(self, frame)
 
 
 class Host:
     def __init__(self, interface, **kwargs):
         self.interface = interface
+        interface.attach_device(self)
         interface.attachment = self.__receive
         self.arp_table = kwargs.get('arp_table') or dict()
         self.name = kwargs.get('name')
 
-    def send(self, info, ip_target):
+    def send(self, canvas, ip_target):
         def function():
             if ip_target in self.arp_table:
                 packet = data.Packet(self.interface.ip_address, ip_target)
@@ -50,7 +68,7 @@ class Host:
             else:
                 packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
                 frame = data.BroadcastFrame(self.interface.mac_address, packet)
-            self.interface.send(frame)
+            self.interface.send(frame, canvas)
         function()
 
     def __receive(self, source, frame):
@@ -70,6 +88,7 @@ class Host:
 
 class Hub:
     def __init__(self, **kwargs):
+        self.device = self
         self.name = kwargs.get('name')
         self.others = set()
 
@@ -81,9 +100,20 @@ class Hub:
             if other is not source:
                 self.send(frame, other)
 
-    def send(self, frame, target):
+    def send(self, frame, target, canvas=None):
         print('%s sends to %s' % (self.name, target.name))
-        target.receive(self, frame)
+        if canvas:
+            # from visual import vnetwork as vn
+            my_device = self.device
+            other_device = target.device
+            edges = my_device.link_edges.intersection(other_device.link_edges)
+            for edge in edges:
+                is_inverted = not edge.points[0] == my_device
+                f = vn.Frame(edge, target.receive, (self, frame), is_inverted)
+                f.display(canvas)
+                f.start_animation()
+        else:
+            target.receive(self, frame)
 
 
 class Switch(Hub):
@@ -105,6 +135,7 @@ class Router:
     def __init__(self, *interfaces, **kwargs):
         self.interfaces = interfaces
         for interface in interfaces:
+            interface.attach_device(self)
             interface.attachment = self.__receive
             interface.params = [interface]
 
@@ -148,107 +179,8 @@ class Router:
 
 
 if __name__ == '__main__':
-    interface0 = {
-        'name': 'interface0',
-        'ip_address': ipa.ip_address('192.168.0.1'),
-        'ip_network': ipa.ip_network('192.168.0.0/24'),
-        'mac_address': 'aa.aa.aa.aa.aa.aa',
-    }
-    interface1 = {
-        'name': 'interface1',
-        'ip_address': ipa.ip_address('192.168.0.2'),
-        'ip_network': ipa.ip_network('192.168.0.0/24'),
-        'mac_address': 'aa.aa.aa.aa.aa.bb',
-        'default_gateway': ipa.ip_address('192.168.0.1')
-    }
-    interface2 = {
-        'name': 'interface2',
-        'ip_address': ipa.ip_address('192.168.0.3'),
-        'ip_network': ipa.ip_network('192.168.0.0/24'),
-        'mac_address': 'aa.aa.aa.aa.aa.cc',
-        'default_gateway': ipa.ip_address('192.168.0.1')
-    }
-    interface20 = {
-        'name': 'interface20',
-        'ip_address': ipa.ip_address('10.10.0.1'),
-        'ip_network': ipa.ip_network('10.10.0.0/24'),
-        'mac_address': 'aa.aa.aa.aa.aa.00'
-    }
-    interface21 = {
-        'name': 'interface21',
-        'ip_address': ipa.ip_address('10.10.0.2'),
-        'ip_network': ipa.ip_network('10.10.0.0/24'),
-        'mac_address': 'aa.aa.aa.aa.aa.11',
-        'default_gateway': ipa.ip_address('10.10.0.1')
-    }
-    interface22 = {
-        'name': 'interface22',
-        'ip_address': ipa.ip_address('10.10.0.3'),
-        'ip_network': ipa.ip_network('10.10.0.0/24'),
-        'mac_address': 'aa.aa.aa.aa.aa.22',
-        'default_gateway': ipa.ip_address('10.10.0.1')
-    }
-    interface31 = {
-        'name': 'interface31',
-        'ip_address': ipa.ip_address('172.16.0.1'),
-        'ip_network': ipa.ip_network('172.16.0.0/20')
-    }
-    interface32 = {
-        'name': 'interface32',
-        'ip_address': ipa.ip_address('172.16.0.2'),
-        'ip_network': ipa.ip_network('172.16.0.0/20')
-    }
-    """
-    arp_table0 = {
-        ipa.ip_address('192.168.0.3'): 'aa.aa.aa.aa.aa.cc',
-        ipa.ip_address('192.168.0.2'): 'aa.aa.aa.aa.aa.bb'
-    }
-    arp_table1 = {
-        ipa.ip_address('192.168.0.3'): 'aa.aa.aa.aa.aa.cc',
-        ipa.ip_address('192.168.0.1'): 'aa.aa.aa.aa.aa.aa'
-    }
-    arp_table2 = {
-        ipa.ip_address('192.168.0.2'): 'aa.aa.aa.aa.aa.bb',
-        ipa.ip_address('192.168.0.1'): 'aa.aa.aa.aa.aa.aa'
-    }
-    arp_table20 = {
-        ipa.ip_address('192.168.0.3'): 'aa.aa.aa.aa.aa.cc',
-        ipa.ip_address('192.168.0.2'): 'aa.aa.aa.aa.aa.bb'
-    }
-    arp_table21 = {
-        ipa.ip_address('192.168.0.3'): 'aa.aa.aa.aa.aa.cc',
-        ipa.ip_address('192.168.0.1'): 'aa.aa.aa.aa.aa.aa'
-    }
-    arp_table22 = {
-        ipa.ip_address('192.168.0.2'): 'aa.aa.aa.aa.aa.bb',
-        ipa.ip_address('192.168.0.1'): 'aa.aa.aa.aa.aa.aa'
-    }"""
-    i1 = Interface(**interface1)
-    i2 = Interface(**interface2)
-    i0 = Interface(**interface0)
-    i21 = Interface(**interface21)
-    i22 = Interface(**interface22)
-    i20 = Interface(**interface20)
-
-    routing_table = {
-        ipa.ip_network('192.168.0.0/24'): i0,
-        ipa.ip_network('10.10.0.0/24'): i20
-    }
-
-    pc1 = Host(i1, name='A')
-    pc2 = Host(i2, name='B')
-    pc21 = Host(i21, name='C')
-    pc22 = Host(i22, name='D')
-    switch = Switch(name='switch 0')
-    switch2 = Switch(name='switch 1')
-    router = Router(i0, i20, name='router', routing_table=routing_table)
-    router2 = Router(i0, i20, name='router2', routing_table=routing_table2)
-    i0.connect(switch)
-    i1.connect(switch)
-    i2.connect(switch)
-    i20.connect(switch2)
-    i21.connect(switch2)
-    i22.connect(switch2)
+    pass
     # print(pc1, pc2, switch, i1, i2, sep='\n')
     # pc1.send(None, ipa.ip_address('192.168.0.3'))
-    pc1.send("pc1 wanna say hi", ipa.ip_address('10.10.0.3'))
+    # pc1.send("pc1 wanna say hi", ipa.ip_address('10.10.0.3'))
+

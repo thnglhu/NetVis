@@ -1,5 +1,6 @@
 import ipaddress as ipa
 
+
 class Segment:
     def __init__(self, data=None):
         self.data = data
@@ -19,7 +20,7 @@ class Packet:
 class ARP(Packet):
     def __init__(self, source, target, func=None):
         super().__init__(source, target, None, func)
-        self.is_reply=False
+        self.is_reply = False
 
     def print(self):
         print(self.ip_source, self.ip_target)

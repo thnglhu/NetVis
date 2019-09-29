@@ -76,23 +76,25 @@ class Graph(ig.Graph):
 
     def add_vertices(self, n):
         # TODO add vertices
-        super().add_vertices(n)
+        return super().add_vertices(n)
 
-    def add_vertex(self, name=None, **kwargs):
+    def add_vertex(self, *args, **kwargs):
         from . import vnetwork as vn
-        super().add_vertex(name, **kwargs)
+        super().add_vertex(**kwargs)
         print(self.vs, self.vcount())
         vertex = self.vs[self.vcount() - 1]
         self.__set_default_values(vertex, self.__defaults['vertex'])
-        self.vertices.append(vn.classification[vertex['type']](vertex))
+        self.vertices.append(vn.classification[vertex['type']](vertex, *args, **kwargs))
         self.vertices[-1].load()
+        return self.vertices[-1]
 
-    def add_edge(self, source, target, **kwargs):
+    def add_edge(self, source, target, *args, **kwargs):
         super().add_edge(source, target, **kwargs)
         edge = self.es[self.ecount() - 1]
         self.__set_default_values(edge, self.__defaults['edge'])
         self.edges.append(Edge(edge, self))
         self.edges[-1].load()
+        return self.edges[-1]
 
     def get_vs(self, **kwargs):
         seq = ItemSequence(self.vertices, *self.vertices)
