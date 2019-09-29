@@ -4,157 +4,147 @@ import data
 
 class Interface:
     def __init__(self, **kwargs):
-        self.switch = None
+        self.other = None
         self.attachment = None
-        self.params = list()
+        self.params = []
         for att in kwargs:
             setattr(self, str(att), kwargs[att])
 
-    def connect(self, device):
-        if self.switch is not None:
-            self.switch.unsubscribe(self)
-        self.switch = device
-        device.subscribe(self)
+    def connect(self, other):
+        self.other = other
+        other.attach(self)
+
+    def attach(self, other):
+        self.other = other
 
     def receive(self, source, frame):
-        self.attachment(source, frame, *self.params)
+        print('%s receives from %s' % (self.name, self.other.name))
+        if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
+            self.attachment(source, frame, *self.params)
+        else:
+            print('drop at', self.name)
+
+    def send(self, frame):
+        print('%s sends to %s' % (self.name, self.other.name))
+        self.other.receive(self, frame)
 
 
-class PC:
+class Host:
     def __init__(self, interface, **kwargs):
         self.interface = interface
         interface.attachment = self.__receive
         self.arp_table = kwargs.get('arp_table') or dict()
         self.name = kwargs.get('name')
 
-    def send(self, segment, target):
-        print("<%s>" % self.name, 'send to', target)
-        source = self.interface.ip_address
-        packet = data.Packet(source, target, segment)
-        mac_source = self.interface.mac_address
-        if target not in self.interface.ip_network:
-            print(target, end='')
-            target = self.interface.default_gateway
-
-        def func():
-            if target in self.arp_table:
-                mac_target = self.arp_table[target]
-                frame = data.Frame(mac_source, mac_target, packet)
-                print('send frame')
-                self.interface.switch.receive(self, frame)
+    def send(self, info, ip_target):
+        def function():
+            if ip_target in self.arp_table:
+                packet = data.Packet(self.interface.ip_address, ip_target)
+                frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
+            elif ip_target in self.interface.ip_network:
+                packet = data.ARP(self.interface.ip_address, ip_target, function)
+                frame = data.BroadcastFrame(self.interface.mac_address, packet)
+            elif self.interface.default_gateway in self.arp_table:
+                packet = data.Packet(self.interface.ip_address, ip_target)
+                frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
             else:
-                arp = data.ARP(self.interface.ip_address, target, func)
-                frame = data.BroadcastFrame(self.interface.mac_address, arp)
-                print('send arp')
-                self.interface.switch.receive(self.interface, frame)
-        func()
+                packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
+                frame = data.BroadcastFrame(self.interface.mac_address, packet)
+            self.interface.send(frame)
+        function()
 
     def __receive(self, source, frame):
-        print("<%s>" % self.name, 'receive from', source.name)
-        packet = frame.packet
-        if isinstance(frame, data.BroadcastFrame):
-            if isinstance(packet, data.ARP):
-                if packet.target == self.interface.ip_address:
-                    reply = packet.reply()
-                    frame = data.Frame(self.interface.mac_address, frame.source, reply)
-                    source.receive(self.interface, frame)
+        self.arp_table[frame.packet.ip_source] = frame.mac_source
+        if frame.packet.ip_target == self.interface.ip_address:
+            if isinstance(frame.packet, data.ARP):
+                if frame.packet.is_reply:
+                    # print('Mac address of %s is %s' % (frame.packet.ip_source, frame.mac_source))
+                    frame.packet.func()
                 else:
-                    print('Drop due to unmatched ip address', packet.target, self.interface.ip_address)
-        else:
-            if frame.target == self.interface.mac_address:
-                if isinstance(packet, data.ARP):
-                    if packet.target == self.interface.ip_address:
-                        self.arp_table[packet.source] = frame.source
-                        packet.func()
-                elif isinstance(packet, data.Packet):
-                    if packet.target == self.interface.ip_address:
-                        print('Receive', "\"%s\"" % packet.segment)
+                    reply_arp = frame.packet.reply()
+                    frame = data.Frame(self.interface.mac_address, frame.mac_source, reply_arp)
+                    self.interface.send(frame)
+            else:
+                print('receive something')
 
 
-class Switch:
+class Hub:
     def __init__(self, **kwargs):
-        self.mac_table = kwargs.get('mac_table') or dict()
-        self.interfaces = list()
         self.name = kwargs.get('name')
+        self.others = set()
 
-    def subscribe(self, interface):
-        self.interfaces.append(interface)
-
-    def unsubscribe(self, interface):
-        if interface not in self.interfaces:
-            raise IndexError
-        self.interfaces.pop(interface)
-        for _mac in self.mac_table:
-            if interface is self.mac_table[_mac]:
-                self.mac_table.pop(_mac)
-                break
+    def attach(self, other):
+        self.others.add(other)
 
     def receive(self, source, frame):
-        print("<%s>" % self.name, 'receive from', source.name)
-        self.mac_table[frame.source] = source
-        if frame.target in self.mac_table:
-            self.mac_table[frame.target].receive(self, frame)
-        elif frame.target is None:
-            for interface in self.interfaces:
-                if interface is not source:
-                    print(interface.name)
-                    interface.receive(self, frame)
+        for other in self.others:
+            if other is not source:
+                self.send(frame, other)
+
+    def send(self, frame, target):
+        print('%s sends to %s' % (self.name, target.name))
+        target.receive(self, frame)
+
+
+class Switch(Hub):
+    def __init__(self, **kwargs):
+        self.mac_table = kwargs.get('mac_table') or dict()
+        self.others = set()
+        super().__init__(**kwargs)
+
+    def receive(self, source, frame):
+        self.mac_table[frame.mac_source] = source
+        if isinstance(frame, data.BroadcastFrame):
+            super().receive(source, frame)
+        else:
+            if frame.mac_target in self.mac_table:
+                self.send(frame, self.mac_table[frame.mac_target])
 
 
 class Router:
-    """
     def __init__(self, *interfaces, **kwargs):
         self.interfaces = interfaces
-        self.arp_table = kwargs.get('arp_table') or dict()
-        self.mac_table = kwargs.get('mac_table') or dict()
-    """
-    def __init__(self, *interfaces, **kwargs):
-        self.interfaces = interfaces
-        for index, interface in enumerate(interfaces):
+        for interface in interfaces:
             interface.attachment = self.__receive
             interface.params = [interface]
-            print(interface.receive)
+
         self.arp_table = kwargs.get('arp_table') or dict()
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
 
-    def __receive(self, source, frame, interface):
-        print("<%s>" % self.name, 'receive from', source.name, 'interface:', interface.name)
-        packet = frame.packet
-        if isinstance(frame, data.BroadcastFrame):
-            if isinstance(packet, data.ARP):
-                if packet.target == interface.ip_address:
-                    reply = packet.reply()
-                    frame = data.Frame(interface.mac_address, frame.source, reply)
-                    source.receive(interface, frame)
+    def __receive(self, source, frame, receiver):
+        self.arp_table[frame.packet.ip_source] = frame.mac_source
+        if frame.packet.ip_target == receiver.ip_address:
+            if isinstance(frame.packet, data.ARP):
+                if frame.packet.is_reply:
+                    print(self.name)
+                    print('Mac address of %s is %s' % (frame.packet.ip_source, frame.mac_source))
+                    frame.packet.func()
                 else:
-                    print('Drop due to unmatched ip address', packet.target, interface.ip_address)
-        else:
-            if frame.target == interface.mac_address:
-                if isinstance(packet, data.ARP):
-                    if packet.target is interface.ip_address:
-                        self.arp_table[packet.source] = frame.source
-                        packet.func()
-                elif isinstance(packet, data.Packet):
-                    def func():
-                        for forward_interface in self.interfaces:
-                            if packet.target in forward_interface.ip_network:
-                                if forward_interface.switch:
-                                    if packet.target in self.arp_table:
-                                        print('send frame')
-                                        forward_frame = data.Frame(forward_interface.mac_address, self.arp_table[packet.target], packet)
-                                        forward_interface.switch.receive(forward_interface, forward_frame)
-                                    else:
-                                        print('send arp')
-                                        arp = data.ARP(forward_interface.ip_address, packet.target, func)
-                                        forward_frame = data.BroadcastFrame(forward_interface.mac_address, arp)
-                                        forward_interface.switch.receive(forward_interface, forward_frame)
-                                break
-                        else:
-                            print('Drop')
-                    func()
+                    reply_arp = frame.packet.reply()
+                    frame = data.Frame(receiver.mac_address, frame.mac_source, reply_arp)
+                    receiver.send(frame)
             else:
-                print('Drop due to unmatched mac address: ', frame.target, interface.mac_address)
+                print('receive something')
+        else:
+            if isinstance(frame.packet, data.ARP):
+                return
+            for network in self.routing_table:
+                if frame.packet.ip_target in network:
+                    self.send(self.routing_table[network], frame)
+                    break
+            else:
+                print('drop')
+
+    def send(self, interface, frame):
+        def func():
+            if frame.packet.ip_target in self.arp_table:
+                next_frame = data.Frame(interface.mac_address, self.arp_table[frame.packet.ip_target], frame.packet)
+            else:
+                packet = data.ARP(interface.ip_address, frame.packet.ip_target, func)
+                next_frame = data.BroadcastFrame(interface.mac_address, packet)
+            interface.send(next_frame)
+        func()
 
 
 if __name__ == '__main__':
@@ -198,9 +188,15 @@ if __name__ == '__main__':
         'mac_address': 'aa.aa.aa.aa.aa.22',
         'default_gateway': ipa.ip_address('10.10.0.1')
     }
-    routing_table = {
-        ipa.ip_network('192.168.0.0/24'): interface0,
-        ipa.ip_network('10.10.0.0/24'): iterface20
+    interface31 = {
+        'name': 'interface31',
+        'ip_address': ipa.ip_address('172.16.0.1'),
+        'ip_network': ipa.ip_network('172.16.0.0/20')
+    }
+    interface32 = {
+        'name': 'interface32',
+        'ip_address': ipa.ip_address('172.16.0.2'),
+        'ip_network': ipa.ip_network('172.16.0.0/20')
     }
     """
     arp_table0 = {
@@ -234,13 +230,19 @@ if __name__ == '__main__':
     i22 = Interface(**interface22)
     i20 = Interface(**interface20)
 
-    pc1 = PC(i1, name='A')
-    pc2 = PC(i2, name='B')
-    pc21 = PC(i21, name='C')
-    pc22 = PC(i22, name='D')
+    routing_table = {
+        ipa.ip_network('192.168.0.0/24'): i0,
+        ipa.ip_network('10.10.0.0/24'): i20
+    }
+
+    pc1 = Host(i1, name='A')
+    pc2 = Host(i2, name='B')
+    pc21 = Host(i21, name='C')
+    pc22 = Host(i22, name='D')
     switch = Switch(name='switch 0')
     switch2 = Switch(name='switch 1')
     router = Router(i0, i20, name='router', routing_table=routing_table)
+    router2 = Router(i0, i20, name='router2', routing_table=routing_table2)
     i0.connect(switch)
     i1.connect(switch)
     i2.connect(switch)
