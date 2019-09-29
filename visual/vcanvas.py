@@ -66,7 +66,10 @@ class Canvas(tk.Canvas):
         if canvas_object is not None:
             position = self.__convert_position(*args[:2]).astype(float)
             from visual import vnetwork as vn
-            if isinstance(base, vn.VVertex):
+            if isinstance(base, vn.Frame):
+                rad = args[2]
+                position = np.concatenate((position - rad, position + rad))
+            elif isinstance(base, vn.VVertex):
                 pass
             elif isinstance(base, vg.Edge):
                 position = np.concatenate((position, self.__convert_position(*(args[2:4]))))
@@ -146,6 +149,7 @@ class Canvas(tk.Canvas):
     def fix_order(self):
         self.tag_raise('edge')
         self.tag_raise('vertex')
+        self.tag_raise('frame')
 
     def __pivot(self):
         return self.canvasx(0), self.canvasy(0)

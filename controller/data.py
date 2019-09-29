@@ -46,5 +46,16 @@ class Controller:
         self.__canvas.subscriber['label_x'] = label_x
         self.__canvas.subscriber['label_y'] = label_x
 
+    def test(self):
+        g = self.__graph
+        if g is None:
+            print("ASDASD")
+        else:
+            edge = g.edges[0]
+            from visual import vnetwork as vn
+            f = vn.Frame(edge)
+            f.display(self.__canvas)
+            f.start_animation()
+
 
 

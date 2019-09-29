@@ -48,3 +48,6 @@ class Controller:
             self.__controller.subscribe_labels(label_x, label_y)
         else:
             raise NotImplementedError
+
+    def test(self):
+        self.__controller.test()

@@ -51,12 +51,8 @@ def destroy_window():
 
 def test():
     # controller.filter(target="vertex", criteria=("GeoLocation", ""))
-    global photo
-    import resource
-    photo = resource.get_image('switch')
-    w.canvas.create_image(50, 50, image=photo, tag=('vertex',))
-    w.canvas.create_line(0, 0, 500, 500, width=30, tag=('edge',))
     w.canvas.tag_raise('vertex')
+    controller.test()
     pass
 
 
