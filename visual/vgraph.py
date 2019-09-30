@@ -15,33 +15,42 @@ def read(filename, *args, **kwargs):
 
 
 class Graph(ig.Graph):
+    __defaults = dict()
+    __defaults['vertex'] = (
+        ('x', 0),
+        ('y', 0),
+        ('type', 'pc'),
+        ('state', 'active'),
+        ('tag', {'vertex'})
+    )
+    __defaults['edge'] = (
+        ('width', 2),
+        ('color', 'black'),
+        ('state', 'active'),
+        ('tag', {'edge'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__init_subclass()
 
     def __init_subclass(self):
-
-        def shorten(element, attributes, *key_default):
-            for pair in key_default:
-                element[pair[0]] = attributes.get(pair[0], pair[1]) or pair[1]
-
-        for i, v in enumerate(self.vs):
-            va = v.attributes()
-            keys = ['x', 'y', 'size', 'width', 'color', 'tag', 'index', 'state', 'focus_color']
-            defaults = [0, 0, 10, 2, 'red', {'vertex'}, i, 'normal', 'pink']
-            shorten(v, va, *zip(keys, defaults))
-        self.vertices = list(map(lambda v: Vertex(v), self.vs))
-
-        for i, e in enumerate(self.es):
-            ea = e.attributes()
-            keys = ['width', 'color', 'tag', 'focus_color']
-            defaults = [2, 'black', {'edge'}, 'gray']
-            shorten(e, ea, *zip(keys, defaults))
-        self.edges = list(map(lambda e: Edge(e, self), self.es))
-        # self.hulls = []
+        from . import vnetwork as vn
+        self.vertices = list()
+        self.edges = list()
+        for vertex in self.vs:
+            self.__set_default_values(vertex, self.__defaults['vertex'])
+            self.vertices.append(vn.classification[vertex['type']](vertex))
+        for edge in self.es:
+            self.__set_default_values(edge, self.__defaults['edge'])
+            self.vertices.append(Edge(edge, self))
         self.__backup = self.copy()
         self.load()
-        # self.threads = [None] * 10
+
+    @staticmethod
+    def __set_default_values(item, defaults):
+        for key, value in defaults:
+            item[key] = item.attributes().get(key, value) or value
 
     def display(self, canvas):
         for e in self.edges:
@@ -52,33 +61,40 @@ class Graph(ig.Graph):
         canvas.fix_order()
 
     def fit_canvas(self, canvas):
-        vertices = [[], []]
-        try:
-            vertices[0] = self.vs['x']
-        except AttributeError:
-            vertices[0] = [0] * len(self.vs)
-        try:
-            vertices[1] = self.vs['y']
-        except AttributeError:
-            vertices[1] = [0] * len(self.vs)
+        print(self.vs.attributes())
+        vertices = [self.vs['x'], self.vs['y']]
         top_left = min(vertices[0]), min(vertices[1])
         bottom_right = max(vertices[0]), max(vertices[1])
         canvas.scale_to_fit(top_left, bottom_right)
 
     def load(self):
         for v in self.vertices:
-            v.load();
+            v.load()
         for e in self.edges:
             e.load()
         # for h in self.hulls: h.load()
 
-    def convex_hull(self, indices):
-        vertices = list(map(lambda index: self.vertices[index], indices))
-        # self.hulls = [Hull(vertices)]
-
     def add_vertices(self, n):
         # TODO add vertices
-        super().add_vertices(n)
+        return super().add_vertices(n)
+
+    def add_vertex(self, *args, **kwargs):
+        from . import vnetwork as vn
+        super().add_vertex(**kwargs)
+        print(self.vs, self.vcount())
+        vertex = self.vs[self.vcount() - 1]
+        self.__set_default_values(vertex, self.__defaults['vertex'])
+        self.vertices.append(vn.classification[vertex['type']](vertex, *args, **kwargs))
+        self.vertices[-1].load()
+        return self.vertices[-1]
+
+    def add_edge(self, source, target, *args, **kwargs):
+        super().add_edge(source, target, **kwargs)
+        edge = self.es[self.ecount() - 1]
+        self.__set_default_values(edge, self.__defaults['edge'])
+        self.edges.append(Edge(edge, self))
+        self.edges[-1].load()
+        return self.edges[-1]
 
     def get_vs(self, **kwargs):
         seq = ItemSequence(self.vertices, *self.vertices)
@@ -123,13 +139,13 @@ class ItemSequence:
     def select(self, **kwargs):
         result = self
         operators = {
-            "lt": operator.lt,\
-            "gt": operator.gt,\
-            "le": operator.le,\
-            "ge": operator.ge,\
-            "eq": operator.eq,\
-            "ne": operator.ne,\
-            "in": lambda a, b: a in b,\
+            "lt": operator.lt,
+            "gt": operator.gt,
+            "le": operator.le,
+            "ge": operator.ge,
+            "eq": operator.eq,
+            "ne": operator.ne,
+            "in": lambda a, b: a in b,
             "notin": lambda a, b: a not in b}
         for key, value in kwargs.items():
             if "_" not in key or key.rindex("_") == 0:
@@ -163,16 +179,25 @@ class CanvasItem(ABC):
     @abstractmethod
     def load(self): pass
 
+    @abstractmethod
     def display(self, canvas): pass
 
+    @abstractmethod
+    def reallocate(self, canvas): pass
+
+    @abstractmethod
+    def reconfigure(self, canvas): pass
+
+    @abstractmethod
     def focus(self, canvas): pass
 
+    @abstractmethod
     def blur(self, canvas): pass
 
     def motion(self, canvas, delta_x, delta_y): pass
 
 
-class Vertex(CanvasItem):
+class Vertex(CanvasItem, ABC):
     def __init__(self, ig_vertex):
         super().__init__()
         self.ig_vertex = ig_vertex
@@ -182,28 +207,15 @@ class Vertex(CanvasItem):
         for key in self.ig_vertex.attribute_names():
             self.attributes[key] = self.ig_vertex[key]
 
-    def display(self, canvas):
-        att = self.attributes
-        canvas.create_mapped_circle(self, att['x'], att['y'], att['size'], width=att['width']+0.5, fill=att['color'],
-                                    tag=list(att['tag']), activewidth=att['width'] + 2.5)
-
     def visual(self):
         pass
         # print("Vectex: ", self.x, self.y, self.size, self.color, self.width)
 
     def focus(self, canvas):
-        att = self.attributes
-        att['color'] = att['focus_color']
-        att['tag'].add('highlight')
-        self.display(canvas)
-        canvas.center_to((att['x'], att['y']))
+        pass
 
     def blur(self, canvas):
-        att = self.attributes
-        att['color'] = self.ig_vertex['color']
-        att['focus_size'] = self.ig_vertex['size']
-        att['tag'].remove('highlight')
-        self.display(canvas)
+        pass
 
     def graph(self):
         return self.ig_vertex.graph
@@ -211,8 +223,9 @@ class Vertex(CanvasItem):
     def motion(self, canvas, delta_x, delta_y):
         self.attributes['x'] += delta_x
         self.attributes['y'] += delta_y
-        self.display(canvas)
-        for edge in self.link_edges: edge.display(canvas)
+        self.reallocate(canvas)
+        for edge in self.link_edges:
+            edge.reallocate(canvas)
 
     def subscribe(self, edge):
         self.link_edges.add(edge)
@@ -237,7 +250,24 @@ class Edge(CanvasItem):
 
     def display(self, canvas):
         att = self.attributes
-        canvas.create_mapped_line(self, *self.packed_points(), width=att['width'], fill=att['color'], tag=list(att['tag']), activewidth=att['width'] + 1)
+        print(att)
+        canvas.create_mapped_line(self,
+                                  *self.packed_points(),
+                                  width=att['width'],
+                                  fill=att['color'],
+                                  tag=tuple(att['tag']),
+                                  activewidth=att['width'] + 1)
+
+    def reallocate(self, canvas):
+        canvas.coords_mapped(self, *self.packed_points())
+
+    def reconfigure(self, canvas):
+        att = self.attributes
+        canvas.itemconfig_mapped(self,
+                                 width=att['width'],
+                                 fill=att['color'],
+                                 tag=tuple(att['tag']),
+                                 activewidth=att['width'] + 1)
 
     def visual(self):
         att = self.attributes
@@ -245,33 +275,13 @@ class Edge(CanvasItem):
 
     def focus(self, canvas):
         att = self.attributes
-        att['color'] = self.ig_edge['focus_color']
-        att['tag'].add('highlight')
         self.display(canvas)
         a, b, x, y = self.packed_points()
         canvas.scale_to_fit((a, b), (x, y))
-        # canvas.center_to(((a + x) / 2, (b + y) / 2))
 
     def blur(self, canvas):
         att = self.attributes
-        att['tag'].remove('highlight')
-        att['color'] = self.ig_edge['color']
         self.display(canvas)
 
     def graph(self):
         return self.ig_edge.graph
-
-
-class Hull:
-    def __init__(self, *vertices, **kwargs):
-        self.vertices = vertices
-        self.points = None
-
-    def display(self, canvas):
-        canvas.create_polygon(*self.points, fill='green')
-
-    def load(self):
-        points = np.array(list(map(lambda vertex: (vertex.attributes['x'], vertex.attributes['y']), self.vertices)))
-        convex_hull = ConvexHull(points)
-        print(points)
-        self.points = list(map(lambda index: points[index], convex_hull.vertices))

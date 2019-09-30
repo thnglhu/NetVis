@@ -31,6 +31,7 @@ def test(g2):
     g2.es['color'] = [rgbr(value) for value in g2.es["weight"]]
     #visual_style["bbox"] = (1800, 1800)
 
+
 def highlight_shortest_path(g2, path):
     for i in path:
         v = g2.vs[i]
@@ -41,3 +42,7 @@ def highlight_shortest_path(g2, path):
         print(e.tuple)
         e['tag'].add('highlight')
         e['width'] = 10
+
+
+def super_test(canvas):
+    pass

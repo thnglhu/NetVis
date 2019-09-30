@@ -39,7 +39,8 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
-    print(w.__class__)
+    import test
+    test.super_test(w.canvas)
 
 
 def destroy_window():
@@ -50,6 +51,8 @@ def destroy_window():
 
 def test():
     # controller.filter(target="vertex", criteria=("GeoLocation", ""))
+    w.canvas.tag_raise('vertex')
+    controller.test()
     pass
 
 
