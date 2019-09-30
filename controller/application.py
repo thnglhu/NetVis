@@ -20,6 +20,8 @@ class Controller:
         _, extension = os.path.splitext(file.name)
         self.__controller.load(file, canvas, extension=extension[1:])
         graph = self.__controller.get_graph()
+        vs = graph.get_vs()
+        vs = vs.select()
 
 
     def exit(self):

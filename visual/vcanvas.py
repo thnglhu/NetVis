@@ -11,7 +11,7 @@ class Canvas(tk.Canvas):
         self.__init_subclass(cnf, **kwargs)
 
     def __init_subclass(self, cnf=None, **kwargs):
-        self.scale = 1.0
+        self.__scale = 1.0
         self.__angle = 0.0
         self.__size = np.array([kwargs['width'], kwargs['height']])
         self.__graph_objects = dict()
@@ -94,10 +94,10 @@ class Canvas(tk.Canvas):
             self.delete(canvas_object)
 
     def __convert_position(self, *position):
-        return np.array(position) * self.scale + self.__size / 2
+        return np.array(position) * self.__scale + self.__size / 2
 
     def __invert_position(self, *position):
-        return (position - self.__size / 2) / self.scale
+        return (position - self.__size / 2) / self.__scale
 
     def scale_to_fit(self, top_left, bottom_right):
         top_left = np.array(top_left)
@@ -106,10 +106,10 @@ class Canvas(tk.Canvas):
         top_left[1], bottom_right[1] = sorted((top_left[1], bottom_right[1]))
         size = bottom_right - top_left
         if (size == 0).any():
-            self.scale = 1
+            self.__scale = 1
         else:
             scale = self.__size / size
-            self.scale = max(min(scale), 1)
+            self.__scale = max(min(scale), 1)
         self.center_to((bottom_right + top_left) / 2)
         self.reallocate()
 
@@ -126,11 +126,11 @@ class Canvas(tk.Canvas):
         vector = pivot - pos
         pos2 = self.__invert_position(*pos)
 
-        self.scale += kwargs.get('linear', 0)
-        self.scale *= kwargs.get('potential', 1)
+        self.__scale += kwargs.get('linear', 0)
+        self.__scale *= kwargs.get('potential', 1)
 
-        if self.scale < 1:
-            self.scale = 1
+        if self.__scale < 1:
+            self.__scale = 1
         pos2 = self.__convert_position(*pos2)
         pivot2 = pos2 + vector
         self.scan_mark(0, 0)

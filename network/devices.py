@@ -2,7 +2,6 @@ import ipaddress as ipa
 from . import data
 from visual import  vnetwork as vn
 
-
 class Interface:
     device = None
 

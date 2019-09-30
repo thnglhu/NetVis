@@ -22,11 +22,17 @@ class Controller:
         self.__canvas = canvas
         vcanvas.Canvas.convert(canvas)
         g = self.__graph = vgraph.Graph()
-
-        ###########################################################
-        ##################################TEST#####################
-        ###########################################################
-
+        """
+        g.add_vertex(type='pc', name='pc1', x=0, y=0)
+        g.add_vertex(type='pc', name='pc2', x=0, y=-10)
+        g.add_vertex(type='pc', name='pc3', x=0, y=10)
+        g.add_vertex(type='switch', name='switch', x=10, y=0)
+        g.add_edge('switch', 'pc1', width=10)
+        g.add_edge('switch', 'pc2', width=10)
+        g.add_edge('switch', 'pc3', width=10)
+        # g.load()
+        g.fit_canvas(canvas)
+        canvas.tag_raise('vertex')"""
         from network import devices as dv
         interface0 = {
             'name': 'interface0',
@@ -131,7 +137,7 @@ class Controller:
         g.add_edge('switch 1', 'router')
         g.add_edge('E', 'router')
 
-        pc1['x'] = -10
+        pc1['x'] = -6
         pc1['y'] = -6
         pc2['x'] = -5
         pc2['y'] = 6
@@ -145,12 +151,8 @@ class Controller:
         switch2['x'] = 5
 
         # g.load()
-        self.__canvas.scale = 20.0
         g.display(self.__canvas)
-
-        # ######################################################### #
-        # ###########################TEST########################## #
-        # ######################################################### #
+        g.fit_canvas(self.__canvas)
 
         g.display(canvas)
         return
@@ -175,9 +177,7 @@ class Controller:
             self.first = False
             from visual import vnetwork as vn
 
-            g.fit_canvas(self.__canvas)
-
-            pc1.send(self.__canvas, ipa.ip_address('172.16.0.2'))
+            # pc1.send(self.__canvas, ipa.ip_address('172.16.0.2'))
             # pc22.send(self.__canvas, ipa.ip_address('192.168.0.2'))
 
             from time import sleep
