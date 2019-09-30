@@ -21,8 +21,8 @@ class Graph(ig.Graph):
     def __init_subclass(self):
 
         def shorten(element, attributes, *key_default):
-            for pair in key_default:
-                element[pair[0]] = attributes.get(pair[0], pair[1]) or pair[1]
+            for key, value in key_default:
+                element[key] = attributes.get(key, value) or value
 
         for i, v in enumerate(self.vs):
             va = v.attributes()
