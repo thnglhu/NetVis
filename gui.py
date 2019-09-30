@@ -30,18 +30,20 @@ def vp_start_gui():
     #Starting point when module is the main routine.
     global val, w, root
     root = tk.Tk()
-    top = Toplevel1 (root)
+    top = top_level(root)
     gui_support.init(root, top)
     root.mainloop()
 
 
 w = None
-def create_Toplevel1(root, *args, **kwargs):
-    '''Starting point when module is imported by another program.'''
+
+
+def create_top_level(root, *args, **kwargs):
+    # Starting point when module is imported by another program.
     global w, w_win, rt
     rt = root
-    w = tk.Toplevel (root)
-    top = Toplevel1 (w)
+    w = tk.Toplevel(root)
+    top = top_level(w)
     gui_support.init(w, top, *args, **kwargs)
     return (w, top)
 
@@ -51,19 +53,84 @@ def destroy_top_level():
     w.destroy()
     w = None
 
-class Toplevel1:
+
+def settings_popup_window():
+    settings_popup = tk.Tk()
+
+    settings_popup.geometry("300x500")
+    settings_popup.title("Settings")
+
+    button = ttk.Button(settings_popup, text="Okay")
+    button.grid(row=1, column=0)
+
+    settings_popup.mainloop()
+
+
+class CreateToolTip(object):
+    """
+    create a tooltip for a given widget
+    """
+    def __init__(self, widget, text='widget info'):
+        self.waittime = 500     #miliseconds
+        self.wraplength = 180   #pixels
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<ButtonPress>", self.leave)
+        self.id = None
+        self.tw = None
+
+    def enter(self, event=None):
+        self.schedule()
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(self.waittime, self.showtip)
+
+    def unschedule(self):
+        id = self.id
+        self.id = None
+        if id:
+            self.widget.after_cancel(id)
+
+    def showtip(self, event=None):
+        x = y = 0
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 20
+        # creates a toplevel window
+        self.tw = tk.Toplevel(self.widget)
+        # Leaves only the label and removes the app window
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                       background="#ffffff", relief='solid', borderwidth=1,
+                       wraplength = self.wraplength)
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tw
+        self.tw= None
+        if tw:
+            tw.destroy()
+
+
+class top_level:
     def __init__(self, top=None):
-        '''This class configures and populates the toplevel window.
-           top is the toplevel containing window.'''
+        # This class configures and populates the toplevel window. top is the toplevel containing window.
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
         _fgcolor = '#000000'  # X11 color: 'black'
         _compcolor = '#d9d9d9'  # X11 color: 'gray85'
         _ana1color = '#d9d9d9'  # X11 color: 'gray85'
         _ana2color = '#ececec'  # Closest X11 color: 'gray92'
 
-        top.geometry("600x450+252+102")
-        top.title("New Toplevel")
-        top.configure(background="#d9d9d9")
+        top.title("PocketNet")
+        top.configure(background="#F0F0F0")
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
         # FULLSCREEN
@@ -983,18 +1050,58 @@ class Toplevel1:
             relx=0.05,
             rely=0.71)
 
-        self.Button1 = tk.Button(top)
-        self.Button1.place(relx=0.017, rely=0.022, height=24, width=57)
-        self.Button1.configure(activebackground="#ececec")
-        self.Button1.configure(activeforeground="#000000")
-        self.Button1.configure(background="#d9d9d9")
-        self.Button1.configure(command=gui_support.ABC)
-        self.Button1.configure(disabledforeground="#a3a3a3")
-        self.Button1.configure(foreground="#000000")
-        self.Button1.configure(highlightbackground="#d9d9d9")
-        self.Button1.configure(highlightcolor="black")
-        self.Button1.configure(pady="0")
-        self.Button1.configure(text='''Button''')
+        self.bottleneck_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.75)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.79)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.83)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Analyze: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.87)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Data Panel: Title-------------------------#
+        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Helvetica", 14, "bold"))
+        self.data_panel_title.place(
+            anchor=tk.CENTER,
+            relx=0.5,
+            rely=0.05)
+
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
+
+        self.data_panel_title.configure(bg="#F0F0F0")
+
+        top.configure(menu=self.menubar)
+
 
 if __name__ == '__main__':
     vp_start_gui()
