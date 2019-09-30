@@ -7,11 +7,11 @@
 import sys
 import tkinter as tk
 from tkinter import filedialog
-# from controller import application
+from controller import application
 from gui import *
 import tkinter.ttk as ttk
 
-# controller = application.Controller.get_instance()
+controller = application.Controller.get_instance()
 
 
 def exit_window():
@@ -37,7 +37,7 @@ def open_file():
     file = filedialog.askopenfile(
         title="Select file",
         filetypes=(("GraphML", "*.graphml"), ("Text file", "*.txt")))
-    # controller.load(file, w.canvas)
+    controller.load(file, w.main_canvas)
     sys.stdout.flush()
 
 
