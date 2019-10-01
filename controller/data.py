@@ -184,3 +184,10 @@ class Controller:
 
         self.__canvas.subscription['create'] = my_create
         print(self.__canvas.subscription['create'])
+
+    def modify(self, modify_info):
+        target = self.__canvas.variable.get('inspect')
+        if target:
+            target.modify(modify_info)
+        else:
+            raise ValueError

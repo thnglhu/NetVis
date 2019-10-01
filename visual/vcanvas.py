@@ -31,7 +31,7 @@ class Canvas(tk.Canvas):
         self.subscriber = dict()
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
-        self.bind("<Double-Button-1>", self.__double)
+        self.bind("<Double-Button-3>", self.__double)
         self.bind("<Button-1>", self.__motion_init)
         self.bind("<B1-Motion>", self.__motion)
         self.bind("<Button-3>", self.__option)
@@ -170,6 +170,7 @@ class Canvas(tk.Canvas):
         self.__update_mouse_location(event.x, event.y)
 
     def __double(self, event):
+        print(self.__scan_obj)
         if self.__scan_obj:
             if self.__sender_turn:
                 self.sender = self.__invert_objects.get(self.__scan_obj, None)

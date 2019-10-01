@@ -21,6 +21,11 @@ class Interface:
             'default_gateway': self.__getattribute__('default_gateway')
         }
 
+    def modify(self, info):
+        self.ip_address = info['ip_address']
+        self.ip_network = info['ip_network']
+        self.default_gateway = info['default_gateway']
+
     def connect(self, other):
         self.other = other
         other.attach(self)

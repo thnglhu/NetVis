@@ -63,3 +63,6 @@ class Controller:
 
     def create(self, info):
         self.__controller.create(info)
+
+    def modify(self, modify_info):
+        self.__controller.modify(modify_info)

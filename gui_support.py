@@ -136,6 +136,7 @@ def switch_popup_window():
 
 
 def enable(child_list):
+    # TODO fix this childList ??
     for child in childList:
         child.configure(state='enable')
 
@@ -163,6 +164,7 @@ def save_file():
     if filename == '':
         filename = filedialog.asksaveasfile(mode='w')
     if filename is not None:
+        # TODO fix this ??
         data = textentry.get('1.0', 'end')
         filename.write(data)
 
@@ -170,6 +172,7 @@ def save_file():
 def save_file_as():
     global filename
     filename = filedialog.asksaveasfile(mode='w')
+    # TODO fix this ??
     file_save()
     '''
     file = filedialog.asksaveasfilename(
@@ -198,11 +201,8 @@ def redo():
     print("Redo")
 
 
-def zoom_in():
-    controller.create({
-        'type': 'pc',
-        'name': 'AAA',
-    })
+def zoom_in(event):
+    print("Zoom in")
 
 
 def zoom_out():
@@ -359,22 +359,27 @@ def update_node_info(info):
     # clear the data panel
     global dy
     dy = 0
+    node_info.clear()
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
 
     def add_node_info(key, value=None):
         global dy
-        add_widget("label", key, 0.04)
         if value is not None:
-            add_widget("entry", value, 0.5)
-        dy += 0.09
-
-    def add_table_info(items):
-        global dy
-        for _key, _value in items.items():
-            add_widget("entry", _key, 0.04)
-            add_widget("entry", _value, 0.5)
+            node_info[add_widget("label", key, 0.04)] = add_widget("entry", value, 0.5)
             dy += 0.09
+        else:
+            return add_widget("label", key, 0.04)
+
+    def add_table_info(key, value):
+        table_label = add_node_info(key)
+        global dy
+        dy += 0.09
+        table_info = []
+        for k, v in value.items():
+            table_info.append([add_widget("entry", k, 0.04), add_widget("entry", v, 0.5)])
+            dy += 0.09
+        node_info[table_label] = table_info
 
     '''
     def add_edge_info(sub_info):
@@ -387,15 +392,23 @@ def update_node_info(info):
 
     for key, value in info.items():
         if isinstance(value, dict):
-            add_node_info(key)
-            add_table_info(value)
+            add_table_info(key, value)
         else:
             add_node_info(key, value)
 
-    print(dy)
 
 def node_modify():
-    pass
+    print("modifying")
+    modify_info = dict()
+    for key, value in node_info.items():
+        if isinstance(value, list):
+            table_info = dict()
+            for a, b in value:
+                table_info[a.get()] = b.get()
+            modify_info[key['text']] = table_info
+        else:
+            modify_info[key['text']] = value.get()
+    controller.modify(modify_info)
 
 
 def update_canvas_coords(x, y):

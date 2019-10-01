@@ -19,6 +19,10 @@ class VVertex(vg.Vertex, ABC):
     def _set_image(self):
         pass
 
+    @abstractmethod
+    def modify(self, info):
+        pass
+
     def load(self):
         super().load()
         # att = self.attributes
@@ -62,6 +66,10 @@ class PC(VVertex, dv.Host):
         self['image'] = self['deactivate']
         self.reconfigure(canvas)
 
+    def modify(self, info):
+        self.name = info['name']
+        self.interface.modify(info['interface'])
+
 
 class Switch(VVertex, dv.Switch):
     def __init__(self, ig_vertex, **kwargs):
@@ -82,6 +90,9 @@ class Switch(VVertex, dv.Switch):
 
     def __get_mac_table(self):
         return {str(k): v.name for k, v in self.mac_table.items()}
+
+    def modify(self, info):
+        print(info)
 
 
 class Router(VVertex, dv.Router):
@@ -105,6 +116,8 @@ class Router(VVertex, dv.Router):
     def __get_routing_table(self):
         return {str(k): v.name for k, v in self.routing_table.items()}
 
+    def modify(self, info):
+        print(info)
 
 class Frame(vg.CanvasItem):
     rad = 10
