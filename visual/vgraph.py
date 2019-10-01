@@ -62,8 +62,8 @@ class Graph(ig.Graph):
     def fit_canvas(self, canvas):
         x = sorted(self.get_vs()['x'])
         y = sorted(self.get_vs()['y'])
-        top_left = x[0]-5, y[0]-5
-        bottom_right = x[-1]+5, y[-1]+5
+        top_left = x[0]-2, y[0]-2
+        bottom_right = x[-1]+5, y[-1]+2
         canvas.scale_to_fit(top_left, bottom_right)
 
     def load(self):
@@ -190,12 +190,17 @@ class CanvasItem(ABC):
     def focus(self, canvas): pass
 
     @abstractmethod
+    def unfocus(self, canvas): pass
+
+    @abstractmethod
     def info(self): pass
 
     def motion(self, canvas, delta_x, delta_y): pass
 
 
 class Vertex(CanvasItem, ABC):
+    __focus_circle = None
+
     def __init__(self, ig_vertex):
         super().__init__()
         self.ig_vertex = ig_vertex
@@ -209,21 +214,30 @@ class Vertex(CanvasItem, ABC):
         pass
         # print("Vectex: ", self.x, self.y, self.size, self.color, self.width)
 
-    def focus(self, canvas):
-        pass
-
     def graph(self):
         return self.ig_vertex.graph
 
     def motion(self, canvas, delta_x, delta_y):
-        self.attributes['x'] += delta_x
-        self.attributes['y'] += delta_y
+        self['x'] += delta_x
+        self['y'] += delta_y
         self.reallocate(canvas)
         for edge in self.link_edges:
             edge.reallocate(canvas)
+        if self.__focus_circle:
+            self.__focus_circle.reallocate(canvas)
 
     def subscribe(self, edge):
         self.link_edges.add(edge)
+
+    def reallocate(self, canvas):
+        att = self.attributes
+        canvas.coords_mapped(self, att['x'], att['y'])
+
+    def focus(self, canvas):
+        pass
+
+    def unfocus(self, canvas):
+        pass
 
 
 class Edge(CanvasItem):
@@ -242,6 +256,7 @@ class Edge(CanvasItem):
         def shorten(idx, axis):
             return self.points[idx].attributes[axis]
         return shorten(0, 'x'), shorten(0, 'y'), shorten(1, 'x'), shorten(1, 'y')
+
 
     def display(self, canvas):
         att = self.attributes
@@ -267,10 +282,10 @@ class Edge(CanvasItem):
         att = self.attributes
 
     def focus(self, canvas):
-        att = self.attributes
-        self.display(canvas)
-        a, b, x, y = self.packed_points()
-        canvas.scale_to_fit((a, b), (x, y))
+        pass
+
+    def unfocus(self, canvas):
+        pass
 
     def graph(self):
         return self.ig_edge.graph

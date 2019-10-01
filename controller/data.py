@@ -170,4 +170,17 @@ class Controller:
             return
         raise TypeError
 
+    def create(self, info):
+        t = info['type']
+        g = self.__graph
 
+        def my_create(x, y):
+            if t == 'pc':
+                pc = g.add_vertex(None, type='pc', name=info.get('name', ''))
+                pc['x'], pc['y'] = self.__canvas.invert_position(x, y)
+                print(x, y, pc['x'], pc['y'])
+                pc.display(self.__canvas)
+            self.__canvas.subscription['create'] = None
+
+        self.__canvas.subscription['create'] = my_create
+        print(self.__canvas.subscription['create'])

@@ -1,8 +1,8 @@
-from tkinter import PhotoImage
 from PIL import ImageTk, Image
 __image_paths = dict()
 __image_paths['hub'] = "resource/images/hub.png"
-__image_paths['pc'] = "resource/images/pc.png"
+__image_paths['pc-on'] = "resource/images/pc-on.png"
+__image_paths['pc-off'] = "resource/images/pc-off.png"
 __image_paths['router'] = "resource/images/router.png"
 __image_paths['switch'] = "resource/images/switch.png"
 

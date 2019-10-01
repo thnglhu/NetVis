@@ -195,8 +195,11 @@ def redo():
     print("Redo")
 
 
-def zoom_in(event):
-    print("Zoom in")
+def zoom_in():
+    controller.create({
+        'type': 'pc',
+        'name': 'AAA',
+    })
 
 
 def zoom_out():
@@ -240,16 +243,7 @@ def deselect_all_nodes():
 
 
 def add_node():
-    if w.add_node_combobox.get() == "Computer":
-        computer_popup_window()
-    if w.add_node_combobox.get() == "Hub":
-        hub_popup_window()
-    if w.add_node_combobox.get() == "Modem":
-        modem_popup_window()
-    if w.add_node_combobox.get() == "Router":
-        router_popup_window()
-    if w.add_node_combobox.get() == "Switch":
-        switch_popup_window()
+    print("add node")
 
 
 def remove_node():
@@ -347,14 +341,14 @@ def update_node_info(info):
     def add_node_info(sub_node_info):
         nonlocal dy
         node_data_label = tk.Label(w.node_data_panel, text=sub_node_info, font=("Helvetica", 12))
-        node_data_label.configure(bg="#f0f0f0")
+        node_data_label.configure(bg="#fafafa")
         node_data_label.place(relx=0.04, rely= 0 + dy)
         dy += 0.09
 
     def add_edge_info(sub_info):
         nonlocal dy
         edge_data_label = tk.Label(w.edge_data_panel, text=sub_edge_info, font=("Helvetica", 12))
-        edge_data_label.configure(bg="#f0f0f0")
+        edge_data_label.configure(bg="#fafafa")
         edge_data_label.place(relx=0.04, rely= 0 + dy)
         dy += 0.09
 
@@ -368,6 +362,6 @@ def update_node_info(info):
 
 
 def update_canvas_coords(x, y):
-    w.coordinate_x_label['text']=str(x)
-    w.coordinate_y_label['text']=str(y)
+    w.coordinate_x_label['text'] = str(x)
+    w.coordinate_y_label['text'] = str(y)
 

@@ -9,7 +9,7 @@ import time
 
 
 class VVertex(vg.Vertex, ABC):
-
+    active = True
     def __init__(self, ig_vertex):
         super().__init__(ig_vertex)
         self._set_image()
@@ -27,11 +27,6 @@ class VVertex(vg.Vertex, ABC):
         # print(att)
         canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'], tag=tuple(att['tag']))
 
-    def reallocate(self, canvas):
-        att = self.attributes
-        position = np.array((att['x'], att['y']))
-        canvas.coords_mapped(self, att['x'], att['y'])
-
     def reconfigure(self, canvas):
         att = self.attributes
         self.reallocate(canvas)
@@ -45,14 +40,14 @@ class PC(VVertex, dv.Host):
 
     def _set_image(self):
         att = self.attributes
-        att['image'] = resource.get_image("pc")
+        att['image'] = resource.get_image("pc-on")
         att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
         return {
             'type': 'host',
             'name': self.name,
-            'interface': self.interface.name,
+            'interface': self.interface.name if self.interface else '',
             'arp table': self.arp_table
         }
 
@@ -157,6 +152,8 @@ class Frame(vg.CanvasItem):
         canvas.itemconfig_mapped()
 
     def focus(self, canvas): pass
+
+    def unfocus(self, canvas): pass
 
     def info(self):
         return {
