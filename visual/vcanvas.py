@@ -167,38 +167,33 @@ class Canvas(tk.Canvas):
         self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
+        self.__scan_obj = self.find_withtag(tk.CURRENT)
         self.__update_mouse_location(event.x, event.y)
 
     def __double(self, event):
-        print(self.__scan_obj)
-        if self.__scan_obj:
-            if self.__sender_turn:
-                self.sender = self.__invert_objects.get(self.__scan_obj, None)
-                from visual import vnetwork as vn
-                if not isinstance(self.sender, vn.PC):
-                    pass
-                else:
-                    self.__sender_turn = False
-                    self.sender.focus(self)
+        if self.__sender_turn:
+            self.sender = self.__invert_objects.get(self.__scan_obj, None)
+            from visual import vnetwork as vn
+            if not isinstance(self.sender, vn.PC):
+                pass
             else:
-                self.receiver = self.__invert_objects.get(self.__scan_obj, None)
-                from visual import vnetwork as vn
-                if not isinstance(self.receiver, vn.PC):
-                    pass
-                else:
-                    self.sender.send(self, self.receiver.interface.ip_address)
-                    self.sender.unfocus(self)
-                    self.sender = self.receiver = None
-                    self.__sender_turn = True
+                self.__sender_turn = False
+                self.sender.focus(self)
         else:
-            self.__sender_turn = True
-            if self.sender:
+            self.receiver = self.__invert_objects.get(self.__scan_obj, None)
+            from visual import vnetwork as vn
+            if not isinstance(self.receiver, vn.PC):
+                pass
+            else:
+                print(self.sender, self.receiver)
+                self.sender.send(self, self.receiver.interface.ip_address)
                 self.sender.unfocus(self)
-                self.sender = None
+                self.sender = self.receiver = None
+                self.__sender_turn = True
+
 
     def __motion_init(self, event):
         self.__update_mouse_location(event.x, event.y)
-        self.__scan_obj = self.find_withtag(tk.CURRENT)
         if self.subscription.get('create'):
             x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
             self.subscription['create'](x, y)
