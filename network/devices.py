@@ -14,6 +14,13 @@ class Interface:
         for att in kwargs:
             setattr(self, str(att), kwargs[att])
 
+    def info(self):
+        return {
+            'ip_address': self.ip_address,
+            'ip_network': self.ip_network,
+            'default_gateway': self.__getattribute__('default_gateway')
+        }
+
     def connect(self, other):
         self.other = other
         other.attach(self)

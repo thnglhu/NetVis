@@ -554,6 +554,7 @@ class top_level:
 
         # ---------------------------Data Panel-------------------------#
         self.data_panel = tk.Frame(top)
+
         self.data_panel.place(
             relx=0.805,
             rely=0.055,
@@ -1007,21 +1008,76 @@ class top_level:
             rely=0.87)
 
         self.sample_title.configure(bg="#F0F0F0")
-
         # ---------------------------Data Panel: Title-------------------------#
         self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Helvetica", 12, "bold"))
         self.data_panel_title.place(
             anchor=tk.CENTER,
-            relx=0.2,
+            relx=0.15,
             rely=0.05)
+        self.data_panel_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
 
-        self.data_panel_title.configure(bg="#F0F0F0")
+        # ---------------------------Data Panel: Node Title-------------------------#
+        self.node_data_title = tk.Label(self.data_panel, text="Node Data", font=("Helvetica", 12, "bold"))
+        self.node_data_title.place(
+            anchor=tk.CENTER,
+            relx=0.2,
+            rely=0.09)
+        self.node_data_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.105, width=280, height=4)
+
+        self.node_data_button = tk.Button(self.data_panel, text="Modify")
+        self.node_data_button.place(
+            relx=0.8,
+            rely=0.07)
+        self.node_data_button.configure(bg="#F0F0F0", command=gui_support.node_modify)
+
+        # ---------------------------Data Panel: Node Data Panel-------------------------#
+        self.node_data_panel = tk.Frame(self.data_panel)
+        self.node_data_panel.place(
+            relx=0,
+            rely=0.11,
+            relheight=0.3,
+            relwidth=1)
+        self.node_data_panel.configure(background="#fafbf0")
+
+        # ---------------------------Data Panel: Edge Title-------------------------#
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.43, width=280, height=4)
+
+        self.edge_data_title = tk.Label(self.data_panel, text="Edge Data", font=("Helvetica", 12, "bold"))
+        self.edge_data_title.place(
+            anchor=tk.CENTER,
+            relx=0.2,
+            rely=0.45)
+        self.edge_data_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.465, width=280, height=4)
+
+        # ---------------------------Data Panel: Edge Data Panel-------------------------#
+        self.edge_data_panel = tk.Frame(self.data_panel)
+        self.edge_data_panel.place(
+            relx=0,
+            rely=0.47,
+            relheight=0.3,
+            relwidth=1)
+        self.edge_data_panel.configure(background="#fafbf0")
+
+        # ---------------------------Coordinates-------------------------#
+        self.coordinate_x_label = tk.Label(top, font=("Helvetica", 9))
+        self.coordinate_x_label.place(relx=0.0, rely=0.99, anchor='w')
+        self.coordinate_x_label.configure(bg="#F0F0F0")
+
+        self.coordinate_y_label = tk.Label(top, font=("Helvetica", 9))
+        self.coordinate_y_label.place(relx=0.015, rely=0.99, anchor='w')
+        self.coordinate_y_label.configure(bg="#F0F0F0")
 
         top.configure(menu=self.menubar)
-
 
 if __name__ == '__main__':
     vp_start_gui()

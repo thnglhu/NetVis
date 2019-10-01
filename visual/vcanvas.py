@@ -217,9 +217,9 @@ class Canvas(tk.Canvas):
     def __option(self, event):
         if self.__scan_obj:
             target = self.__invert_objects.get(self.__scan_obj)
-            if self.subscription['option']:
+            if self.subscription.get('option'):
                 self.variable['option'] = target
-                self.subscription['option'](target.get_info())
+                self.subscription['option'](target.info())
 
     def __motion(self, event):
         new = event.x, event.y

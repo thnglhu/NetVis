@@ -1,4 +1,3 @@
-
 # TODO edit GUI here
 """
     DO NOT GENERATE GUI_SUPPORT again
@@ -10,7 +9,9 @@ from tkinter import filedialog
 from controller import application
 from gui import *
 import tkinter.ttk as ttk
-import random # Testing
+import random  # Testing
+
+node_info = dict()
 
 
 def get_random_number():
@@ -22,6 +23,8 @@ controller = application.Controller.get_instance()
 
 filename = ''
 scale = 1
+dy = 0
+
 
 def exit_window():
     # TODO popup save data, clean threads, ... (if exist)
@@ -338,11 +341,63 @@ def destroy_window():
     top_level = None
 
 
+def add_widget(type, text, relx):
+    if type is "label":
+        label = tk.Label(w.node_data_panel, text=text, font=("Helvetica", 12))
+        label.configure(bg="#f0f0f0")
+        label.place(relx=relx, rely=dy)
+        return label
+    elif type is "entry":
+        entry = tk.Entry(w.node_data_panel, font=("Helvetica", 12))
+        entry.insert(0, str(text))
+        entry.place(relx=relx, rely=dy)
+        return entry
+
+
 def update_node_info(info):
-    print('Do something with this info', info)
+    # print('Do something with this info', info)
+    # clear the data panel
+    global dy
+    dy = 0
+    for widget in w.node_data_panel.winfo_children():
+        widget.destroy()
+
+    def add_node_info(key, value=None):
+        global dy
+        add_widget("label", key, 0.04)
+        if value is not None:
+            add_widget("entry", value, 0.5)
+        dy += 0.09
+
+    def add_table_info(items):
+        global dy
+        for _key, _value in items.items():
+            add_widget("entry", _key, 0.04)
+            add_widget("entry", _value, 0.5)
+            dy += 0.09
+
+    '''
+    def add_edge_info(sub_info):
+        nonlocal dy
+        edge_data_label = tk.Label(w.edge_data_panel, text=sub_edge_info, font=("Helvetica", 12))
+        edge_data_label.configure(bg="#f0f0f0")
+        edge_data_label.place(relx=0.04, rely=dy)
+        dy += 0.09
+    '''
+
+    for key, value in info.items():
+        if isinstance(value, dict):
+            add_node_info(key)
+            add_table_info(value)
+        else:
+            add_node_info(key, value)
+
+    print(dy)
+
+def node_modify():
+    pass
 
 
 def update_canvas_coords(x, y):
-    pass
-    # print('Do something with this coords', x, y)
-
+    w.coordinate_x_label['text'] = str(x)
+    w.coordinate_y_label['text'] = str(y)

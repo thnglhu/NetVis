@@ -50,7 +50,7 @@ class PC(VVertex, dv.Host):
         return {
             'type': 'host',
             'name': self.name,
-            'interface': self.interface.name if self.interface else '',
+            'interface': self.interface.info(),
             'arp table': self.arp_table
         }
 
