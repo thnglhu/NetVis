@@ -39,7 +39,6 @@ def highlight_shortest_path(g2, path):
         v['size'] = 20
     es = g2.es.select(_between=(path, path))
     for e in es:
-        print(e.tuple)
         e['tag'].add('highlight')
         e['width'] = 10
 

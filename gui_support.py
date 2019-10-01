@@ -38,6 +38,8 @@ def open_file():
         title="Select file",
         filetypes=(("GraphML", "*.graphml"), ("Text file", "*.txt")))
     controller.load(file, w.main_canvas)
+    controller.subscribe_inspection(update_node_info)
+    controller.subscribe_coords(update_canvas_coords)
     sys.stdout.flush()
 
 
@@ -194,7 +196,6 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
-    print(w.__class__)
 
 
 def destroy_window():
@@ -202,3 +203,12 @@ def destroy_window():
     global top_level
     top_level.destroy()
     top_level = None
+
+
+def update_node_info(info):
+    print('Do something with this info', info)
+
+
+def update_canvas_coords(x, y):
+    print('Do something with this coords', x, y)
+

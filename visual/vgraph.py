@@ -57,14 +57,13 @@ class Graph(ig.Graph):
             e.display(canvas)
         for v in self.vertices:
             v.display(canvas)
-        # for hull in self.hulls: hull.display(canvas)
         canvas.fix_order()
 
     def fit_canvas(self, canvas):
-        print(self.vs.attributes())
-        vertices = [self.vs['x'], self.vs['y']]
-        top_left = min(vertices[0]), min(vertices[1])
-        bottom_right = max(vertices[0]), max(vertices[1])
+        x = sorted(self.get_vs()['x'])
+        y = sorted(self.get_vs()['y'])
+        top_left = x[0]-5, y[0]-5
+        bottom_right = x[-1]+5, y[-1]+5
         canvas.scale_to_fit(top_left, bottom_right)
 
     def load(self):
@@ -81,7 +80,6 @@ class Graph(ig.Graph):
     def add_vertex(self, *args, **kwargs):
         from . import vnetwork as vn
         super().add_vertex(**kwargs)
-        print(self.vs, self.vcount())
         vertex = self.vs[self.vcount() - 1]
         self.__set_default_values(vertex, self.__defaults['vertex'])
         self.vertices.append(vn.classification[vertex['type']](vertex, *args, **kwargs))
@@ -192,7 +190,7 @@ class CanvasItem(ABC):
     def focus(self, canvas): pass
 
     @abstractmethod
-    def blur(self, canvas): pass
+    def info(self): pass
 
     def motion(self, canvas, delta_x, delta_y): pass
 
@@ -212,9 +210,6 @@ class Vertex(CanvasItem, ABC):
         # print("Vectex: ", self.x, self.y, self.size, self.color, self.width)
 
     def focus(self, canvas):
-        pass
-
-    def blur(self, canvas):
         pass
 
     def graph(self):
@@ -250,7 +245,6 @@ class Edge(CanvasItem):
 
     def display(self, canvas):
         att = self.attributes
-        print(att)
         canvas.create_mapped_line(self,
                                   *self.packed_points(),
                                   width=att['width'],
@@ -271,7 +265,6 @@ class Edge(CanvasItem):
 
     def visual(self):
         att = self.attributes
-        print("Edge: ", *self.packed_points(), att['color'], att['width'])
 
     def focus(self, canvas):
         att = self.attributes
@@ -279,9 +272,10 @@ class Edge(CanvasItem):
         a, b, x, y = self.packed_points()
         canvas.scale_to_fit((a, b), (x, y))
 
-    def blur(self, canvas):
-        att = self.attributes
-        self.display(canvas)
-
     def graph(self):
         return self.ig_edge.graph
+
+    def info(self):
+        return {
+            'bandwidth': '10bps'
+        }
