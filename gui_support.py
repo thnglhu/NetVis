@@ -352,26 +352,31 @@ def add_widget(type, text, relx):
 
 
 def update_node_info(info):
-    print('Do something with this info', info)
+    # print('Do something with this info', info)
     # clear the data panel
     global dy
     dy = 0
+    node_info.clear()
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
 
     def add_node_info(key, value=None):
         global dy
-        add_widget("label", key, 0.04)
         if value is not None:
-            add_widget("entry", value, 0.5)
-        dy += 0.09
+            node_info[add_widget("label", key, 0.04)] = add_widget("entry", value, 0.5)
+            dy += 0.09
+        else:
+            return add_widget("label", key, 0.04)
 
-    def add_table_info(dict):
+    def add_table_info(key, value):
+        table_label = add_node_info(key)
         global dy
-        for key, value in dict.items():
-            add_widget("entry", key, 0.04)
-            add_widget("entry", key, 0.5)
         dy += 0.09
+        table_info = []
+        for k, v in value.items():
+            table_info.append([add_widget("entry", k, 0.04), add_widget("entry", v, 0.5)])
+            dy += 0.09
+        node_info[table_label] = table_info
 
     '''
     def add_edge_info(sub_info):
@@ -384,14 +389,23 @@ def update_node_info(info):
 
     for key, value in info.items():
         if isinstance(value, dict):
-            add_node_info(key)
-            add_table_info(value)
+            add_table_info(key, value)
         else:
             add_node_info(key, value)
 
 
 def node_modify():
-    pass
+    print("modifying")
+    modify_info = dict()
+    for key, value in node_info.items():
+        if isinstance(value, list):
+            table_info = []
+            for a, b in value:
+                table_info.append([a.get(), b.get()])
+            modify_info[key['text']] = table_info
+        else:
+            modify_info[key['text']] = value.get()
+    print(modify_info)
 
 
 def update_canvas_coords(x, y):
