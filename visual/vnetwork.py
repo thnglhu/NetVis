@@ -24,7 +24,7 @@ class VVertex(vg.Vertex, ABC):
 
     def display(self, canvas):
         att = self.attributes
-        print(att)
+        # print(att)
         canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'], tag=tuple(att['tag']))
 
     def reallocate(self, canvas):
@@ -48,6 +48,14 @@ class PC(VVertex, dv.Host):
         att['image'] = resource.get_image("pc")
         att['size'] = att['image'].width(), att['image'].height()
 
+    def info(self):
+        return {
+            'type': 'host',
+            'name': self.name,
+            'interface': self.interface.name,
+            'arp table': self.arp_table
+        }
+
 
 class Switch(VVertex, dv.Switch):
     def __init__(self, ig_vertex, **kwargs):
@@ -59,6 +67,16 @@ class Switch(VVertex, dv.Switch):
         att['image'] = resource.get_image("switch")
         att['size'] = att['image'].width(), att['image'].height()
 
+    def info(self):
+        return {
+            'type': 'switch',
+            'name': self.name,
+            'mac table': self.__get_mac_table()
+        }
+
+    def __get_mac_table(self):
+        return {str(k): v.name for k, v in self.mac_table.items()}
+
 
 class Router(VVertex, dv.Router):
     def __init__(self, ig_vertex, *interfaces, **kwargs):
@@ -69,6 +87,17 @@ class Router(VVertex, dv.Router):
         att = self.attributes
         att['image'] = resource.get_image("router")
         att['size'] = att['image'].width(), att['image'].height()
+
+    def info(self):
+        return {
+            'type': 'switch',
+            'name': self.name,
+            'arp table': self.arp_table,
+            'routing table': self.__get_routing_table()
+        }
+
+    def __get_routing_table(self):
+        return {str(k): v.name for k, v in self.routing_table.items()}
 
 
 class Frame(vg.CanvasItem):
@@ -129,8 +158,10 @@ class Frame(vg.CanvasItem):
 
     def focus(self, canvas): pass
 
-    def blur(self, canvas): pass
-
+    def info(self):
+        return {
+            'type': 'frame'
+        }
 
 classification = dict()
 classification['pc'] = PC

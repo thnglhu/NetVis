@@ -4,10 +4,14 @@ import ipaddress as ipa
 class Segment:
     def __init__(self, data=None):
         self.data = data
+        self.size = 1
+
+    def get_size(self):
+        return self.size
 
 
 class Packet:
-    def __init__(self, source, target, segment=None, func=None):
+    def __init__(self, source, target, segment, func=None):
         self.ip_source = source
         self.ip_target = target
         self.segment = segment
@@ -15,6 +19,9 @@ class Packet:
 
     def print(self):
         print(self.ip_source, self.ip_target)
+
+    def get_size(self):
+        return self.segment.get_size() + 2
 
 
 class ARP(Packet):
@@ -30,6 +37,9 @@ class ARP(Packet):
         reply_arp.is_reply = True
         return reply_arp
 
+    def get_size(self):
+        return 2
+
 
 class Frame:
     def __init__(self, source, target, packet):
@@ -38,9 +48,11 @@ class Frame:
         self.packet = packet
 
     def print(self):
-        print(self.mac_source, self.mac_target)
+        # print(self.mac_source, self.mac_target)
         self.packet.print()
 
+    def get_size(self):
+        return self.packet.get_size() + 2
 
 class BroadcastFrame(Frame):
     def __init__(self, source, packet):

@@ -7,6 +7,8 @@ class Controller:
     __instance = None
     __graph = None
     __canvas = None
+    __inspect = None
+
     @staticmethod
     def get_instance():
         if not Controller.__instance:
@@ -16,6 +18,9 @@ class Controller:
 
     def get_graph(self):
         return self.__graph
+
+    def subscribe(self, t, func):
+        self.__canvas.subscription[t] = func
 
     def load(self, instance, canvas, **kwargs):
         # TODO add more type
@@ -168,30 +173,4 @@ class Controller:
     def subscribe_labels(self, label_x, label_y):
         self.__canvas.subscriber['label_x'] = label_x
         self.__canvas.subscriber['label_y'] = label_x
-
-    def test(self):
-        g = self.__graph
-        if g is None:
-            print("ASDASD")
-        elif self.first:
-            self.first = False
-            from visual import vnetwork as vn
-
-            # pc1.send(self.__canvas, ipa.ip_address('172.16.0.2'))
-            # pc22.send(self.__canvas, ipa.ip_address('192.168.0.2'))
-
-            from time import sleep
-            from threading import Thread
-
-            def demo(pc, ip):
-                from random import uniform
-                sleep(uniform(2, 4))
-                pc.send(self.__canvas, ip)
-            # Thread(target=demo, args=(pc1, ipa.ip_address('10.10.0.2'))).start()
-            # Thread(target=demo, args=(pc2, ipa.ip_address('10.10.0.3'))).start()
-            # Thread(target=demo, args=(pc22, ipa.ip_address('10.10.0.2'))).start()
-            # Thread(target=demo, args=(pc1, ipa.ip_address('10.10.0.2'))).start()
-
-
-
 

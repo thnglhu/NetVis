@@ -654,7 +654,7 @@ class top_level:
             rely=0.055,
             relheight=0.90,
             relwidth=0.19)
-        self.data_panel.configure(background="#F0F0F0")
+        self.data_panel.configure(background="#AABBCC", borderwidth=10)
 
         # ---------------------------Top Panel-------------------------#
         self.top_panel = tk.Frame(top)
@@ -673,10 +673,13 @@ class top_level:
             relx=0.02,
             rely=0.5,
             height=37,
-            width=37)
+            width=37,
+        )
         self.add_file_button.configure(
             image=self.add_file_image,
-            command=gui_support.open_file)
+            command=gui_support.open_file,
+            borderwidth=0
+        )
 
         add_file_tooltip = CreateToolTip(self.add_file_button, "Open a graph. The file extension should be GraphML, GDF or GEXF")
 

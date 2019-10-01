@@ -1,9 +1,11 @@
 import ipaddress as ipa
 from . import data
-from visual import  vnetwork as vn
+from visual import vnetwork as vn
+
 
 class Interface:
     device = None
+    name = 'unknown'
 
     def __init__(self, **kwargs):
         self.other = None
@@ -57,17 +59,13 @@ class Host:
     def send(self, canvas, ip_target):
         def function():
             if ip_target in self.arp_table:
-                print(self.name, ip_target, 'is cached')
-                packet = data.Packet(self.interface.ip_address, ip_target)
+                packet = data.Packet(self.interface.ip_address, ip_target, None)
                 frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
             elif ip_target in self.interface.ip_network:
-                print(self.name, 'is looking for', ip_target)
                 packet = data.ARP(self.interface.ip_address, ip_target, function)
                 frame = data.BroadcastFrame(self.interface.mac_address, packet)
             elif self.interface.default_gateway in self.arp_table:
-                print(self.name, ip_target, 'is outside of the network, now sending to the default gateway',
-                      self.interface.default_gateway)
-                packet = data.Packet(self.interface.ip_address, ip_target)
+                packet = data.Packet(self.interface.ip_address, ip_target, None)
                 frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
             else:
                 print(self.name, 'is looking for the default gateway', self.interface.default_gateway)

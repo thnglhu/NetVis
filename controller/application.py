@@ -6,6 +6,7 @@ import os
 
 class Controller:
     __instance = None
+    __inspect = None
 
     @staticmethod
     def get_instance():
@@ -22,7 +23,6 @@ class Controller:
         graph = self.__controller.get_graph()
         vs = graph.get_vs()
         vs = vs.select()
-
 
     def exit(self):
         pass
@@ -50,4 +50,7 @@ class Controller:
             raise NotImplementedError
 
     def test(self):
-        self.__controller.test()
+        self.__controller.inspect()
+
+    def subscribe_inspection(self, func):
+        self.__controller.subscribe('inspect', func)
