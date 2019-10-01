@@ -338,7 +338,36 @@ def destroy_window():
 def update_node_info(info):
     print('Do something with this info', info)
 
+    # clear the data panel
+    for widget in w.node_data_panel.winfo_children():
+        widget.destroy()
+
+    dy = 0
+
+    def add_node_info(sub_node_info):
+        nonlocal dy
+        node_data_label = tk.Label(w.node_data_panel, text=sub_node_info, font=("Helvetica", 12))
+        node_data_label.configure(bg="#f0f0f0")
+        node_data_label.place(relx=0.04, rely= 0 + dy)
+        dy += 0.09
+
+    def add_edge_info(sub_info):
+        nonlocal dy
+        edge_data_label = tk.Label(w.edge_data_panel, text=sub_edge_info, font=("Helvetica", 12))
+        edge_data_label.configure(bg="#f0f0f0")
+        edge_data_label.place(relx=0.04, rely= 0 + dy)
+        dy += 0.09
+
+    for key, value in info.items():
+        if isinstance(value, dict):
+            add_node_info(str(key))
+            for k, v in value.items():
+                add_node_info(str(k + ':\t ' + str(v)))
+        else:
+            add_node_info(str(key + ':\t ' + str(value)))
+
 
 def update_canvas_coords(x, y):
-    print('Do something with this coords', x, y)
+    w.coordinate_x_label['text']=str(x)
+    w.coordinate_y_label['text']=str(y)
 
