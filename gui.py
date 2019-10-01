@@ -7,6 +7,7 @@
 
 import sys
 
+
 try:
     import Tkinter as tk
 except ImportError:
@@ -152,26 +153,20 @@ class top_level:
         # ---------------------------Toolbar: File-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="File")
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.create_new_file,
             font="TkMenuFont",
             foreground="#000000",
             label="New")
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.open_file,
             font="TkMenuFont",
             foreground="#000000",
@@ -181,9 +176,7 @@ class top_level:
 
         self.nested_menu_file = tk.Menu(self.sub_menu)
         self.sub_menu.add_cascade(menu=self.nested_menu_file,
-                                  activebackground="#ececec",
-                                  activeforeground="#000000",
-                                  background="#d9d9d9",
+                                  background="#ffffff",
                                   font="TkMenuFont",
                                   foreground="#000000",
                                   label="Recent Files")
@@ -195,18 +188,14 @@ class top_level:
         self.sub_menu.add_separator()
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.save_file,
             font="TkMenuFont",
             foreground="#000000",
             label="Save")
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.save_file_as,
             font="TkMenuFont",
             foreground="#000000",
@@ -215,9 +204,7 @@ class top_level:
         self.sub_menu.add_separator()
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.print_file,
             font="TkMenuFont",
             foreground="#000000",
@@ -226,18 +213,14 @@ class top_level:
         self.sub_menu.add_separator()
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.close,
             font="TkMenuFont",
             foreground="#000000",
             label="Close")
 
         self.sub_menu.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.exit_window,
             font="TkMenuFont",
             foreground="#000000",
@@ -246,26 +229,20 @@ class top_level:
         # ---------------------------Toolbar: Edit-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_edit,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Edit")
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.undo,
             font="TkMenuFont",
             foreground="#000000",
             label="Undo")
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.redo,
             font="TkMenuFont",
             foreground="#000000",
@@ -274,18 +251,14 @@ class top_level:
         self.sub_menu_edit.add_separator()
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.zoom_in,
             font="TkMenuFont",
             foreground="#000000",
             label="Zoom In")
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.zoom_out,
             font="TkMenuFont",
             foreground="#000000",
@@ -296,26 +269,20 @@ class top_level:
         self.nested_menu_edit = tk.Menu(self.sub_menu_edit)
         self.sub_menu_edit.add_cascade(
             menu=self.nested_menu_edit,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Find")
 
         self.nested_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.find_node,
             font="TkMenuFont",
             foreground="#000000",
             label="Find Node")
 
         self.nested_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.find_edge,
             font="TkMenuFont",
             foreground="#000000",
@@ -324,36 +291,28 @@ class top_level:
         self.nested_menu_edit.add_separator()
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.cut,
             font="TkMenuFont",
             foreground="#000000",
             label="Cut")
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.copy,
             font="TkMenuFont",
             foreground="#000000",
             label="Copy")
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.paste,
             font="TkMenuFont",
             foreground="#000000",
             label="Paste")
 
         self.sub_menu_edit.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.select_all,
             font="TkMenuFont",
             foreground="#000000",
@@ -362,53 +321,41 @@ class top_level:
         # ---------------------------Toolbar: Node-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_node,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Node")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.select_all_nodes,
             font="TkMenuFont",
             foreground="#000000",
             label="Select All")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.deselect_all_nodes,
             font="TkMenuFont",
             foreground="#000000",
             label="Deselect All")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.add_node,
             font="TkMenuFont",
             foreground="#000000",
             label="Add Node")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.remove_node,
             font="TkMenuFont",
             foreground="#000000",
             label="Remove Node")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.rename_node,
             font="TkMenuFont",
             foreground="#000000",
@@ -417,9 +364,7 @@ class top_level:
         self.sub_menu_node.add_separator()
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.select_node_properties,
             font="TkMenuFont",
             foreground="#000000",
@@ -428,27 +373,21 @@ class top_level:
         self.sub_menu_node.add_separator()
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_nodes_color,
             font="TkMenuFont",
             foreground="#000000",
             label="Change All Nodes Color")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_nodes_size,
             font="TkMenuFont",
             foreground="#000000",
             label="Change All Nodes Size")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_nodes_shape,
             font="TkMenuFont",
             foreground="#000000",
@@ -457,18 +396,14 @@ class top_level:
         self.sub_menu_node.add_separator()
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_nodes_label_size,
             font="TkMenuFont",
             foreground="#000000",
             label="Change All Node's Label Size")
 
         self.sub_menu_node.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_nodes_label_color,
             font="TkMenuFont",
             foreground="#000000",
@@ -477,26 +412,20 @@ class top_level:
         # ---------------------------Toolbar: Edge-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_edge,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Edge")
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.select_all_edges,
             font="TkMenuFont",
             foreground="#000000",
             label="Select All")
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.deselect_all_edges,
             font="TkMenuFont",
             foreground="#000000",
@@ -505,18 +434,14 @@ class top_level:
         self.sub_menu_edge.add_separator()
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.add_edge,
             font="TkMenuFont",
             foreground="#000000",
             label="Add Edge")
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.remove_edge,
             font="TkMenuFont",
             foreground="#000000",
@@ -525,9 +450,7 @@ class top_level:
         self.sub_menu_edge.add_separator()
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.select_edge_properties,
             font="TkMenuFont",
             foreground="#000000",
@@ -536,27 +459,21 @@ class top_level:
         self.sub_menu_edge.add_separator()
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_edges_label,
             font="TkMenuFont",
             foreground="#000000",
             label="Change Edge Label")
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_edges_color,
             font="TkMenuFont",
             foreground="#000000",
             label="Change Edge Color")
 
         self.sub_menu_edge.add_command(
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             command=gui_support.change_all_edges_weight,
             font="TkMenuFont",
             foreground="#000000",
@@ -565,9 +482,7 @@ class top_level:
         # ---------------------------Toolbar: Network-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_network,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Network")
@@ -575,9 +490,7 @@ class top_level:
         # ---------------------------Toolbar: Filter-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_filter,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Filter")
@@ -585,9 +498,7 @@ class top_level:
         # ---------------------------Toolbar: Analyze-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_analyze,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Analyze")
@@ -595,9 +506,7 @@ class top_level:
         # ---------------------------Toolbar: Options-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_options,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Options")
@@ -605,9 +514,7 @@ class top_level:
         # ---------------------------Toolbar: Settings-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_settings,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Settings")
@@ -615,9 +522,7 @@ class top_level:
         # ---------------------------Toolbar: Help-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_help,
-            activebackground="#ececec",
-            activeforeground="#000000",
-            background="#d9d9d9",
+            background="#ffffff",
             font="TkMenuFont",
             foreground="#000000",
             label="Help")
@@ -634,6 +539,7 @@ class top_level:
             borderwidth="0",
             background="#DCDCDC")
 
+        self.main_canvas.create_rectangle(50, 25, 150, 75, fill="blue")
 
         # ---------------------------Control Panel-------------------------#
         self.control_panel = tk.Frame(top)
@@ -675,7 +581,8 @@ class top_level:
             width=37)
         self.add_file_button.configure(
             image=self.add_file_image,
-            command=gui_support.open_file)
+            command=gui_support.open_file,
+            borderwidth=0)
 
         add_file_tooltip = CreateToolTip(self.add_file_button, "Open a graph. The file extension should be GraphML, GDF or GEXF")
 
@@ -689,9 +596,9 @@ class top_level:
             height=37,
             width=37)
         self.new_file_button.configure(
-            borderwidth=0.0,
+            borderwidth=0,
             image=self.new_file_image,
-            command=gui_support.create_new_file())
+            command=gui_support.create_new_file)
 
         add_file_tooltip = CreateToolTip(self.new_file_button,"Create an empty GraphML file")
 
@@ -706,7 +613,8 @@ class top_level:
             width=37)
         self.save_file_button.configure(
             image=self.save_file_image,
-            command=gui_support.save_file)
+            command=gui_support.save_file,
+            borderwidth=0)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.115, rely=0.1, width=4, height=27)
@@ -724,7 +632,8 @@ class top_level:
             width=37)
         self.print_button.configure(
             image=self.print_image,
-            command=gui_support.print_file)
+            command=gui_support.print_file,
+            borderwidth=0)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.185, rely=0.1, width=4, height=27)
@@ -741,7 +650,8 @@ class top_level:
             height=37,
             width=37)
         self.search_button.configure(
-            image=self.search_image)
+            image=self.search_image,
+            borderwidth=0)
         self.search_box = tk.Text(self.top_panel)
         self.search_box.place(
             anchor=tk.CENTER,
@@ -767,7 +677,8 @@ class top_level:
             width=37)
         self.zoom_in_button.configure(
             image=self.zoom_in_image,
-            command=gui_support.zoom_in)
+            command=gui_support.zoom_in,
+            borderwidth=0)
 
         add_file_tooltip = CreateToolTip(self.zoom_in_button, "Zoom in")
 
@@ -782,7 +693,8 @@ class top_level:
             width=37)
         self.zoom_out_button.configure(
             image=self.zoom_out_image,
-            command=gui_support.zoom_out)
+            command=gui_support.zoom_out,
+            borderwidth=0)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.488, rely=0.1, width=4, height=27)
@@ -800,7 +712,8 @@ class top_level:
             width=37)
         self.node_properties_button.configure(
             image=self.node_properties_image,
-            command=gui_support.select_node_properties)
+            command=gui_support.select_node_properties,
+            borderwidth=0)
 
         add_file_tooltip = CreateToolTip(self.node_properties_button, "Edit a node's properties such as device type, label, color, connectivity,... ")
 
@@ -815,7 +728,8 @@ class top_level:
             width=37)
         self.edge_properties_button.configure(
             image=self.edge_properties_image,
-            command=gui_support.select_edge_properties)
+            command=gui_support.select_edge_properties,
+            borderwidth=0)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.6, rely=0.1, width=4, height=27)
@@ -832,7 +746,8 @@ class top_level:
             height=37,
             width=37)
         self.filter_button.configure(
-            image=self.filter_image)
+            image=self.filter_image,
+            borderwidth=0)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.68, rely=0.1, width=4, height=27)
@@ -850,7 +765,8 @@ class top_level:
             width=37)
         self.settings_button.configure(
             image=self.settings_image,
-            command=settings_popup_window)
+            command=settings_popup_window,
+            borderwidth=0)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.94, rely=0.1, width=4, height=27)
@@ -867,12 +783,13 @@ class top_level:
             height=37,
             width=37)
         self.help_button.configure(
-            image=self.help_image)
+            image=self.help_image,
+            borderwidth=0)
 
         add_file_tooltip = CreateToolTip(self.help_button, "Help")
 
         # ---------------------------Control Panel: Title-------------------------#
-        self.control_panel_title = tk.Label(self.control_panel, text="Control Panel", font=("Helvetica", 14, "bold"))
+        self.control_panel_title = tk.Label(self.control_panel, text="Control Panel", font=("Helvetica", 12, "bold"))
         self.control_panel_title.place(
             anchor=tk.CENTER,
             relx=0.16,
@@ -884,7 +801,7 @@ class top_level:
         self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
 
         # ---------------------------Control Panel: Node-------------------------#
-        self.node_title = tk.Label(self.control_panel, text="Node", font=("Helvetica", 14, "bold"))
+        self.node_title = tk.Label(self.control_panel, text="Node", font=("Helvetica", 12, "bold"))
         self.node_title.place(
             anchor=tk.CENTER,
             relx=0.12,
@@ -896,7 +813,7 @@ class top_level:
         self.separator.place(relx=0.05, rely=0.11, width=280, height=4)
 
         # ---------------------------Control Panel: Node: Add a node-------------------------#
-        self.add_node_title = tk.Label(self.control_panel, text="Add Node:", font=("Helvetica", 14))
+        self.add_node_title = tk.Label(self.control_panel, text="Add Devices:", font=("Helvetica", 12))
         self.add_node_title.place(
             anchor='w',
             relx=0.05,
@@ -905,16 +822,20 @@ class top_level:
         self.add_node_title.configure(bg="#F0F0F0")
 
         self.node_type = StringVar()
-        self.add_node_combobox = ttk.Combobox(self.control_panel, state='readonly', textvariable=self.node_type)
-        self.add_node_combobox['values'] = ("Computer", "Hub", "Repeater", "Modem", "Bridge", "Router")
+        self.add_node_combobox = ttk.Combobox(self.control_panel, state='readonly', textvariable=self.node_type, width=10)
+        self.add_node_combobox['values'] = ("Computer", "Hub", "Modem", "Router", "Switch")
         self.add_node_combobox.current(0)
         self.add_node_combobox.place(
             anchor='w',
             relx=0.4,
             rely=0.14)
 
+        self.node_button = tk.Button(self.control_panel, text="Apply", command=gui_support.add_node)
+        self.node_button.place(anchor='w', relx=0.8, rely=0.14)
+        self.node_button.configure(bg="#f0f0f0")
+
         # ---------------------------Control Panel: Node: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -923,7 +844,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Node: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -941,7 +862,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Node: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -950,7 +871,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Node: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -962,7 +883,7 @@ class top_level:
         self.separator.place(relx=0.05, rely=0.37, width=280, height=4)
 
         # ---------------------------Control Panel: Edge-------------------------#
-        self.edge_title = tk.Label(self.control_panel, text="Edge", font=("Helvetica", 14, "bold"))
+        self.edge_title = tk.Label(self.control_panel, text="Edge", font=("Helvetica", 12, "bold"))
         self.edge_title.place(
             anchor=tk.CENTER,
             relx=0.12,
@@ -974,7 +895,7 @@ class top_level:
         self.separator.place(relx=0.05, rely=0.41, width=280, height=4)
 
         # ---------------------------Control Panel: Edge: Add an edge-------------------------#
-        self.add_edge_title = tk.Label(self.control_panel, text="Add Edge:", font=("Helvetica", 14))
+        self.add_edge_title = tk.Label(self.control_panel, text="Add Edge:", font=("Helvetica", 12))
         self.add_edge_title.place(
             anchor='w',
             relx=0.05,
@@ -992,7 +913,7 @@ class top_level:
             rely=0.44)
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1001,7 +922,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1010,7 +931,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1019,7 +940,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1031,7 +952,7 @@ class top_level:
         self.separator.place(relx=0.05, rely=0.63, width=280, height=4)
 
         # ---------------------------Control Panel: Analyze-------------------------#
-        self.analyze_title = tk.Label(self.control_panel, text="Analyze", font=("Helvetica", 14, "bold"))
+        self.analyze_title = tk.Label(self.control_panel, text="Analyze", font=("Helvetica", 12, "bold"))
         self.analyze_title.place(
             anchor='w',
             relx=0.05,
@@ -1043,7 +964,7 @@ class top_level:
         self.separator.place(relx=0.05, rely=0.675, width=280, height=4)
 
         # ---------------------------Control Panel: Analyze: Show Bottleneck-------------------------#
-        self.bottleneck_title = tk.Label(self.control_panel, text="Show Bottleneck:", font=("Helvetica", 14))
+        self.bottleneck_title = tk.Label(self.control_panel, text="Show Bottleneck:", font=("Helvetica", 12))
         self.bottleneck_title.place(
             anchor='w',
             relx=0.05,
@@ -1052,7 +973,7 @@ class top_level:
         self.bottleneck_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1061,7 +982,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1070,7 +991,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1079,7 +1000,7 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 14))
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
         self.sample_title.place(
             anchor='w',
             relx=0.05,
@@ -1088,10 +1009,10 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Data Panel: Title-------------------------#
-        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Helvetica", 14, "bold"))
+        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Helvetica", 12, "bold"))
         self.data_panel_title.place(
             anchor=tk.CENTER,
-            relx=0.5,
+            relx=0.2,
             rely=0.05)
 
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)

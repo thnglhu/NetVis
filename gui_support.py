@@ -10,9 +10,18 @@ from tkinter import filedialog
 from controller import application
 from gui import *
 import tkinter.ttk as ttk
+import random # Testing
+
+
+def get_random_number():
+    point = random.randint(1, 500)
+    return point
+
 
 controller = application.Controller.get_instance()
 
+filename = ''
+scale = 1
 
 def exit_window():
     # TODO popup save data, clean threads, ... (if exist)
@@ -24,13 +33,108 @@ def exit_window():
 def save_popup_window():
     save_popup = tk.Tk()
 
-    save_popup.geometry("50x50")
-    save_popup.title("Do you want to save?")
+    save_popup.geometry("230x100")
+    save_popup.title("Save file...")
 
-    button = ttk.Button(save_popup, text="Yes")
-    button.grid(row=1, column=0)
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    save_popup.geometry("+%d+%d" % (x, y))
+
+    new_label = tk.Label(save_popup, text="Do you want to save this file?")
+    new_label.place(relx=0.1, rely=0.1)
+    new_label.configure(bg="#ffffff")
+
+    yes_button = ttk.Button(save_popup, text="Yes", command=save_file_as)
+    yes_button.place(relx=0.1, rely=0.5)
+
+    def refresh_canvas():
+        w.main_canvas.delete("all")
+        save_popup.destroy()
+
+    no_button = ttk.Button(save_popup, text="No", command=refresh_canvas)
+    no_button.place(relx=0.5, rely=0.5)
 
     save_popup.mainloop()
+
+
+def computer_popup_window():
+    computer_popup = tk.Tk()
+
+    computer_popup.geometry("500x1000")
+    computer_popup.title("Node Properties")
+
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    computer_popup.geometry("+%d+%d" % (x, y))
+
+    popup_label = tk.Label(computer_popup, text="This is node window properties")
+    popup_label.place(relx=0.1, rely=0.1)
+    popup_label.configure(bg="#ffffff")
+
+
+def hub_popup_window():
+    hub_popup = tk.Tk()
+
+    hub_popup.geometry("500x1000")
+    hub_popup.title("Node Properties")
+
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    hub_popup.geometry("+%d+%d" % (x, y))
+
+    hub_label = tk.Label(hub_popup, text="This is hub window properties")
+    hub_label.place(relx=0.1, rely=0.1)
+    hub_label.configure(bg="#ffffff")
+
+
+def modem_popup_window():
+    modem_popup = tk.Tk()
+
+    modem_popup.geometry("500x1000")
+    modem_popup.title("Node Properties")
+
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    modem_popup.geometry("+%d+%d" % (x, y))
+
+    modem_label = tk.Label(modem_popup, text="This is modem window properties")
+    modem_label.place(relx=0.1, rely=0.1)
+    modem_label.configure(bg="#ffffff")
+
+
+def router_popup_window():
+    router_popup = tk.Tk()
+
+    router_popup.geometry("500x1000")
+    router_popup.title("Node Properties")
+
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    router_popup.geometry("+%d+%d" % (x, y))
+
+    router_label = tk.Label(router_popup, text="This is router window properties")
+    router_label.place(relx=0.1, rely=0.1)
+    router_label.configure(bg="#ffffff")
+
+
+def switch_popup_window():
+    switch_popup = tk.Tk()
+
+    switch_popup.geometry("500x1000")
+    switch_popup.title("Node Properties")
+
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    switch_popup.geometry("+%d+%d" % (x, y))
+
+    switch_label = tk.Label(switch_popup, text="This is switch window properties")
+    switch_label.place(relx=0.1, rely=0.1)
+    switch_label.configure(bg="#ffffff")
+
+
+def enable(child_list):
+    for child in childList:
+        child.configure(state='enable')
 
 
 def open_file():
@@ -42,7 +146,7 @@ def open_file():
 
 
 def create_new_file():
-    print("Create")
+    save_popup_window()
 
 
 def open_recent_file():
@@ -50,18 +154,35 @@ def open_recent_file():
 
 
 def save_file():
-    print("Save")
+    global filename
+    if filename == '':
+        filename = filedialog.asksaveasfile(mode='w')
+    if filename is not None:
+        data = textentry.get('1.0', 'end')
+        filename.write(data)
 
 
 def save_file_as():
+    global filename
+    filename = filedialog.asksaveasfile(mode='w')
+    file_save()
+    '''
     file = filedialog.asksaveasfilename(
         initialdir="/", title="Select file",
         filetypes=(("jpeg files", "*.jpg"), ("Text files", "*.txt")))
     print(file, file.__class__)
+    '''
 
 
 def close():
-    print("Close")
+    w.main_canvas.delete("all")
+    for child in w.control_panel.winfo_children():
+        if not isinstance(child, ttk.Separator):
+            child.configure(state=tk.DISABLED)
+
+    for child in w.data_panel.winfo_children():
+        if not isinstance(child, ttk.Separator):
+            child.configure(state=tk.DISABLED)
 
 
 def undo():
@@ -72,7 +193,7 @@ def redo():
     print("Redo")
 
 
-def zoom_in():
+def zoom_in(event):
     print("Zoom in")
 
 
@@ -117,7 +238,16 @@ def deselect_all_nodes():
 
 
 def add_node():
-    print("Add Node")
+    if w.add_node_combobox.get() == "Computer":
+        computer_popup_window()
+    if w.add_node_combobox.get() == "Hub":
+        hub_popup_window()
+    if w.add_node_combobox.get() == "Modem":
+        modem_popup_window()
+    if w.add_node_combobox.get() == "Router":
+        router_popup_window()
+    if w.add_node_combobox.get() == "Switch":
+        switch_popup_window()
 
 
 def remove_node():
