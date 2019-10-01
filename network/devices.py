@@ -53,10 +53,11 @@ class Interface:
 
 class Host:
     def __init__(self, interface, **kwargs):
+        if isinstance(interface, dict):
+            interface = Interface(**interface)
         self.interface = interface
-        if interface:
-            interface.attach_device(self)
-            interface.attachment = self.__receive
+        interface.attach_device(self)
+        interface.attachment = self.__receive
         self.arp_table = kwargs.get('arp_table') or dict()
         self.name = kwargs.get('name')
 
@@ -119,13 +120,10 @@ class Hub:
         if canvas:
             my_device = self.device
             other_device = target.device
-            edges = my_device.link_edges.intersection(other_device.link_edges)
+            edges = my_device.__getattribute__('link_edges').intersection(other_device.link_edges)
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
-                if isinstance(frame.packet, data.ARP):
-                    color = 'red'
-                else:
-                    color = 'blue'
+                color = 'red' if isinstance(frame.packet, data.ARP) else 'blue'
                 f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, fill=color)
                 f.display(canvas)
                 f.start_animation()
@@ -193,6 +191,7 @@ class Router:
         if interface.other is None:
             print("Connection is not avaiable")
             return
+
         def func():
             if frame.packet.ip_target in self.arp_table:
                 print(self.name, frame.packet.ip_target, 'is cached')

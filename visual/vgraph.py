@@ -94,6 +94,10 @@ class Graph(ig.Graph):
         self.edges[-1].load()
         return self.edges[-1]
 
+    def connect_interface(self, interface, device):
+        self.add_edge(interface.device.ig_vertex, device.device.ig_vertex)
+        interface.connect(device)
+
     def get_vs(self, **kwargs):
         seq = ItemSequence(self.vertices, *self.vertices)
         return seq.select(**kwargs)

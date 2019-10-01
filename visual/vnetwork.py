@@ -10,6 +10,7 @@ import time
 
 class VVertex(vg.Vertex, ABC):
     active = True
+
     def __init__(self, ig_vertex):
         super().__init__(ig_vertex)
         self._set_image()
@@ -41,6 +42,8 @@ class PC(VVertex, dv.Host):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("pc-on")
+        att['deactivate'] = resource.get_image("pc-on")
+        att['activate'] = resource.get_image("pc-on-focus")
         att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
@@ -50,6 +53,14 @@ class PC(VVertex, dv.Host):
             'interface': self.interface.name if self.interface else '',
             'arp table': self.arp_table
         }
+
+    def focus(self, canvas):
+        self['image'] = self['activate']
+        self.reconfigure(canvas)
+
+    def unfocus(self, canvas):
+        self['image'] = self['deactivate']
+        self.reconfigure(canvas)
 
 
 class Switch(VVertex, dv.Switch):
