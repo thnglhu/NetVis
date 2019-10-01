@@ -195,8 +195,11 @@ def redo():
     print("Redo")
 
 
-def zoom_in(event):
-    print("Zoom in")
+def zoom_in():
+    controller.create({
+        'type': 'pc',
+        'name': 'AAA',
+    })
 
 
 def zoom_out():
@@ -340,5 +343,6 @@ def update_node_info(info):
 
 
 def update_canvas_coords(x, y):
-    print('Do something with this coords', x, y)
+    pass
+    # print('Do something with this coords', x, y)
 

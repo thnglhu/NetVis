@@ -47,7 +47,7 @@ class PC(VVertex, dv.Host):
         return {
             'type': 'host',
             'name': self.name,
-            'interface': self.interface.name,
+            'interface': self.interface.name if self.interface else '',
             'arp table': self.arp_table
         }
 
@@ -152,6 +152,8 @@ class Frame(vg.CanvasItem):
         canvas.itemconfig_mapped()
 
     def focus(self, canvas): pass
+
+    def unfocus(self, canvas): pass
 
     def info(self):
         return {

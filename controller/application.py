@@ -60,3 +60,6 @@ class Controller:
 
     def __subscribe(self, key, func):
         self.__controller.subscribe(key, func)
+
+    def create(self, info):
+        self.__controller.create(info)

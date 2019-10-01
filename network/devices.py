@@ -31,6 +31,9 @@ class Interface:
             print('drop at', self.name)
 
     def send(self, frame, canvas=None):
+        if self.other is None:
+            print('Connection is not available')
+            return
         if canvas:
             my_device = self.device
             other_device = self.other.device
@@ -51,12 +54,17 @@ class Interface:
 class Host:
     def __init__(self, interface, **kwargs):
         self.interface = interface
-        interface.attach_device(self)
-        interface.attachment = self.__receive
+        if interface:
+            interface.attach_device(self)
+            interface.attachment = self.__receive
         self.arp_table = kwargs.get('arp_table') or dict()
         self.name = kwargs.get('name')
 
     def send(self, canvas, ip_target, segment=None):
+        if not self.interface:
+            print('No connection')
+            return
+
         def function():
             if ip_target in self.arp_table:
                 packet = data.Packet(self.interface.ip_address, ip_target, segment)
@@ -105,6 +113,9 @@ class Hub:
                 self.send(frame, other, canvas)
 
     def send(self, frame, target, canvas=None):
+        if target is None:
+            print('Connection is not available')
+            return
         if canvas:
             my_device = self.device
             other_device = target.device
@@ -179,6 +190,9 @@ class Router:
                 print('drop')
 
     def send(self, interface, frame, canvas=None):
+        if interface.other is None:
+            print("Connection is not avaiable")
+            return
         def func():
             if frame.packet.ip_target in self.arp_table:
                 print(self.name, frame.packet.ip_target, 'is cached')

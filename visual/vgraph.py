@@ -234,14 +234,10 @@ class Vertex(CanvasItem, ABC):
         canvas.coords_mapped(self, att['x'], att['y'])
 
     def focus(self, canvas):
-        if not self.__focus_circle:
-            self.__focus_circle = Circle(self)
-            self.__focus_circle.display(canvas)
+        pass
 
     def unfocus(self, canvas):
-        if self.__focus_circle:
-            canvas.delete(self.__focus_circle)
-            self.__focus_circle = None
+        pass
 
 
 class Edge(CanvasItem):
