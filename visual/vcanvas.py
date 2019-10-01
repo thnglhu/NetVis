@@ -4,6 +4,12 @@ from mathplus.geometry import *
 
 
 class Canvas(tk.Canvas):
+    subscription = dict()
+    """
+        inspect: information an object
+        mouse: location of the mouse
+    """
+    last = (0, 0)
     def __init__(self, master=None, cnf=None, **kwargs):
         tk.Canvas.__init__(self, master, cnf, **kwargs)
         if cnf is None:
@@ -19,7 +25,8 @@ class Canvas(tk.Canvas):
         self.__scan_obj = None
         self.__focus_object = None
         self.__target = None
-        self.__movable = False
+        self.__movable = True
+        self.__test = True
         self.subscriber = dict()
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
@@ -35,29 +42,56 @@ class Canvas(tk.Canvas):
             tk.Canvas.delete(self, "all")
 
     def create_mapped_circle(self, base, *args, **kw):
-        x, y, radius = args
-        position = self.__convert_position(x, y)
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is None:
+            x, y, radius = args
+            position = self.__convert_position(x, y)
             self.__graph_objects[base] = tk.Canvas.create_oval(self, *(position - radius), *(position + radius), **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
-        else:
-            self.coords(canvas_object, *(position - radius), *(position + radius))
-            self.itemconfig(canvas_object, **kw)
         return self.__graph_objects.get(base)
 
     def create_mapped_line(self, base, *args, **kw):
-        a, b, x, y = args
-        end_a = self.__convert_position(a, b)
-        end_b = self.__convert_position(x, y)
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is None:
+            a, b, x, y = args
+            end_a = self.__convert_position(a, b)
+            end_b = self.__convert_position(x, y)
             self.__graph_objects[base] = tk.Canvas.create_line(self, *end_a, *end_b, **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
-        else:
-            self.coords(canvas_object, *end_a, *end_b)
-            self.itemconfig(canvas_object, **kw)
         return self.__graph_objects[base]
+
+    def create_mapped_image(self, base, *args, **kw):
+        canvas_object = self.__graph_objects.get(base)
+        if canvas_object is None:
+            position = self.__convert_position(*args)
+            self.__graph_objects[base] = tk.Canvas.create_image(self, *position, **kw)
+            self.__invert_objects[self.__graph_objects[base],] = base
+
+    def coords_mapped(self, base, *args):
+        from visual import vgraph as vg
+        canvas_object = self.__graph_objects.get(base)
+        if canvas_object is not None:
+            position = self.__convert_position(*args[:2]).astype(float)
+            from visual import vnetwork as vn
+            if isinstance(base, vn.Frame):
+                rad = args[2]
+                position = np.concatenate((position - rad, position + rad))
+            elif isinstance(base, vn.VVertex):
+                pass
+            elif isinstance(base, vg.Edge):
+                position = np.concatenate((position, self.__convert_position(*(args[2:4]))))
+            else:
+                raise ValueError
+            self.coords(canvas_object, *position)
+        else:
+            raise TypeError
+
+    def itemconfig_mapped(self, base, **kwargs):
+        canvas_object = self.__graph_objects.get(base)
+        if canvas_object is not None:
+            self.itemconfig(canvas_object, **kwargs)
+        else:
+            raise TypeError
 
     def remove(self, base):
         canvas_object = self.__graph_objects.get(base)
@@ -77,7 +111,6 @@ class Canvas(tk.Canvas):
         top_left[0], bottom_right[0] = sorted((top_left[0], bottom_right[0]))
         top_left[1], bottom_right[1] = sorted((top_left[1], bottom_right[1]))
         size = bottom_right - top_left
-        print(size)
         if (size == 0).any():
             self.__scale = 1
         else:
@@ -112,13 +145,18 @@ class Canvas(tk.Canvas):
 
     def reallocate(self):
         for canvas_object in self.__graph_objects:
-            canvas_object.display(self)
+            canvas_object.reallocate(self)
+        self.fix_order()
+
+    def reconfigure(self):
+        for canvas_object in self.__graph_objects:
+            canvas_object.reconfigure(self)
         self.fix_order()
 
     def fix_order(self):
         self.tag_raise('edge')
         self.tag_raise('vertex')
-        self.tag_raise('highlight')
+        self.tag_raise('frame')
 
     def __pivot(self):
         return self.canvasx(0), self.canvasy(0)
@@ -127,12 +165,26 @@ class Canvas(tk.Canvas):
         self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
-        temp = self.find_withtag(tk.CURRENT)
-        # if temp != self.__scan_obj:
-        #    obj = self.__invert_objects.get(temp, None)
-        self.__scan_obj = temp
+        self.__update_mouse_location(event.x, event.y)
 
     def __focus(self, event):
+        if self.__test:
+            self.sender = self.__invert_objects.get(self.__scan_obj, None)
+            from visual import vnetwork as vn
+            if not isinstance(self.sender, vn.PC):
+                pass
+            else:
+                self.__test = False
+        else:
+            self.receiver = self.__invert_objects.get(self.__scan_obj, None)
+            from visual import vnetwork as vn
+            if not isinstance(self.receiver, vn.PC):
+                pass
+            else:
+                self.sender.send(self, self.receiver.interface.ip_address)
+                self.sender = self.receiver = None
+                self.__test = True
+        """
         need_fix = False
         if self.__focus_object:
             self.__focus_object.blur(self)
@@ -145,16 +197,22 @@ class Canvas(tk.Canvas):
                 need_fix = True
         if need_fix:
             self.fix_order()
+        """
 
     def __motion_init(self, event):
-        self.last = np.array((event.x, event.y))
+        self.__scan_obj = self.find_withtag(tk.CURRENT)
         if self.__scan_obj:
             self.__target = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vgraph as vg
+            if self.__target is not None:
+                if self.subscription.get('inspect'):
+                    self.subscription['inspect'](self.__target.info())
             if not isinstance(self.__target, vg.Vertex):
                 self.__target = None
         else:
             self.__target = None
+
+        self.__update_mouse_location(event.x, event.y)
 
     def __motion(self, event):
         new = event.x, event.y
@@ -165,16 +223,17 @@ class Canvas(tk.Canvas):
             new = event.x, event.y
             self.scan_mark(*self.last)
             self.scan_dragto(*new, gain=1)
-        self.last = np.array(new)
-        x = self.subscriber.get('label_x')
-        y = self.subscriber.get('label_y')
-        if x and y:
-            x.labelText, y.labelText = new
+        self.__update_mouse_location(*new)
 
     def __resize(self, event):
         self.__size[0] = event.width
         self.__size[1] = event.height
         self.reallocate()
+
+    def __update_mouse_location(self, x, y):
+        self.last = x, y
+        if self.subscription.get('mouse'):
+            self.subscription['mouse'](x, y)
 
     @staticmethod
     def convert(canvas):

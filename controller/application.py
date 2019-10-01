@@ -6,6 +6,7 @@ import os
 
 class Controller:
     __instance = None
+    __inspect = None
 
     @staticmethod
     def get_instance():
@@ -19,14 +20,43 @@ class Controller:
     def load(self, file, canvas):
         _, extension = os.path.splitext(file.name)
         self.__controller.load(file, canvas, extension=extension[1:])
+        graph = self.__controller.get_graph()
+        vs = graph.get_vs()
+        vs = vs.select()
 
     def exit(self):
         pass
 
+    def filter(self, **kwargs):
+        # filter(target="vertex", criteria="GeoLocation", equal="USA")
+        target = kwargs.get("target")
+        criteria = kwargs.get("criteria")
+        equal = kwargs.get("equal")
+        if target == "edge":
+            pass
+        elif target == "vertex":
+            graph = self.__controller.get_graph()
+            graph.vs["activate"] = [True if v[criteria] == equal else False for v in graph.vs]
+            pass
+        else:
+            raise TypeError
+
     def bind(self, *cnf, **kwargs):
         if kwargs.get("canvasposition"):
             label_x = cnf[0]
-            label_y = cnf[0]
+            label_y = cnf[1]
             self.__controller.subscribe_labels(label_x, label_y)
         else:
             raise NotImplementedError
+
+    def test(self):
+        self.__controller.inspect()
+
+    def subscribe_inspection(self, func):
+        self.__subscribe('inspect', func)
+
+    def subscribe_coords(self, func):
+        self.__subscribe('mouse', func)
+
+    def __subscribe(self, key, func):
+        self.__controller.subscribe(key, func)
