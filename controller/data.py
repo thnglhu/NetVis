@@ -170,7 +170,4 @@ class Controller:
             return
         raise TypeError
 
-    def subscribe_labels(self, label_x, label_y):
-        self.__canvas.subscriber['label_x'] = label_x
-        self.__canvas.subscriber['label_y'] = label_x
 

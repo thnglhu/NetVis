@@ -7,6 +7,7 @@ class Canvas(tk.Canvas):
     subscription = dict()
     """
         inspect: information an object
+        mouse: location of the mouse
     """
     last = (0, 0)
     def __init__(self, master=None, cnf=None, **kwargs):
@@ -164,10 +165,7 @@ class Canvas(tk.Canvas):
         self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
-        temp = self.find_withtag(tk.CURRENT)
-        # if temp != self.__scan_obj:
-        #    obj = self.__invert_objects.get(temp, None)
-        self.__scan_obj = temp
+        self.__update_mouse_location(event.x, event.y)
 
     def __focus(self, event):
         if self.__test:
@@ -202,7 +200,7 @@ class Canvas(tk.Canvas):
         """
 
     def __motion_init(self, event):
-        self.__update_mouse_location(event.x, event.y)
+        self.__scan_obj = self.find_withtag(tk.CURRENT)
         if self.__scan_obj:
             self.__target = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vgraph as vg
@@ -213,6 +211,8 @@ class Canvas(tk.Canvas):
                 self.__target = None
         else:
             self.__target = None
+
+        self.__update_mouse_location(event.x, event.y)
 
     def __motion(self, event):
         new = event.x, event.y
