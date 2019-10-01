@@ -56,16 +56,16 @@ class Host:
         self.arp_table = kwargs.get('arp_table') or dict()
         self.name = kwargs.get('name')
 
-    def send(self, canvas, ip_target):
+    def send(self, canvas, ip_target, segment=None):
         def function():
             if ip_target in self.arp_table:
-                packet = data.Packet(self.interface.ip_address, ip_target, None)
+                packet = data.Packet(self.interface.ip_address, ip_target, segment)
                 frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
             elif ip_target in self.interface.ip_network:
                 packet = data.ARP(self.interface.ip_address, ip_target, function)
                 frame = data.BroadcastFrame(self.interface.mac_address, packet)
             elif self.interface.default_gateway in self.arp_table:
-                packet = data.Packet(self.interface.ip_address, ip_target, None)
+                packet = data.Packet(self.interface.ip_address, ip_target, segment)
                 frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
             else:
                 print(self.name, 'is looking for the default gateway', self.interface.default_gateway)

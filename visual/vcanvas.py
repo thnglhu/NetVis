@@ -209,6 +209,8 @@ class Canvas(tk.Canvas):
                     self.subscription['inspect'](self.__target.info())
             if not isinstance(self.__target, vg.Vertex):
                 self.__target = None
+            else:
+                self.__target.focus(self)
         else:
             self.__target = None
 
