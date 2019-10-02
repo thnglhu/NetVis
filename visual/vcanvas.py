@@ -5,11 +5,14 @@ from mathplus.geometry import *
 
 class Canvas(tk.Canvas):
     subscription = dict()
+    variable = dict()
     """
         inspect: information an object
         mouse: location of the mouse
     """
     last = (0, 0)
+    __scale = 1.0
+
     def __init__(self, master=None, cnf=None, **kwargs):
         tk.Canvas.__init__(self, master, cnf, **kwargs)
         if cnf is None:
@@ -17,8 +20,6 @@ class Canvas(tk.Canvas):
         self.__init_subclass(cnf, **kwargs)
 
     def __init_subclass(self, cnf=None, **kwargs):
-        self.__scale = 1.0
-        self.__angle = 0.0
         self.__size = np.array([kwargs['width'], kwargs['height']])
         self.__graph_objects = dict()
         self.__invert_objects = dict()
@@ -26,13 +27,14 @@ class Canvas(tk.Canvas):
         self.__focus_object = None
         self.__target = None
         self.__movable = True
-        self.__test = True
+        self.__sender_turn = True
         self.subscriber = dict()
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
-        self.bind("<Double-Button-1>", self.__focus)
+        self.bind("<Double-Button-3>", self.__double)
         self.bind("<Button-1>", self.__motion_init)
         self.bind("<B1-Motion>", self.__motion)
+        self.bind("<Button-3>", self.__option)
         self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
@@ -165,60 +167,55 @@ class Canvas(tk.Canvas):
         self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
+        self.__scan_obj = self.find_withtag(tk.CURRENT)
         self.__update_mouse_location(event.x, event.y)
 
-    def __focus(self, event):
-        if self.__test:
+    def __double(self, event):
+        if self.__sender_turn:
             self.sender = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vnetwork as vn
             if not isinstance(self.sender, vn.PC):
                 pass
             else:
-                self.__test = False
+                self.__sender_turn = False
+                self.sender.focus(self)
         else:
             self.receiver = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vnetwork as vn
             if not isinstance(self.receiver, vn.PC):
                 pass
             else:
+                print(self.sender, self.receiver)
                 self.sender.send(self, self.receiver.interface.ip_address)
+                self.sender.unfocus(self)
                 self.sender = self.receiver = None
-                self.__test = True
-        """
-        need_fix = False
-        if self.__focus_object:
-            self.__focus_object.blur(self)
-            need_fix = True
-        self.__focus_object = None
-        if self.__scan_obj:
-            self.__focus_object = self.__invert_objects.get(self.__scan_obj, None)
-            if self.__focus_object:
-                self.__focus_object.focus(self)
-                need_fix = True
-        if need_fix:
-            self.fix_order()
-        """
+                self.__sender_turn = True
+
 
     def __motion_init(self, event):
         self.__update_mouse_location(event.x, event.y)
-        self.__scan_obj = self.find_withtag(tk.CURRENT)
         if self.subscription.get('create'):
             x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
             self.subscription['create'](x, y)
             return
         if self.__scan_obj:
-            self.__target = self.__invert_objects.get(self.__scan_obj, None)
+            self.__target = self.__invert_objects.get(self.__scan_obj)
             from visual import vgraph as vg
             if self.__target is not None:
                 if self.subscription.get('inspect'):
                     self.subscription['inspect'](self.__target.info())
+                    self.variable['inspect'] = self.__target
             if not isinstance(self.__target, vg.Vertex):
                 self.__target = None
-            else:
-                self.__target.focus(self)
         else:
             self.__target = None
 
+    def __option(self, event):
+        if self.__scan_obj:
+            target = self.__invert_objects.get(self.__scan_obj)
+            if self.subscription.get('option'):
+                self.variable['option'] = target
+                self.subscription['option'](target.info())
 
     def __motion(self, event):
         new = event.x, event.y
@@ -239,7 +236,7 @@ class Canvas(tk.Canvas):
     def __update_mouse_location(self, x, y):
         self.last = x, y
         if self.subscription.get('mouse'):
-            self.subscription['mouse'](x, y)
+            self.subscription['mouse'](x + self.canvasx(0), y + self.canvasy(0))
 
     @staticmethod
     def convert(canvas):
