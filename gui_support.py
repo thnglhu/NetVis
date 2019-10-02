@@ -1,3 +1,4 @@
+
 # TODO edit GUI here
 """
     DO NOT GENERATE GUI_SUPPORT again
@@ -9,9 +10,7 @@ from tkinter import filedialog
 from controller import application
 from gui import *
 import tkinter.ttk as ttk
-import random  # Testing
-
-node_info = dict()
+import random # Testing
 
 
 def get_random_number():
@@ -23,8 +22,6 @@ controller = application.Controller.get_instance()
 
 filename = ''
 scale = 1
-dy = 0
-
 
 def exit_window():
     # TODO popup save data, clean threads, ... (if exist)
@@ -136,7 +133,6 @@ def switch_popup_window():
 
 
 def enable(child_list):
-    # TODO fix this childList ??
     for child in childList:
         child.configure(state='enable')
 
@@ -164,7 +160,6 @@ def save_file():
     if filename == '':
         filename = filedialog.asksaveasfile(mode='w')
     if filename is not None:
-        # TODO fix this ??
         data = textentry.get('1.0', 'end')
         filename.write(data)
 
@@ -172,7 +167,6 @@ def save_file():
 def save_file_as():
     global filename
     filename = filedialog.asksaveasfile(mode='w')
-    # TODO fix this ??
     file_save()
     '''
     file = filedialog.asksaveasfilename(
@@ -201,8 +195,11 @@ def redo():
     print("Redo")
 
 
-def zoom_in(event):
-    print("Zoom in")
+def zoom_in():
+    controller.create({
+        'type': 'pc',
+        'name': 'AAA',
+    })
 
 
 def zoom_out():
@@ -412,5 +409,6 @@ def node_modify():
 
 
 def update_canvas_coords(x, y):
-    w.coordinate_x_label['text'] = str(x)
-    w.coordinate_y_label['text'] = str(y)
+    pass
+    # print('Do something with this coords', x, y)
+
