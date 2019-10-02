@@ -64,7 +64,7 @@ class PC(VVertex, dv.Host):
 
     def modify(self, info):
         self.name = info['name']
-        self.interface.modify_device(info['interface'])
+        self.interface.modify(info['interface'])
 
 
 class Switch(VVertex, dv.Switch):

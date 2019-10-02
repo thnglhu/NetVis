@@ -24,7 +24,7 @@ class Controller:
         self.__subscribe(func, 'inspect', 'button-1', 'object')
 
     def subscribe_coords(self, func):
-        self.__subscribe(func, 'inspect', 'button-1', 'location-motion')
+        self.__subscribe(func, 'coords', 'button-1', 'location-motion')
 
     def __subscribe(self, func, name, *args):
         self.__cache[name] = func
@@ -45,9 +45,7 @@ class Controller:
 
     def modify_device(self, modify_info):
         warp = self.__canvas.cache[self.__cache['inspect']]
-        print(warp)
         target = warp.get_variable()
-        print(target)
         target.modify(modify_info)
 
     def load(self, file, canvas):

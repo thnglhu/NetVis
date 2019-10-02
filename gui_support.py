@@ -342,11 +342,8 @@ def add_widget(type, text, relx):
         return entry
 
 
-node_info = dict()
-
-
 def update_node_info(info):
-    print('Do something with this info', info)
+    # print('Do something with this info', info)
     # clear the data panel
     global dy
     dy = 0
