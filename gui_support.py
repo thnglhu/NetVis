@@ -133,7 +133,7 @@ def switch_popup_window():
 
 
 def enable(child_list):
-    for child in childList:
+    for child in child_list:
         child.configure(state='enable')
 
 
