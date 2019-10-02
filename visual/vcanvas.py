@@ -14,13 +14,8 @@ class Canvas(tk.Canvas):
         'button-3': dict(),
         'motion': set(),
     }
-    variable = dict()
-    """
-        inspect: information an object
-        mouse: location of the mouse
-    """
+    cache = dict()
     last = (0, 0)
-    __scale = 1.0
 
     def __init__(self, master=None, cnf=None, **kwargs):
         tk.Canvas.__init__(self, master, cnf, **kwargs)
@@ -30,6 +25,7 @@ class Canvas(tk.Canvas):
 
     def __init_subclass(self, cnf=None, **kwargs):
         self.__size = np.array([kwargs['width'], kwargs['height']])
+        self.__scale = 1.0
         self.__graph_objects = dict()
         self.__invert_objects = dict()
         self.__scan_obj = None
@@ -43,7 +39,6 @@ class Canvas(tk.Canvas):
         self.bind("<Double-Button-3>", self.__double)
         self.bind("<Button-1>", self.__motion_init)
         self.bind("<B1-Motion>", self.__motion)
-        self.bind("<Button-3>", self.__option)
         self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
@@ -122,6 +117,7 @@ class Canvas(tk.Canvas):
         top_left[0], bottom_right[0] = sorted((top_left[0], bottom_right[0]))
         top_left[1], bottom_right[1] = sorted((top_left[1], bottom_right[1]))
         size = bottom_right - top_left
+        print(size)
         if (size == 0).any():
             self.__scale = 1
         else:
@@ -200,8 +196,6 @@ class Canvas(tk.Canvas):
                 self.sender = self.receiver = None
                 self.__sender_turn = True
 
-
-
     def __motion_init(self, event):
         self.__update_mouse_location(event.x, event.y)
         self.__button_1_location(event)
@@ -233,13 +227,13 @@ class Canvas(tk.Canvas):
     def __update_mouse_location(self, x, y):
         self.last = x, y
         for subscriber in self.subscription['motion']:
-            subscriber(x + self.canvasx(0), y + self.canvasy(0))
+            subscriber.trigger(x + self.canvasx(0), y + self.canvasy(0))
 
     def __button_1_location(self, event):
         # qualified = False
         for subscriber in self.subscription['button-1']['location']:
             x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
-            subscriber(x, y)
+            subscriber.trigger(x, y)
             # qualified = True
         # if qualified:
         #    self.__scan(event)
@@ -248,20 +242,30 @@ class Canvas(tk.Canvas):
         target = self.__invert_objects.get(self.__scan_obj)
         if target:
             for subscriber in self.subscription['button-1']['object']:
-                self.variable[subscriber] = target
-                subscriber(target.info())
+                subscriber.trigger(target.info())
+                subscriber.set_variable(target)
 
     def subscribe(self, func, *args):
+        print(func)
+        if func in self.cache:
+            return
         location = self.subscription
         for sub in args:
             location = location[sub]
-        location.add(func)
+        self.cache[func] = Warp(func)
+        location.add(self.cache[func])
 
     def unsubscribe(self, func, *args):
+        if func not in self.cache:
+            return
         location = self.subscription
         for sub in args:
             location = location[sub]
-        location.remove(func)
+        function = self.cache[func]
+        if function not in location:
+            return
+        location.remove(function)
+        self.cache.remove(func)
         if func in self.variable:
             del self.variable[func]
 
@@ -274,3 +278,18 @@ class Canvas(tk.Canvas):
         width = canvas.winfo_width()
         canvas.__init_subclass(width=width, height=height)
         return canvas
+
+
+class Warp:
+    def __init__(self, function, variable=None):
+        self.function = function
+        self.variable = variable
+
+    def trigger(self, *args):
+        self.function(*args)
+
+    def set_variable(self, value):
+        self.variable = value
+
+    def get_variable(self):
+        return self.variable

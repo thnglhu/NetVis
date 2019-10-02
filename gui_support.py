@@ -411,7 +411,7 @@ def node_modify():
             modify_info[key['text']] = table_info
         else:
             modify_info[key['text']] = value.get()
-    controller.modify(modify_info)
+    controller.modify_device(modify_info)
 
 
 def update_canvas_coords(x, y):
