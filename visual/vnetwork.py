@@ -28,14 +28,12 @@ class VVertex(vg.Vertex, ABC):
         # att = self.attributes
 
     def display(self, canvas):
-        att = self.attributes
-        # print(att)
-        canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'], tag=tuple(att['tag']))
+        canvas.create_mapped_image(self, self['x'], self['y'], image=self['image'].get_image(), tag=tuple(self['tag']))
+        self['image'].subscribe(self, self.reconfigure, canvas)
 
     def reconfigure(self, canvas):
-        att = self.attributes
         self.reallocate(canvas)
-        canvas.itemconfig_mapped(self, image=att['image'], tag=tuple(att['tag']))
+        canvas.itemconfig_mapped(self, image=self['image'].get_image(), tag=tuple(self['tag']))
 
 
 class PC(VVertex, dv.Host):
@@ -48,7 +46,6 @@ class PC(VVertex, dv.Host):
         att['image'] = resource.get_image("pc-on")
         att['deactivate'] = resource.get_image("pc-on")
         att['activate'] = resource.get_image("pc-on-focus")
-        att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
         return {
@@ -79,7 +76,6 @@ class Switch(VVertex, dv.Switch):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("switch")
-        att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
         return {
@@ -103,7 +99,6 @@ class Router(VVertex, dv.Router):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("router")
-        att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
         return {

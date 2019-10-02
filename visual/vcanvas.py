@@ -90,6 +90,7 @@ class Canvas(tk.Canvas):
                 raise ValueError
             self.coords(canvas_object, *position)
         else:
+            print(canvas_object)
             raise TypeError
 
     def itemconfig_mapped(self, base, **kwargs):
@@ -176,6 +177,7 @@ class Canvas(tk.Canvas):
         self.__update_mouse_location(event.x, event.y)
 
     def __double(self, event):
+        self.__scan_obj = self.find_withtag(tk.CURRENT)
         if self.__sender_turn:
             self.sender = self.__invert_objects.get(self.__scan_obj, None)
             from visual import vnetwork as vn
@@ -197,6 +199,8 @@ class Canvas(tk.Canvas):
                 self.__sender_turn = True
 
     def __motion_init(self, event):
+        self.__scan_obj = self.find_withtag(tk.CURRENT)
+        print(self.__scan_obj)
         self.__update_mouse_location(event.x, event.y)
         self.__button_1_location(event)
         self.__button_1_object(event)
