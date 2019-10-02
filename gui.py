@@ -1068,6 +1068,17 @@ class top_level:
             relwidth=1)
         self.edge_data_panel.configure(background="#fafbf0")
 
+        # ---------------------------Log Text-------------------------------------------#
+        self.log_text = tk.Text(self.edge_data_panel, wrap="word", state="disabled")
+        self.log_text.place(
+            relx=0.02,
+            rely=0.02,
+            width=350,
+            height=300,
+        )
+        self.log_scrollbar = tk.Scrollbar(command=self.log_text.yview())
+        self.log_text['yscrollcommand'] = self.log_scrollbar.set
+
         # ---------------------------Coordinates-------------------------#
         self.coordinate_x_label = tk.Label(top, font=("Helvetica", 9))
         self.coordinate_x_label.place(relx=0.0, rely=0.99, anchor='w')

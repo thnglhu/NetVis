@@ -346,13 +346,23 @@ def add_widget(type, text, relx):
         return label
     elif type is "entry":
         entry = tk.Entry(w.node_data_panel, font=("Helvetica", 12))
-        entry.insert(0, str(text))
+        if text is not None:
+            entry.insert(0, str(text))
         entry.place(relx=relx, rely=dy)
         return entry
 
 
+def update_log(log):
+    w.log_text['state'] = 'normal'
+    w.log_text.insert('1.0', '\n\n')
+    w.log_text.insert('1.0', log)
+    w.log_text['state'] = 'disabled'
+
+
 def update_node_info(info):
     # print('Do something with this info', info)
+    update_log(info)
+    add_interface(info)
     # clear the data panel
     global dy
     dy = 0
@@ -378,15 +388,6 @@ def update_node_info(info):
             dy += 0.09
         node_info[table_label] = table_info
 
-    '''
-    def add_edge_info(sub_info):
-        nonlocal dy
-        edge_data_label = tk.Label(w.edge_data_panel, text=sub_edge_info, font=("Helvetica", 12))
-        edge_data_label.configure(bg="#f0f0f0")
-        edge_data_label.place(relx=0.04, rely=dy)
-        dy += 0.09
-    '''
-
     for key, value in info.items():
         if isinstance(value, dict):
             add_table_info(key, value)
@@ -408,6 +409,74 @@ def node_modify():
     print(modify_info)
 
 
+def add_interface(info):
+    if info['type'] is not "router":
+        return
+
+    add_interface_popup = tk.Tk()
+    add_interface_popup.geometry("500x500")
+    add_interface_popup.title("Add New Interface to Router: " + info['type'])
+    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
+    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
+    add_interface_popup.geometry("+%d+%d" % (x, y))
+
+    # TODO: do not accept duplicate name
+    global dy
+    dy = 0.02
+    # INPUT
+    dy += 0.1
+    label = tk.Label(add_interface_popup, text="Interface Name: ", font=("Helvetica", 12))
+    label.configure(bg="#f0f0f0")
+    label.place(relx=0.02, rely=dy)
+    ifname_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifname_input.place(relx=0.5, rely=dy)
+
+    dy += 0.1
+    label = tk.Label(add_interface_popup, text="Interface Address: ", font=("Helvetica", 12))
+    label.configure(bg="#f0f0f0")
+    label.place(relx=0.02, rely=dy)
+    ifaddress_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifaddress_input.place(relx=0.5, rely=dy)
+
+    dy += 0.1
+    label = tk.Label(add_interface_popup, text="Network Address: ", font=("Helvetica", 12))
+    label.configure(bg="#f0f0f0")
+    label.place(relx=0.02, rely=dy)
+    ifnet_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifnet_input.place(relx=0.5, rely=dy)
+
+    dy += 0.1
+    label = tk.Label(add_interface_popup, text="Default Gateway: ", font=("Helvetica", 12))
+    label.configure(bg="#f0f0f0")
+    label.place(relx=0.02, rely=dy)
+    gateway_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    gateway_input.place(relx=0.5, rely=dy)
+
+    # OK & CANCEL BUTTONS
+    def create_interface():
+        interface_info = dict()
+        interface_info['name'] = ifname_input.get()
+        interface_info['interface'] = ifaddress_input.get()
+        interface_info['network'] = ifnet_input.get()
+        interface_info['gateway'] = gateway_input.get()
+        print(interface_info)
+        close_popup()
+
+    def close_popup():
+        add_interface_popup.destroy()
+
+    ok_button = tk.Button(add_interface_popup, text="OK", command=create_interface)
+    ok_button.pack(side='bottom')
+
+    ok_button = tk.Button(add_interface_popup, text="Cancel", command=close_popup)
+    ok_button.pack(side='bottom')
+
+
+
+
+
 def update_canvas_coords(x, y):
     w.coordinate_x_label['text'] = str(x)
     w.coordinate_y_label['text'] = str(y)
+
+
