@@ -236,7 +236,7 @@ class Canvas(tk.Canvas):
     def __update_mouse_location(self, x, y):
         self.last = x, y
         if self.subscription.get('mouse'):
-            self.subscription['mouse'](x, y)
+            self.subscription['mouse'](x + self.canvasx(0), y + self.canvasy(0))
 
     @staticmethod
     def convert(canvas):
