@@ -126,21 +126,21 @@ class Controller:
         # router = Router(i0, i20, name='router', routing_table=routing_table)
         router = g.add_vertex(i0, i20, i30, type='router', routing_table=routing_table, name='router')
         # router2 = g.add_vertex()
-        i0.connect(switch)
-        i1.connect(switch)
-        i2.connect(switch)
-        i20.connect(switch2)
-        i21.connect(switch2)
-        i22.connect(switch2)
-        i30.connect(i31)
+        # i0.connect(switch)
+        # i1.connect(switch)
+        # i2.connect(switch)
+        # i20.connect(switch2)
+        # i21.connect(switch2)
+        # i22.connect(switch2)
+        # i30.connect(i31)
 
-        g.add_edge(pc1.ig_vertex, switch.ig_vertex)
-        g.add_edge('B', 'switch 0')
-        g.add_edge('C', 'switch 1')
-        g.add_edge('D', 'switch 1')
-        g.add_edge('switch 0', 'router')
-        g.add_edge('switch 1', 'router')
-        g.add_edge('E', 'router')
+        g.connect_interface(i1, switch)
+        g.connect_interface(i2, switch)
+        g.connect_interface(i0, switch)
+        g.connect_interface(i20, switch2)
+        g.connect_interface(i21, switch2)
+        g.connect_interface(i22, switch2)
+        g.connect_interface(i31, i30)
 
         pc1['x'] = -6
         pc1['y'] = -6
@@ -184,3 +184,10 @@ class Controller:
 
         self.__canvas.subscription['create'] = my_create
         print(self.__canvas.subscription['create'])
+
+    def modify(self, modify_info):
+        target = self.__canvas.variable.get('inspect')
+        if target:
+            target.modify(modify_info)
+        else:
+            raise ValueError
