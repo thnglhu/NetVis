@@ -26,6 +26,7 @@ scale = 1
 dy = 0
 
 
+
 def exit_window():
     # TODO popup save data, clean threads, ... (if exist)
     # controller.exit()
@@ -60,79 +61,83 @@ def save_popup_window():
     save_popup.mainloop()
 
 
-def computer_popup_window():
-    computer_popup = tk.Tk()
+node_info_dict = dict()
 
-    computer_popup.geometry("500x1000")
-    computer_popup.title("Node Properties")
+node_info_dict_child = dict()
 
-    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
-    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-    computer_popup.geometry("+%d+%d" % (x, y))
+def node_properties_popup_window():
+    node_popup = tk.Tk()
 
-    popup_label = tk.Label(computer_popup, text="This is node window properties")
-    popup_label.place(relx=0.1, rely=0.1)
-    popup_label.configure(bg="#ffffff")
-
-
-def hub_popup_window():
-    hub_popup = tk.Tk()
-
-    hub_popup.geometry("500x1000")
-    hub_popup.title("Node Properties")
+    node_popup.geometry("500x350")
+    node_popup.title("Node Properties")
 
     x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
     y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-    hub_popup.geometry("+%d+%d" % (x, y))
+    node_popup.geometry("+%d+%d" % (x, y))
 
-    hub_label = tk.Label(hub_popup, text="This is hub window properties")
-    hub_label.place(relx=0.1, rely=0.1)
-    hub_label.configure(bg="#ffffff")
+    node_type_label = tk.Label(node_popup, text="Node Type:")
+    node_type_label.place(relx=0.05, rely=0.03)
+    node_type_label.configure(bg="#ffffff")
+
+    box_value = StringVar()
+    node_type_combobox = ttk.Combobox(node_popup, values=box_value)
+    node_type_combobox['values'] = ('Host', 'Switch', 'Router')
+    node_type_combobox.current(0)
+    node_type_combobox.place(relx=0.5, rely=0.03)
+
+    node_name_label = tk.Label(node_popup, text="Node Name:")
+    node_name_label.place(relx=0.05, rely=0.1)
+    node_name_label.configure(bg="#ffffff")
+
+    node_name_textbox = tk.Entry(node_popup)
+    node_name_textbox.place(relx=0.5, rely=0.1)
+    node_name_textbox.configure(bg="#efefef")
+
+    node_interface_label = tk.Label(node_popup, text="Node Interface:")
+    node_interface_label.place(relx=0.05, rely=0.17)
+    node_interface_label.configure(bg="#ffffff")
+
+    ipaddress_interface_label = tk.Label(node_popup, text="Node IP Address:")
+    ipaddress_interface_label.place(relx=0.1, rely=0.24)
+    ipaddress_interface_label.configure(bg="#ffffff")
+
+    ipaddress_interface_textbox = tk.Entry(node_popup)
+    ipaddress_interface_textbox.place(relx=0.5, rely=0.24)
+    ipaddress_interface_textbox.configure(bg="#efefef")
+
+    ipnetwork_interface_label = tk.Label(node_popup, text="Node IP Network:")
+    ipnetwork_interface_label.place(relx=0.1, rely=0.31)
+    ipnetwork_interface_label.configure(bg="#ffffff")
+
+    ipnetwork_interface_textbox = tk.Entry(node_popup)
+    ipnetwork_interface_textbox.place(relx=0.5, rely=0.31)
+    ipnetwork_interface_textbox.configure(bg="#efefef")
+
+    default_gateway_interface_label = tk.Label(node_popup, text="Node Default Gateway:")
+    default_gateway_interface_label.place(relx=0.1, rely=0.38)
+    default_gateway_interface_label.configure(bg="#ffffff")
+
+    default_gateway_interface_textbox = tk.Entry(node_popup)
+    default_gateway_interface_textbox.place(relx=0.5, rely=0.38)
+    default_gateway_interface_textbox.configure(bg="#efefef")
+
+    def node_info_passing():
+        node_info_dict.clear()
+        node_info_dict["type"] = node_type_combobox.get()
+        node_info_dict["name"] = node_name_textbox.get()
+        node_info_dict["interface"] = node_info_dict_child
+        node_info_dict_child["ip_addess"] = ipaddress_interface_textbox.get()
+        node_info_dict_child["ip_network"] = ipnetwork_interface_textbox.get()
+        node_info_dict_child["default_gateway"] = default_gateway_interface_textbox.get()
+        print(node_info_dict)
+        #controller.create(node_info_dict)
+        node_popup.destroy()
+
+    node_button = tk.Button(node_popup, text="Apply", command=node_info_passing)
+    node_button.place(relx=0.75, rely=0.5)
 
 
-def modem_popup_window():
-    modem_popup = tk.Tk()
 
-    modem_popup.geometry("500x1000")
-    modem_popup.title("Node Properties")
-
-    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
-    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-    modem_popup.geometry("+%d+%d" % (x, y))
-
-    modem_label = tk.Label(modem_popup, text="This is modem window properties")
-    modem_label.place(relx=0.1, rely=0.1)
-    modem_label.configure(bg="#ffffff")
-
-
-def router_popup_window():
-    router_popup = tk.Tk()
-
-    router_popup.geometry("500x1000")
-    router_popup.title("Node Properties")
-
-    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
-    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-    router_popup.geometry("+%d+%d" % (x, y))
-
-    router_label = tk.Label(router_popup, text="This is router window properties")
-    router_label.place(relx=0.1, rely=0.1)
-    router_label.configure(bg="#ffffff")
-
-
-def switch_popup_window():
-    switch_popup = tk.Tk()
-
-    switch_popup.geometry("500x1000")
-    switch_popup.title("Node Properties")
-
-    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
-    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-    switch_popup.geometry("+%d+%d" % (x, y))
-
-    switch_label = tk.Label(switch_popup, text="This is switch window properties")
-    switch_label.place(relx=0.1, rely=0.1)
-    switch_label.configure(bg="#ffffff")
 
 
 def enable(child_list):
@@ -201,24 +206,16 @@ def redo():
     print("Redo")
 
 
-def zoom_in(event):
-    print("Zoom in")
+def zoom_in():
+    w.main_canvas.scale("all", 450, 450, 1.1, 1.1)
 
 
 def zoom_out():
-    print("Zoom out")
-
-
-def print_file():
-    print("Print")
+    w.main_canvas.scale("all", 450, 450, 0.9, 0.9)
 
 
 def find_node():
     print("Find node")
-
-
-def find_edge():
-    print("Find edge")
 
 
 def cut():
@@ -234,7 +231,7 @@ def paste():
 
 
 def select_all():
-    print("Select All")
+    print("select all")
 
 
 def select_all_nodes():
@@ -246,20 +243,11 @@ def deselect_all_nodes():
 
 
 def add_node():
-    if w.add_node_combobox.get() == "Computer":
-        computer_popup_window()
-    if w.add_node_combobox.get() == "Hub":
-        hub_popup_window()
-    if w.add_node_combobox.get() == "Modem":
-        modem_popup_window()
-    if w.add_node_combobox.get() == "Router":
-        router_popup_window()
-    if w.add_node_combobox.get() == "Switch":
-        switch_popup_window()
+    node_properties_popup_window()
 
 
 def remove_node():
-    print("Remove Node")
+    pass
 
 
 def rename_node():
@@ -358,7 +346,7 @@ node_info = dict()
 
 
 def update_node_info(info):
-    # print('Do something with this info', info)
+    print('Do something with this info', info)
     # clear the data panel
     global dy
     dy = 0
@@ -370,7 +358,7 @@ def update_node_info(info):
         global dy
         if value is not None:
             node_info[add_widget("label", key, 0.04)] = add_widget("entry", value, 0.5)
-            dy += 0.09
+            dy += 0.1
         else:
             return add_widget("label", key, 0.04)
 
@@ -381,7 +369,7 @@ def update_node_info(info):
         table_info = []
         for k, v in value.items():
             table_info.append([add_widget("entry", k, 0.04), add_widget("entry", v, 0.5)])
-            dy += 0.09
+            dy += 0.15
         node_info[table_label] = table_info
 
     '''
