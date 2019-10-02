@@ -69,12 +69,15 @@ class AnimatedImage(StaticImage):
         thread.start()
 
     def __change_image(self):
-        while True:
-            if len(self.subscribers) > 0:
-                self.index = (self.index + 1) % len(self.data)
-                for subscriber, pack in self.subscribers.items():
-                    pack[0](pack[1])
-            sleep(self.time)
+        try:
+            while True:
+                if len(self.subscribers) > 0:
+                    self.index = (self.index + 1) % len(self.data)
+                    for subscriber, pack in self.subscribers.items():
+                        pack[0](pack[1])
+                sleep(self.time)
+        except RuntimeError:
+            pass
 
     def get_image(self):
         return self.data[self.index]

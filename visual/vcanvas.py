@@ -36,7 +36,6 @@ class Canvas(tk.Canvas):
         self.subscriber = dict()
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
-        self.bind("<Double-Button-3>", self.__double)
         self.bind("<Button-1>", self.__motion_init)
         self.bind("<B1-Motion>", self.__motion)
         self.bind("<Configure>", self.__resize)
@@ -71,7 +70,19 @@ class Canvas(tk.Canvas):
         if canvas_object is None:
             position = self.convert_position(*args)
             self.__graph_objects[base] = tk.Canvas.create_image(self, *position, **kw)
-            self.__invert_objects[self.__graph_objects[base],] = base
+            self.__invert_objects[self.__graph_objects[base], ] = base
+
+            from visual import vnetwork as vn
+            canvas_object = self.__graph_objects.get(base)
+            self.tag_bind(canvas_object, '<Button-1>', self.__device_motion_init, (base, ))
+            self.tag_bind(canvas_object, '<B1-Motion>', self.__device_motion, (base, ))
+            self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__device_release)
+
+    def tag_bind(self, tagOrId, sequence=None, func=None, args=None):
+        def _func(event):
+            if args: func(event, *args)
+            else: func(event)
+        super().tag_bind(tagOrId, sequence, _func)
 
     def coords_mapped(self, base, *args):
         from visual import vgraph as vg
@@ -96,7 +107,7 @@ class Canvas(tk.Canvas):
     def itemconfig_mapped(self, base, **kwargs):
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is not None:
-            self.itemconfig(canvas_object, **kwargs)
+            self.itemconfigure(canvas_object, **kwargs)
         else:
             raise TypeError
 
@@ -173,55 +184,31 @@ class Canvas(tk.Canvas):
         self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
-        self.__scan_obj = self.find_withtag(tk.CURRENT)
         self.__update_mouse_location(event.x, event.y)
-
-    def __double(self, event):
-        self.__scan_obj = self.find_withtag(tk.CURRENT)
-        if self.__sender_turn:
-            self.sender = self.__invert_objects.get(self.__scan_obj, None)
-            from visual import vnetwork as vn
-            if not isinstance(self.sender, vn.PC):
-                pass
-            else:
-                self.__sender_turn = False
-                self.sender.focus(self)
-        else:
-            self.receiver = self.__invert_objects.get(self.__scan_obj, None)
-            from visual import vnetwork as vn
-            if not isinstance(self.receiver, vn.PC):
-                pass
-            else:
-                print(self.sender, self.receiver)
-                self.sender.send(self, self.receiver.interface.ip_address)
-                self.sender.unfocus(self)
-                self.sender = self.receiver = None
-                self.__sender_turn = True
 
     def __motion_init(self, event):
-        self.__scan_obj = self.find_withtag(tk.CURRENT)
-        print(self.__scan_obj)
         self.__update_mouse_location(event.x, event.y)
-        self.__button_1_location(event)
-        self.__button_1_object(event)
-        if self.__scan_obj:
-            self.__target = self.__invert_objects.get(self.__scan_obj)
-            from visual import vgraph as vg
-            if not isinstance(self.__target, vg.Vertex):
-                self.__target = None
-        else:
-            self.__target = None
 
     def __motion(self, event):
         new = event.x, event.y
-        if self.__movable and self.__target:
-            vector = self.invert_position(*new) - self.invert_position(*self.last)
-            self.__target.motion(self, *vector)
-        else:
-            new = event.x, event.y
+        if self.__movable:
             self.scan_mark(*self.last)
             self.scan_dragto(*new, gain=1)
         self.__update_mouse_location(*new)
+
+    def __device_motion_init(self, event, device):
+        self.__button_1_object(device)
+        self.__update_mouse_location(event.x, event.y)
+        self.__movable = False
+
+    def __device_motion(self, event, device):
+        new = event.x, event.y
+        vector = self.invert_position(*new) - self.invert_position(*self.last)
+        device.motion(self, *vector)
+        self.__update_mouse_location(event.x, event.y)
+
+    def __device_release(self, event):
+        self.__movable = True
 
     def __resize(self, event):
         self.__size[0] = event.width
@@ -234,16 +221,11 @@ class Canvas(tk.Canvas):
             subscriber.trigger(x + self.canvasx(0), y + self.canvasy(0))
 
     def __button_1_location(self, event):
-        # qualified = False
         for subscriber in self.subscription['button-1']['location']:
-            x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
+            x, y = np.array((self.canvasx(0), self.canvasy(0))) + (event.x, event.y)
             subscriber.trigger(x, y)
-            # qualified = True
-        # if qualified:
-        #    self.__scan(event)
 
-    def __button_1_object(self, event):
-        target = self.__invert_objects.get(self.__scan_obj)
+    def __button_1_object(self, target):
         if target:
             for subscriber in self.subscription['button-1']['object']:
                 subscriber.trigger(target.info())

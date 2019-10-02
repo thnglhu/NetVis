@@ -135,7 +135,8 @@ class top_level:
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
         # FULLSCREEN
-        root.attributes('-fullscreen', True)
+        # root.attributes('-fullscreen', True)
+        root.geometry("1024x1024")
 
         self.menubar = tk.Menu(top, font="TkMenuFont", bg=_bgcolor, fg=_fgcolor)
 

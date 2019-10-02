@@ -32,7 +32,6 @@ class VVertex(vg.Vertex, ABC):
         self['image'].subscribe(self, self.reconfigure, canvas)
 
     def reconfigure(self, canvas):
-        self.reallocate(canvas)
         canvas.itemconfig_mapped(self, image=self['image'].get_image(), tag=tuple(self['tag']))
 
 
