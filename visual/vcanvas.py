@@ -4,7 +4,16 @@ from mathplus.geometry import *
 
 
 class Canvas(tk.Canvas):
-    subscription = dict()
+    subscription = {
+        'button-1': {
+            'location': set(),
+            'location-motion': set(),
+            'object': set()
+        },
+        'button-2': dict(),
+        'button-3': dict(),
+        'motion': set(),
+    }
     variable = dict()
     """
         inspect: information an object
@@ -192,30 +201,18 @@ class Canvas(tk.Canvas):
                 self.__sender_turn = True
 
 
+
     def __motion_init(self, event):
         self.__update_mouse_location(event.x, event.y)
-        if self.subscription.get('create'):
-            x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
-            self.subscription['create'](x, y)
-            return
+        self.__button_1_location(event)
+        self.__button_1_object(event)
         if self.__scan_obj:
             self.__target = self.__invert_objects.get(self.__scan_obj)
             from visual import vgraph as vg
-            if self.__target is not None:
-                if self.subscription.get('inspect'):
-                    self.subscription['inspect'](self.__target.info())
-                    self.variable['inspect'] = self.__target
             if not isinstance(self.__target, vg.Vertex):
                 self.__target = None
         else:
             self.__target = None
-
-    def __option(self, event):
-        if self.__scan_obj:
-            target = self.__invert_objects.get(self.__scan_obj)
-            if self.subscription.get('option'):
-                self.variable['option'] = target
-                self.subscription['option'](target.info())
 
     def __motion(self, event):
         new = event.x, event.y
@@ -235,8 +232,38 @@ class Canvas(tk.Canvas):
 
     def __update_mouse_location(self, x, y):
         self.last = x, y
-        if self.subscription.get('mouse'):
-            self.subscription['mouse'](x + self.canvasx(0), y + self.canvasy(0))
+        for subscriber in self.subscription['motion']:
+            subscriber(x + self.canvasx(0), y + self.canvasy(0))
+
+    def __button_1_location(self, event):
+        # qualified = False
+        for subscriber in self.subscription['button-1']['location']:
+            x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
+            subscriber(x, y)
+            # qualified = True
+        # if qualified:
+        #    self.__scan(event)
+
+    def __button_1_object(self, event):
+        target = self.__invert_objects.get(self.__scan_obj)
+        if target:
+            for subscriber in self.subscription['button-1']['object']:
+                self.variable[subscriber] = target
+                subscriber(target.info())
+
+    def subscribe(self, func, *args):
+        location = self.subscription
+        for sub in args:
+            location = location[sub]
+        location.add(func)
+
+    def unsubscribe(self, func, *args):
+        location = self.subscription
+        for sub in args:
+            location = location[sub]
+        location.remove(func)
+        if func in self.variable:
+            del self.variable[func]
 
     @staticmethod
     def convert(canvas):

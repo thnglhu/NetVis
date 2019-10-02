@@ -19,8 +19,8 @@ class Controller:
     def get_graph(self):
         return self.__graph
 
-    def subscribe(self, t, func):
-        self.__canvas.subscription[t] = func
+    def subscribe(self, func, *args):
+        self.__canvas.subscribe(func, *args)
 
     def load(self, instance, canvas, **kwargs):
         # TODO add more type
@@ -173,6 +173,7 @@ class Controller:
     def create(self, info):
         t = info['type']
         g = self.__graph
+        func = object
 
         def my_create(x, y):
             if t == 'pc':
@@ -180,10 +181,10 @@ class Controller:
                 pc['x'], pc['y'] = self.__canvas.invert_position(x, y)
                 print(x, y, pc['x'], pc['y'])
                 pc.display(self.__canvas)
-            self.__canvas.subscription['create'] = None
+            self.__canvas.unsubscribe(func, 'button-1', 'location')
 
-        self.__canvas.subscription['create'] = my_create
-        print(self.__canvas.subscription['create'])
+        func = my_create
+        self.__canvas.subscribe(func, 'button-1', 'location')
 
     def modify(self, modify_info):
         target = self.__canvas.variable.get('inspect')

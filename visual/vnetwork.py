@@ -107,7 +107,7 @@ class Router(VVertex, dv.Router):
 
     def info(self):
         return {
-            'type': 'switch',
+            'type': 'router',
             'name': self.name,
             'arp table': self.arp_table,
             'routing table': self.__get_routing_table()

@@ -53,13 +53,14 @@ class Controller:
         self.__controller.inspect()
 
     def subscribe_inspection(self, func):
-        self.__subscribe('inspect', func)
+        # self.inspect =
+        self.__subscribe(func, 'button-1', 'object')
 
     def subscribe_coords(self, func):
-        self.__subscribe('mouse', func)
+        self.__subscribe(func, 'button-1', 'location-motion')
 
-    def __subscribe(self, key, func):
-        self.__controller.subscribe(key, func)
+    def __subscribe(self, func, *args):
+        self.__controller.subscribe(func, *args)
 
     def create(self, info):
         self.__controller.create(info)
