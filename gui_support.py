@@ -401,10 +401,10 @@ def context_menu(info):
     menu = tk.Menu(w.main_canvas, tearoff=0)
     menu_dictionary = {
         'host': {
-            'Connect': controller.prepare_connecting,
+            'Connect': controller.prepare_connecting
         },
         'switch': {
-            'Connect': controller.prepare_connecting,
+            'Connect': controller.prepare_connecting
         },
         'router': {
             'Connect': router_connect,
@@ -424,8 +424,8 @@ def context_menu(info):
     finally:
         menu.grab_release()
 
+
 def router_connect(info):
-    print(info)
     select_interface_popup = tk.Tk()
     select_interface_popup.geometry("500x500")
     select_interface_popup.title("Select an Interface of Router " + info['type'])
@@ -442,9 +442,9 @@ def router_connect(info):
     # OK & Cancel buttons
     def close_popup():
         select_interface_popup.destroy()
+
     def select_interface():
-        print(interfaces_combobox.get())
-        # TODO: call something to select interface
+        controller.select_interface(interfaces_combobox.get())
         close_popup()
 
     ok_button = tk.Button(select_interface_popup, text="OK", command=select_interface)

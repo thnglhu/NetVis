@@ -1,4 +1,5 @@
 from visual import vgraph, vcanvas
+from visual import vnetwork as vn
 import ipaddress as ipa
 import os
 
@@ -58,40 +59,69 @@ class Controller:
             target = warp.get_variable()
             target.add_interface(interface_info)
             warp = self.__canvas.cache[self.__cache['inspect']]
-            warp.trigger(warp.get_variable().info())
+            if warp and warp.get_variable():
+                warp.trigger(warp.get_variable().info())
+
+    name = ''
+    device_1 = None
+    require = False
+
+    def select_interface(self, name):
+        self.name = name
+        if self.require:
+            self.require = False
+            self.connect_with()
+        else:
+            self.prepare_connecting()
 
     save = None
 
-    def __isolate(self, device):
-        from visual import vnetwork as vn
-        if isinstance(device, vn.PC):
-            other = device.interface.other
+    def __isolate(self, interface):
+        device = interface.device
+        if isinstance(device, vn.PC) or isinstance(device, vn.Router):
+            other = interface.other
             if other:
                 intersection = device.link_edges.intersection(other.device.link_edges)
                 for edge in intersection.copy():
                     edge.destroy(self.__canvas)
-                device.interface.other = None
-            return device.interface
-        elif isinstance(device, vn.Switch):
-            return device
-        return None
+                interface.other = None
 
     def connect_with(self):
-        device_1 = self.__canvas.cache[self.__cache['props']].get_variable()
+
+        # What a messy
+
+        if self.device_1 is None:
+            self.device_1 = self.__canvas.cache[self.__cache['props']].get_variable()
+            if isinstance(self.device_1, vn.Router):
+                self.device_1 = self.device_1.get_interface(self.name)
+            elif isinstance(self.device_1, vn.PC):
+                self.device_1 = self.device_1.interface
+            self.require = True
         device_2 = self.__canvas.cache[self.connect_with].get_variable()
-        intersection = device_1.link_edges.intersection(device_2.link_edges)
+        if isinstance(device_2, vn.Router):
+            if self.require:
+                info = self.__canvas.cache[self.__cache['inspect']].get_variable().info()
+                from gui_support import router_connect
+                router_connect(info)
+                return
+            device_2 = device_2.get_interface(self.name)
+        elif isinstance(device_2, vn.PC):
+            device_2 = device_2.interface
+        intersection = self.device_1.device.link_edges.intersection(device_2.device.link_edges)
         if len(intersection) > 0:
             pass
             # print(device_1.name, 'and', device_2.name, 'are already connected')
         else:
-            interface_1 = self.__isolate(device_1)
-            interface_2 = self.__isolate(device_2)
-            edge = self.__graph.add_edge(device_1.ig_vertex, device_2.ig_vertex)
-            interface_1.connect(interface_2)
+            self.__isolate(self.device_1)
+            self.__isolate(device_2)
+            edge = self.__graph.add_edge(self.device_1.device.ig_vertex, device_2.device.ig_vertex)
+            self.device_1.connect(device_2)
             edge.display(self.__canvas)
             self.__canvas.tag_lower('edge')
-        device_1.unfocus(self.__canvas)
+        self.device_1.device.unfocus(self.__canvas)
         self.__canvas.unsubscribe(self.connect_with, 'button-1', 'empty')
+        self.device_1 = None
+        self.require = False
 
     def prepare_connecting(self, *args):
         if self.save:
@@ -99,7 +129,6 @@ class Controller:
             self.__canvas.unsubscribe(self.connect_with, 'button-1', 'empty')
         self.save = self.__canvas.cache[self.__cache['props']].get_variable()
         self.save.focus(self.__canvas)
-
         self.__canvas.subscribe(self.connect_with, 'button-1', 'empty')
 
     def load(self, file, canvas):

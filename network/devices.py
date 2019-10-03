@@ -238,6 +238,10 @@ class Router:
     def add_interface(self, interface_info):
         self.interfaces.append(Interface(**interface_info))
 
+    def get_interface(self, name):
+        for interface in self.interfaces:
+            if interface.name == name:
+                return interface
 
 if __name__ == '__main__':
     pass
