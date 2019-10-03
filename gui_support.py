@@ -75,6 +75,7 @@ node_info_dict = dict()
 
 node_info_dict_child = dict()
 
+
 def node_properties_popup_window():
     node_popup = tk.Tk()
 
@@ -140,22 +141,17 @@ def node_properties_popup_window():
         node_info_dict_child["ip_network"] = ipnetwork_interface_textbox.get()
         node_info_dict_child["default_gateway"] = default_gateway_interface_textbox.get()
         print(node_info_dict)
-        #controller.create(node_info_dict)
+        # controller.create(node_info_dict)
         node_popup.destroy()
 
     node_button = tk.Button(node_popup, text="Apply", command=node_info_passing)
     node_button.place(relx=0.75, rely=0.5)
 
 
-
-
-
 def enable(child_list):
     # TODO fix this childList ??
     for child in childList:
         child.configure(state='enable')
-
-
 
 
 def create_new_file():
@@ -324,7 +320,6 @@ def init(top, gui, *args, **kwargs):
     root = top
 
 
-
 def destroy_window():
     # Function which closes the window.
     global top_level
@@ -430,9 +425,32 @@ def context_menu(info):
         menu.grab_release()
 
 def router_connect(info):
-    # TODO select interface
-    # controller.prepare_connecting(<interface name>)
-    pass
+    print(info)
+    select_interface_popup = tk.Tk()
+    select_interface_popup.geometry("500x500")
+    select_interface_popup.title("Select an Interface of Router " + info['type'])
+    select_interface_popup.geometry("+%d+%d" % (
+    (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
+
+    # Combo box handling
+    interfaces_combobox = ttk.Combobox(select_interface_popup, values=[])
+    interfaces_combobox.place(relx=0.02, rely=0.02)
+    for number, interface in info['interfaces'].items():
+        interfaces_combobox['values'] += (interface,)
+    interfaces_combobox.current(0)
+
+    # OK & Cancel buttons
+    def close_popup():
+        select_interface_popup.destroy()
+    def select_interface():
+        print(interfaces_combobox.get())
+        # TODO: call something to select interface
+        close_popup()
+
+    ok_button = tk.Button(select_interface_popup, text="OK", command=select_interface)
+    ok_button.pack(side='bottom')
+    cancel_button = tk.Button(select_interface_popup, text="Cancel", command=close_popup)
+    cancel_button.pack(side='bottom')
 
 
 def add_interface(info):
@@ -441,10 +459,9 @@ def add_interface(info):
 
     add_interface_popup = tk.Tk()
     add_interface_popup.geometry("500x500")
-    add_interface_popup.title("Add New Interface to Router: " + info['type'])
-    x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
-    y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-    add_interface_popup.geometry("+%d+%d" % (x, y))
+    add_interface_popup.title("Add New Interface to Router: " + info['name'])
+    add_interface_popup.geometry("+%d+%d" % (
+    (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
 
     # TODO: do not accept duplicate name
     global dy
@@ -491,6 +508,8 @@ def add_interface(info):
     gateway_input.insert(0, '0.0.0.0')
 
     # OK & CANCEL BUTTONS
+    def close_popup():
+        add_interface_popup.destroy()
     def create_interface():
         interface_info = dict()
         interface_info['name'] = ifname_input.get()
@@ -501,21 +520,13 @@ def add_interface(info):
         controller.add_interface(interface_info)
         close_popup()
 
-    def close_popup():
-        add_interface_popup.destroy()
-
     ok_button = tk.Button(add_interface_popup, text="OK", command=create_interface)
     ok_button.pack(side='bottom')
-
-    ok_button = tk.Button(add_interface_popup, text="Cancel", command=close_popup)
-    ok_button.pack(side='bottom')
-
-
-
+    cancel_button = tk.Button(add_interface_popup, text="Cancel", command=close_popup)
+    cancel_button.pack(side='bottom')
 
 
 def update_canvas_coords(x, y):
     w.coordinate_x_label['text'] = str(x)
     w.coordinate_y_label['text'] = str(y)
-
 
