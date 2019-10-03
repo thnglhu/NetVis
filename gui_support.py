@@ -401,14 +401,18 @@ def context_menu(info):
     menu = tk.Menu(w.main_canvas, tearoff=0)
     menu_dictionary = {
         'host': {
-            'Connect': controller.prepare_connecting
+            'Connect': controller.prepare_connecting,
+            'Send to': controller.send_message,
+            'Disable': controller.disable_device,
         },
         'switch': {
-            'Connect': controller.prepare_connecting
+            'Connect': controller.prepare_connecting,
+            'Disable': controller.disable_device,
         },
         'router': {
             'Connect': router_connect,
-            'Add an interface': add_interface
+            'Add an interface': add_interface,
+            'Disable': controller.disable_device,
         }
     }
     if info['type'] not in menu_dictionary:
@@ -510,6 +514,7 @@ def add_interface(info):
     # OK & CANCEL BUTTONS
     def close_popup():
         add_interface_popup.destroy()
+
     def create_interface():
         interface_info = dict()
         interface_info['name'] = ifname_input.get()

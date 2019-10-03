@@ -38,7 +38,7 @@ class ARP(Packet):
         return reply_arp
 
     def get_size(self):
-        return 2
+        return 28
 
 
 class Frame:

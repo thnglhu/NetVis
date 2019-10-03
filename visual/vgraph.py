@@ -174,6 +174,8 @@ class ItemSequence:
 
 
 class CanvasItem(ABC):
+    active = True
+
     def __init__(self):
         self.attributes = dict()
 
@@ -206,6 +208,12 @@ class CanvasItem(ABC):
 
     @abstractmethod
     def destroy(self, canvas): pass
+
+    def disable(self, canvas):
+        self.active = False
+
+    def enable(self, canvas):
+        self.active = True
 
     def motion(self, canvas, delta_x, delta_y): pass
 

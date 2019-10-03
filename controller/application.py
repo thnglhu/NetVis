@@ -3,12 +3,14 @@ from visual import vnetwork as vn
 import ipaddress as ipa
 import os
 
+
 class Controller:
     __instance = None
     __graph = None
     __canvas = None
     __inspect = None
     __cache = dict()
+
     @staticmethod
     def get_instance():
         if not Controller.__instance:
@@ -39,26 +41,31 @@ class Controller:
         g = self.__graph
 
         def my_create(x, y):
+            device = None
             if device_type == 'pc':
-                pc = g.add_vertex(None, type='pc', name=info.get('name', ''))
-                pc['x'], pc['y'] = self.__canvas.invert_position(x, y)
-                pc.display(self.__canvas)
+                device = g.add_vertex(info['interface'],
+                                      type='pc',
+                                      name=info.get('name', ''),
+                                      arp_table=info.get('interface'))
+            if device:
+                device['x'], device['y'] = self.__canvas.invert_position(x, y)
+                device.display(self.__canvas)
             self.__canvas.unsubscribe(my_create, 'button-1', 'location')
 
         self.__canvas.subscribe(my_create, 'button-1', 'location')
 
     def modify_device(self, modify_info):
-        warp = self.__canvas.cache[self.__cache['inspect']]
+        warp = self.left_click()
         if warp:
             target = warp.get_variable()
             target.modify(modify_info)
 
     def add_interface(self, interface_info):
-        warp = self.__canvas.cache[self.__cache['props']]
+        warp = self.right_click()
         if warp:
             target = warp.get_variable()
             target.add_interface(interface_info)
-            warp = self.__canvas.cache[self.__cache['inspect']]
+            warp = self.left_click()
             if warp and warp.get_variable():
                 warp.trigger(warp.get_variable().info())
 
@@ -70,7 +77,7 @@ class Controller:
         self.name = name
         if self.require:
             self.require = False
-            self.connect_with()
+            self.__connect_with()
         else:
             self.prepare_connecting()
 
@@ -86,21 +93,21 @@ class Controller:
                     edge.destroy(self.__canvas)
                 interface.other = None
 
-    def connect_with(self):
+    def __connect_with(self):
 
         # What a messy
 
         if self.device_1 is None:
-            self.device_1 = self.__canvas.cache[self.__cache['props']].get_variable()
+            self.device_1 = self.right_click().get_variable()
             if isinstance(self.device_1, vn.Router):
                 self.device_1 = self.device_1.get_interface(self.name)
             elif isinstance(self.device_1, vn.PC):
                 self.device_1 = self.device_1.interface
             self.require = True
-        device_2 = self.__canvas.cache[self.connect_with].get_variable()
+        device_2 = self.__canvas.cache[self.__connect_with].get_variable()
         if isinstance(device_2, vn.Router):
             if self.require:
-                info = self.__canvas.cache[self.__cache['inspect']].get_variable().info()
+                info = self.left_click().get_variable().info()
                 from gui_support import router_connect
                 router_connect(info)
                 return
@@ -119,17 +126,38 @@ class Controller:
             edge.display(self.__canvas)
             self.__canvas.tag_lower('edge')
         self.device_1.device.unfocus(self.__canvas)
-        self.__canvas.unsubscribe(self.connect_with, 'button-1', 'empty')
+        self.__canvas.unsubscribe(self.__connect_with, 'button-1', 'empty')
         self.device_1 = None
         self.require = False
 
     def prepare_connecting(self, *args):
         if self.save:
             self.save.unfocus(self.__canvas)
-            self.__canvas.unsubscribe(self.connect_with, 'button-1', 'empty')
-        self.save = self.__canvas.cache[self.__cache['props']].get_variable()
+            self.__canvas.unsubscribe(self.__connect_with, 'button-1', 'empty')
+        self.save = self.right_click().get_variable()
         self.save.focus(self.__canvas)
-        self.__canvas.subscribe(self.connect_with, 'button-1', 'empty')
+        self.__canvas.subscribe(self.__connect_with, 'button-1', 'empty')
+
+    def send_message(self, *args):
+        sender = self.right_click().get_variable()
+
+        def trigger_message():
+            receiver = self.left_click().get_variable()
+            if isinstance(receiver, vn.PC):
+                sender.send(self.__canvas, receiver.interface.ip_address)
+            self.__canvas.unsubscribe(trigger_message, 'button-1', 'empty')
+
+        self.__canvas.subscribe(trigger_message, 'button-1', 'empty')
+
+    def disable_device(self, *args):
+        device = self.right_click().get_variable()
+        device.disable(self.__canvas)
+
+    def right_click(self):
+        return self.__canvas.cache[self.__cache['props']]
+
+    def left_click(self):
+        return self.__canvas.cache[self.__cache['inspect']]
 
     def load(self, file, canvas):
         # _, extension = os.path.splitext(file.name)

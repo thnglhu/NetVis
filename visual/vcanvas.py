@@ -78,12 +78,13 @@ class Canvas(tk.Canvas):
 
             from visual import vnetwork as vn
             canvas_object = self.__graph_objects.get(base)
-            self.tag_bind(canvas_object, '<Button-1>', self.__vertex_button, ('button-1', base))
-            self.tag_bind(canvas_object, '<B1-Motion>', self.__vertex_button_motion, ('button-1', base))
-            self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__vertex__button_release, ('button-1', ))
-            self.tag_bind(canvas_object, '<Button-3>', self.__vertex_button, ('button-3', base))
-            self.tag_bind(canvas_object, '<B3-Motion>', self.__vertex_button_motion, ('button-3', base))
-            self.tag_bind(canvas_object, '<ButtonRelease-3>', self.__vertex__button_release, ('button-3',))
+            if isinstance(base, vn.VVertex):
+                self.tag_bind(canvas_object, '<Button-1>', self.__vertex_button, ('button-1', base))
+                self.tag_bind(canvas_object, '<B1-Motion>', self.__vertex_button_motion, ('button-1', base))
+                self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__vertex__button_release, ('button-1', ))
+                self.tag_bind(canvas_object, '<Button-3>', self.__vertex_button, ('button-3', base))
+                self.tag_bind(canvas_object, '<B3-Motion>', self.__vertex_button_motion, ('button-3', base))
+                self.tag_bind(canvas_object, '<ButtonRelease-3>', self.__vertex__button_release, ('button-3',))
 
     def tag_bind(self, tagOrId, sequence=None, func=None, args=None):
         def _func(event):
@@ -98,8 +99,7 @@ class Canvas(tk.Canvas):
             position = self.convert_position(*args[:2]).astype(float)
             from visual import vnetwork as vn
             if isinstance(base, vn.Frame):
-                rad = args[2]
-                position = np.concatenate((position - rad, position + rad))
+                pass
             elif isinstance(base, vn.VVertex):
                 pass
             elif isinstance(base, vg.Edge):

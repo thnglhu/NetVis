@@ -42,17 +42,26 @@ class Interface:
                 self.other.disconnect(self, True)
         self.other = None
 
-
     def attach_device(self, device):
         self.device = device
 
     def receive(self, source, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
             self.attachment(source, frame, canvas, *self.params)
         else:
             print('drop at', self.name)
 
     def send(self, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         if self.other is None:
             print('Connection is not available')
             return
@@ -61,12 +70,10 @@ class Interface:
             other_device = self.other.device
             edges = my_device.link_edges.intersection(other_device.link_edges)
             for edge in edges:
+                from resource import get_image
                 is_inverted = not edge.points[0] == my_device
-                if isinstance(frame.packet, data.ARP):
-                    color = 'red'
-                else:
-                    color = 'blue'
-                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, fill=color)
+                image = get_image('arp' if isinstance(frame.packet, data.ARP) else 'mail')
+                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image)
                 f.display(canvas)
                 f.start_animation()
         else:
@@ -87,6 +94,11 @@ class Host:
         self.interface.disconnect(other)
 
     def send(self, canvas, ip_target, segment=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         if not self.interface:
             print('No connection')
             return
@@ -109,6 +121,11 @@ class Host:
         function()
 
     def __receive(self, source, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         self.arp_table[frame.packet.ip_source] = frame.mac_source
         # print(self.name, 'update arp table')
         if frame.packet.ip_target == self.interface.ip_address:
@@ -141,11 +158,21 @@ class Hub:
         other.attach(self)
 
     def receive(self, source, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         for other in self.others:
             if other is not source:
                 self.send(frame, other, canvas)
 
     def send(self, frame, target, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         if target is None:
             print('Connection is not available')
             return
@@ -155,8 +182,9 @@ class Hub:
             edges = my_device.__getattribute__('link_edges').intersection(other_device.link_edges)
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
-                color = 'red' if isinstance(frame.packet, data.ARP) else 'blue'
-                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, fill=color)
+                from resource import get_image
+                image = get_image('arp' if isinstance(frame.packet, data.ARP) else 'mail')
+                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, image=image)
                 f.display(canvas)
                 f.start_animation()
         else:
@@ -170,6 +198,11 @@ class Switch(Hub):
         super().__init__(**kwargs)
 
     def receive(self, source, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         # print(self.name, 'update mac table')
         self.mac_table[frame.mac_source] = source
         if isinstance(frame, data.BroadcastFrame):
@@ -193,6 +226,11 @@ class Router:
         self.name = kwargs.get('name')
 
     def __receive(self, source, frame, canvas, receiver):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         # print(self.name, 'update arp table')
         self.arp_table[frame.packet.ip_source] = frame.mac_source
         if frame.packet.ip_target == receiver.ip_address:
@@ -220,6 +258,11 @@ class Router:
                 print('drop')
 
     def send(self, interface, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
         if interface.other is None:
             print("Connection is not avaiable")
             return

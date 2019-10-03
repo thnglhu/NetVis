@@ -5,9 +5,11 @@ image_paths = dict()
 image_paths['hub'] = "resource/images/hub.png"
 image_paths['pc-on'] = "resource/images/pc-on.gif"
 image_paths['pc-on-focus'] = "resource/images/pc-on-focus.gif"
-image_paths['pc-off'] = "resource/images/pc-off.png"
+image_paths['pc-off'] = "resource/images/pc-off.gif"
 image_paths['router'] = "resource/images/router.png"
 image_paths['switch'] = "resource/images/switch.gif"
+image_paths['arp'] = "resource/images/arp.png"
+image_paths['mail'] = "resource/images/mail.png"
 # image_paths['abc'] = "D:/Users/thngl/Documents/GitHub/NetVis/resource/images/pc-on.gif"
 
 image_cache = dict()

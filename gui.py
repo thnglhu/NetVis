@@ -28,7 +28,9 @@ from tkinter import StringVar
 
 
 def vp_start_gui():
-    #Starting point when module is the main routine.
+
+    # Starting point when module is the main routine.
+
     global val, w, root
     root = tk.Tk()
     top = top_level(root)

@@ -45,6 +45,7 @@ class PC(VVertex, dv.Host):
         att['image'] = resource.get_image("pc-on")
         att['deactivate'] = resource.get_image("pc-on")
         att['activate'] = resource.get_image("pc-on-focus")
+        att['offline'] = resource.get_image('pc-off')
 
     def info(self):
         return {
@@ -55,19 +56,23 @@ class PC(VVertex, dv.Host):
         }
 
     def focus(self, canvas):
-        self['image'] = self['activate']
-        self.reconfigure(canvas)
+        if self.active:
+            self['image'] = self['activate']
+            self.reconfigure(canvas)
 
     def unfocus(self, canvas):
-        self['image'] = self['deactivate']
-        self.reconfigure(canvas)
+        if self.active:
+            self['image'] = self['deactivate']
+            self.reconfigure(canvas)
 
     def modify(self, info):
         self.name = info['name']
         self.interface.modify(info['interface'])
 
-    # def disconnect(self):
-    #     self.interface.disconnect()
+    def disable(self, canvas):
+        self.active = False
+        self['image'] = self['offline']
+        self.reconfigure(canvas)
 
     def get_edge(self):
         if self.other:
@@ -122,8 +127,8 @@ class Router(VVertex, dv.Router):
     def modify(self, info):
         print(info)
 
+
 class Frame(vg.CanvasItem):
-    rad = 10
     __thread = None
 
     def __init__(self, edge, func=None, params=(), is_inverted=False, **kwargs):
@@ -135,15 +140,15 @@ class Frame(vg.CanvasItem):
         self.load()
         self.func = func
         self.params = params
-        self.color = kwargs.get('fill')
+        self['image'] = kwargs.get('image')
 
     def __animate(self, canvas):
         att = self.attributes
         while att['percent'] < 100.0:
-            att['percent'] += 1
+            att['percent'] += 5
             self.load()
             self.reallocate(canvas)
-            time.sleep(0.01)
+            time.sleep(0.05)
         if att['percent'] > 100.0:
             att['percent'] = 100.0
             self.load()
@@ -163,7 +168,8 @@ class Frame(vg.CanvasItem):
     def display(self, canvas):
         att = self.attributes
         self.__thread = Thread(target=self.__animate, args=(canvas,))
-        canvas.create_mapped_circle(self, *att['position'], self.rad, fill=self.color, tag='frame')
+        canvas.create_mapped_image(self, *self['position'], image=self['image'].get_image(), tag='frame')
+        self['image'].subscribe(self, self.reconfigure, canvas)
 
     def start_animation(self):
         if self.__thread:
@@ -173,19 +179,22 @@ class Frame(vg.CanvasItem):
 
     def reallocate(self, canvas):
         att = self.attributes
-        canvas.coords_mapped(self, *att['position'], self.rad)
+        canvas.coords_mapped(self, *att['position'])
 
     def reconfigure(self, canvas):
-        canvas.itemconfig_mapped()
+        canvas.itemconfig_mapped(image=self['image'].get_image())
 
     def focus(self, canvas): pass
 
     def unfocus(self, canvas): pass
 
+    def destroy(self, canvas): pass
+
     def info(self):
         return {
             'type': 'frame'
         }
+
 
 classification = dict()
 classification['pc'] = PC
