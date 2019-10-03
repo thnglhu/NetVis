@@ -26,6 +26,16 @@ scale = 1
 dy = 0
 
 
+def open_file():
+    file = filedialog.askopenfile(
+        title="Select file",
+        filetypes=(("GraphML", "*.graphml"), ("Text file", "*.txt")))
+    controller.load(file, w.main_canvas)
+    controller.subscribe_inspection(update_node_info)
+    controller.subscribe_coords(update_canvas_coords)
+    controller.subscribe_property(context_menu)
+    sys.stdout.flush()
+
 
 def exit_window():
     # TODO popup save data, clean threads, ... (if exist)
@@ -146,14 +156,6 @@ def enable(child_list):
         child.configure(state='enable')
 
 
-def open_file():
-    file = filedialog.askopenfile(
-        title="Select file",
-        filetypes=(("GraphML", "*.graphml"), ("Text file", "*.txt")))
-    controller.load(file, w.main_canvas)
-    controller.subscribe_inspection(update_node_info)
-    controller.subscribe_coords(update_canvas_coords)
-    sys.stdout.flush()
 
 
 def create_new_file():
@@ -316,10 +318,11 @@ def settings():
 
 
 def init(top, gui, *args, **kwargs):
-    global w, top_level, root
+    global w, top_level, root, x, y
     w = gui
     top_level = top
     root = top
+
 
 
 def destroy_window():
@@ -353,7 +356,6 @@ def update_log(log):
 def update_node_info(info):
     # print('Do something with this info', info)
     update_log(info)
-    add_interface(info)
     # clear the data panel
     global dy
     dy = 0
@@ -400,8 +402,50 @@ def node_modify():
     controller.modify_device(modify_info)
 
 
+def context_menu(info):
+    menu = tk.Menu(w.main_canvas, tearoff=0)
+    menu_dictionary = {
+        'host': {
+            'Connect': host_connect,
+        },
+        'switch': {
+            'Connect': switch_connect,
+        },
+        'router': {
+            'Connect': router_connect,
+            'Add an interface': add_interface
+        }
+    }
+    if info['type'] not in menu_dictionary:
+        raise KeyError
+    from functools import partial
+    for text, function in menu_dictionary[info['type']].items():
+        menu.add_command(label=text, command=partial(function, info) if function is not None else None)
+
+    try:
+        _x = root.winfo_pointerx()
+        _y = root.winfo_pointery()
+        menu.tk_popup(_x, _y)
+    finally:
+        menu.grab_release()
+
+
+def host_connect(info):
+    controller.prepare_connecting(info['interface'])
+
+
+def switch_connect(info):
+    controller.prepare_connecting(info['name'])
+
+
+def router_connect(info):
+    # TODO select interface
+    # controller.prepare_connecting(<interface>)
+    pass
+
+
 def add_interface(info):
-    if info['type'] is not "router":
+    if info['type'] != "router":
         return
 
     add_interface_popup = tk.Tk()
@@ -415,6 +459,7 @@ def add_interface(info):
     global dy
     dy = 0.02
     # INPUT
+
     dy += 0.1
     label = tk.Label(add_interface_popup, text="Interface Name: ", font=("Helvetica", 12))
     label.configure(bg="#f0f0f0")
@@ -423,34 +468,46 @@ def add_interface(info):
     ifname_input.place(relx=0.5, rely=dy)
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="Interface Address: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="Mac Address: ", font=("Helvetica", 12))
+    label.configure(bg="#f0f0f0")
+    label.place(relx=0.02, rely=dy)
+    ifmac_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifmac_input.place(relx=0.5, rely=dy)
+    ifmac_input.insert(0, 'ff.ff.ff.ff.ff.ff')
+
+    dy += 0.1
+    label = tk.Label(add_interface_popup, text="IP Address: ", font=("Helvetica", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
     ifaddress_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
     ifaddress_input.place(relx=0.5, rely=dy)
+    ifaddress_input.insert(0, '0.0.0.0')
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="Network Address: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="IP Network: ", font=("Helvetica", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
     ifnet_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
     ifnet_input.place(relx=0.5, rely=dy)
+    ifnet_input.insert(0, '0.0.0.0/24')
 
     dy += 0.1
     label = tk.Label(add_interface_popup, text="Default Gateway: ", font=("Helvetica", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
-    gateway_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    gateway_input = tk.Entry(add_interface_popup, font=("Helvetica", 12), text='ASDasdasd')
     gateway_input.place(relx=0.5, rely=dy)
+    gateway_input.insert(0, '0.0.0.0')
 
     # OK & CANCEL BUTTONS
     def create_interface():
         interface_info = dict()
         interface_info['name'] = ifname_input.get()
-        interface_info['interface'] = ifaddress_input.get()
-        interface_info['network'] = ifnet_input.get()
-        interface_info['gateway'] = gateway_input.get()
-        print(interface_info)
+        interface_info['mac_address'] = ifmac_input.get()
+        interface_info['ip_address'] = ifaddress_input.get()
+        interface_info['ip_network'] = ifnet_input.get()
+        interface_info['default_gateway'] = gateway_input.get()
+        controller.add_interface(interface_info)
         close_popup()
 
     def close_popup():

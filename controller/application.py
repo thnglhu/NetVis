@@ -26,6 +26,9 @@ class Controller:
     def subscribe_coords(self, func):
         self.__subscribe(func, 'coords', 'button-1', 'location-motion')
 
+    def subscribe_property(self, func):
+        self.__subscribe(func, 'props', 'button-3', 'object')
+
     def __subscribe(self, func, name, *args):
         self.__cache[name] = func
         self.__canvas.subscribe(func, *args)
@@ -45,8 +48,20 @@ class Controller:
 
     def modify_device(self, modify_info):
         warp = self.__canvas.cache[self.__cache['inspect']]
-        target = warp.get_variable()
-        target.modify(modify_info)
+        if warp:
+            target = warp.get_variable()
+            target.modify(modify_info)
+
+    def add_interface(self, interface_info):
+        warp = self.__canvas.cache[self.__cache['props']]
+        if warp:
+            target = warp.get_variable()
+            target.add_interface(interface_info)
+            warp = self.__canvas.cache[self.__cache['inspect']]
+            warp.trigger(warp.get_variable().info())
+
+    def prepare_connecting(self, interface):
+        pass
 
     def load(self, file, canvas):
         # _, extension = os.path.splitext(file.name)

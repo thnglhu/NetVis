@@ -524,8 +524,6 @@ class top_level:
             borderwidth="0",
             background="#DCDCDC")
 
-        self.main_canvas.create_rectangle(50, 25, 150, 75, fill="blue")
-
         # ---------------------------Control Panel-------------------------#
         self.control_panel = tk.Frame(top)
         self.control_panel.place(

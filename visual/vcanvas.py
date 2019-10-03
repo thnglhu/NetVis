@@ -11,7 +11,9 @@ class Canvas(tk.Canvas):
             'object': set()
         },
         'button-2': dict(),
-        'button-3': dict(),
+        'button-3': {
+            'object': set()
+        },
         'motion': set(),
     }
     cache = dict()
@@ -74,9 +76,12 @@ class Canvas(tk.Canvas):
 
             from visual import vnetwork as vn
             canvas_object = self.__graph_objects.get(base)
-            self.tag_bind(canvas_object, '<Button-1>', self.__device_motion_init, (base, ))
-            self.tag_bind(canvas_object, '<B1-Motion>', self.__device_motion, (base, ))
-            self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__device_release)
+            self.tag_bind(canvas_object, '<Button-1>', self.__vertex_button, ('button-1', base))
+            self.tag_bind(canvas_object, '<B1-Motion>', self.__vertex_button_motion, ('button-1', base))
+            self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__vertex__button_release, ('button-1', ))
+            self.tag_bind(canvas_object, '<Button-3>', self.__vertex_button, ('button-3', base))
+            self.tag_bind(canvas_object, '<B3-Motion>', self.__vertex_button_motion, ('button-3', base))
+            self.tag_bind(canvas_object, '<ButtonRelease-3>', self.__vertex__button_release, ('button-3',))
 
     def tag_bind(self, tagOrId, sequence=None, func=None, args=None):
         def _func(event):
@@ -196,19 +201,22 @@ class Canvas(tk.Canvas):
             self.scan_dragto(*new, gain=1)
         self.__update_mouse_location(*new)
 
-    def __device_motion_init(self, event, device):
-        self.__button_1_object(device)
+    def __vertex_button(self, event, button, device):
+        self.__button_object(button, device)
         self.__update_mouse_location(event.x, event.y)
-        self.__movable = False
+        if button == 'button-1':
+            self.__movable = False
 
-    def __device_motion(self, event, device):
+    def __vertex_button_motion(self, event, button, device):
         new = event.x, event.y
-        vector = self.invert_position(*new) - self.invert_position(*self.last)
-        device.motion(self, *vector)
+        if button == 'button-1':
+            vector = self.invert_position(*new) - self.invert_position(*self.last)
+            device.motion(self, *vector)
         self.__update_mouse_location(event.x, event.y)
 
-    def __device_release(self, event):
-        self.__movable = True
+    def __vertex__button_release(self, event, button):
+        if button == 'button-1':
+            self.__movable = True
 
     def __resize(self, event):
         self.__size[0] = event.width
@@ -220,19 +228,18 @@ class Canvas(tk.Canvas):
         for subscriber in self.subscription['motion']:
             subscriber.trigger(x + self.canvasx(0), y + self.canvasy(0))
 
-    def __button_1_location(self, event):
-        for subscriber in self.subscription['button-1']['location']:
+    def __button_location(self, button, event):
+        for subscriber in self.subscription[button]['location']:
             x, y = np.array((self.canvasx(0), self.canvasy(0))) + (event.x, event.y)
             subscriber.trigger(x, y)
 
-    def __button_1_object(self, target):
+    def __button_object(self, button, target):
         if target:
-            for subscriber in self.subscription['button-1']['object']:
+            for subscriber in self.subscription[button]['object']:
                 subscriber.trigger(target.info())
                 subscriber.set_variable(target)
 
     def subscribe(self, func, *args):
-        print(func)
         if func in self.cache:
             return
         location = self.subscription

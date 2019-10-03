@@ -16,6 +16,7 @@ class Interface:
 
     def info(self):
         return {
+            'name': self.name,
             'ip_address': self.ip_address,
             'ip_network': self.ip_network,
             'default_gateway': self.__getattribute__('default_gateway')
@@ -162,7 +163,7 @@ class Switch(Hub):
 
 class Router:
     def __init__(self, *interfaces, **kwargs):
-        self.interfaces = interfaces
+        self.interfaces = list(interfaces)
         for interface in interfaces:
             interface.attach_device(self)
             interface.attachment = self.__receive
@@ -214,6 +215,9 @@ class Router:
                 next_frame = data.BroadcastFrame(interface.mac_address, packet)
             interface.send(next_frame, canvas)
         func()
+
+    def add_interface(self, interface_info):
+        self.interfaces.append(Interface(**interface_info))
 
 
 if __name__ == '__main__':
