@@ -52,6 +52,7 @@ class Interface:
         except AttributeError:
             pass
         if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
+            print(self, source, frame, canvas, self.params)
             self.attachment(source, frame, canvas, *self.params)
         else:
             print('drop at', self.name)
@@ -279,7 +280,11 @@ class Router:
         func()
 
     def add_interface(self, interface_info):
-        self.interfaces.append(Interface(**interface_info))
+        interface = Interface(**interface_info)
+        self.interfaces.append(interface)
+        interface.attach_device(self)
+        interface.attachment = self.__receive
+        interface.params = [interface]
 
     def get_interface(self, name):
         for interface in self.interfaces:
