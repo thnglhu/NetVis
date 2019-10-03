@@ -130,7 +130,7 @@ def node_properties_popup_window():
         node_info_dict_child["ip_network"] = ipnetwork_interface_textbox.get()
         node_info_dict_child["default_gateway"] = default_gateway_interface_textbox.get()
         print(node_info_dict)
-        #controller.create(node_info_dict)
+        controller.create(node_info_dict)
         node_popup.destroy()
 
     node_button = tk.Button(node_popup, text="Apply", command=node_info_passing)
