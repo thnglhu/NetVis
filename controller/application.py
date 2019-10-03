@@ -44,7 +44,7 @@ class Controller:
                 pc.display(self.__canvas)
             self.__canvas.unsubscribe(my_create, 'button-1', 'location')
 
-        self.__canvas.subscribe(func, 'button-1', 'location')
+        self.__canvas.subscribe(my_create, 'button-1', 'location')
 
     def modify_device(self, modify_info):
         warp = self.__canvas.cache[self.__cache['inspect']]
@@ -60,8 +60,12 @@ class Controller:
             warp = self.__canvas.cache[self.__cache['inspect']]
             warp.trigger(warp.get_variable().info())
 
-    def prepare_connecting(self, interface):
-        pass
+    def prepare_connecting(self, *args):
+
+        def connect_with(*params):
+            pass
+
+        self.__canvas.subscribe()
 
     def load(self, file, canvas):
         # _, extension = os.path.splitext(file.name)

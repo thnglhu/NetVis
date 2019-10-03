@@ -29,6 +29,7 @@ class Graph(ig.Graph):
         ('state', 'active'),
         ('tag', {'edge'})
     )
+    connectable = dict()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -83,8 +84,9 @@ class Graph(ig.Graph):
         vertex = self.vs[self.vcount() - 1]
         self.__set_default_values(vertex, self.__defaults['vertex'])
         self.vertices.append(vn.classification[vertex['type']](vertex, *args, **kwargs))
-        self.vertices[-1].load()
-        return self.vertices[-1]
+        vertex = self.vertices[-1]
+        vertex.load()
+        return vertex
 
     def add_edge(self, source, target, *args, **kwargs):
         super().add_edge(source, target, **kwargs)

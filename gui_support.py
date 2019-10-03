@@ -406,10 +406,10 @@ def context_menu(info):
     menu = tk.Menu(w.main_canvas, tearoff=0)
     menu_dictionary = {
         'host': {
-            'Connect': host_connect,
+            'Connect': controller.prepare_connecting,
         },
         'switch': {
-            'Connect': switch_connect,
+            'Connect': controller.prepare_connecting,
         },
         'router': {
             'Connect': router_connect,
@@ -429,18 +429,9 @@ def context_menu(info):
     finally:
         menu.grab_release()
 
-
-def host_connect(info):
-    controller.prepare_connecting(info['interface'])
-
-
-def switch_connect(info):
-    controller.prepare_connecting(info['name'])
-
-
 def router_connect(info):
     # TODO select interface
-    # controller.prepare_connecting(<interface>)
+    # controller.prepare_connecting(<interface name>)
     pass
 
 
