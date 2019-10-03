@@ -66,6 +66,14 @@ class PC(VVertex, dv.Host):
         self.name = info['name']
         self.interface.modify(info['interface'])
 
+    # def disconnect(self):
+    #     self.interface.disconnect()
+
+    def get_edge(self):
+        if self.other:
+            graph = self.get_graph()
+        return None
+
 
 class Switch(VVertex, dv.Switch):
     def __init__(self, ig_vertex, **kwargs):

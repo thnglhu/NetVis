@@ -60,12 +60,47 @@ class Controller:
             warp = self.__canvas.cache[self.__cache['inspect']]
             warp.trigger(warp.get_variable().info())
 
-    def prepare_connecting(self, *args):
+    save = None
 
-        def connect_with(*params):
+    def __isolate(self, device):
+        from visual import vnetwork as vn
+        if isinstance(device, vn.PC):
+            other = device.interface.other
+            if other:
+                intersection = device.link_edges.intersection(other.device.link_edges)
+                for edge in intersection.copy():
+                    edge.destroy(self.__canvas)
+                device.interface.other = None
+            return device.interface
+        elif isinstance(device, vn.Switch):
+            return device
+        return None
+
+    def connect_with(self):
+        device_1 = self.__canvas.cache[self.__cache['props']].get_variable()
+        device_2 = self.__canvas.cache[self.connect_with].get_variable()
+        intersection = device_1.link_edges.intersection(device_2.link_edges)
+        if len(intersection) > 0:
             pass
+            # print(device_1.name, 'and', device_2.name, 'are already connected')
+        else:
+            interface_1 = self.__isolate(device_1)
+            interface_2 = self.__isolate(device_2)
+            edge = self.__graph.add_edge(device_1.ig_vertex, device_2.ig_vertex)
+            interface_1.connect(interface_2)
+            edge.display(self.__canvas)
+            self.__canvas.tag_lower('edge')
+        device_1.unfocus(self.__canvas)
+        self.__canvas.unsubscribe(self.connect_with, 'button-1', 'empty')
 
-        self.__canvas.subscribe()
+    def prepare_connecting(self, *args):
+        if self.save:
+            self.save.unfocus(self.__canvas)
+            self.__canvas.unsubscribe(self.connect_with, 'button-1', 'empty')
+        self.save = self.__canvas.cache[self.__cache['props']].get_variable()
+        self.save.focus(self.__canvas)
+
+        self.__canvas.subscribe(self.connect_with, 'button-1', 'empty')
 
     def load(self, file, canvas):
         # _, extension = os.path.splitext(file.name)

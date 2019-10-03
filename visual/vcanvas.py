@@ -8,11 +8,13 @@ class Canvas(tk.Canvas):
         'button-1': {
             'location': set(),
             'location-motion': set(),
+            'empty': set(),
             'object': set()
         },
         'button-2': dict(),
         'button-3': {
-            'object': set()
+            'object': set(),
+            'empty': set()
         },
         'motion': set(),
     }
@@ -204,6 +206,7 @@ class Canvas(tk.Canvas):
     def __vertex_button(self, event, button, device):
         self.__button_object(button, device)
         self.__update_mouse_location(event.x, event.y)
+        self.__button_empty(button, device)
         if button == 'button-1':
             self.__movable = False
 
@@ -225,19 +228,26 @@ class Canvas(tk.Canvas):
 
     def __update_mouse_location(self, x, y):
         self.last = x, y
-        for subscriber in self.subscription['motion']:
+        for subscriber in self.subscription['motion'].copy():
             subscriber.trigger(x + self.canvasx(0), y + self.canvasy(0))
 
     def __button_location(self, button, event):
-        for subscriber in self.subscription[button]['location']:
+        for subscriber in self.subscription[button]['location'].copy():
             x, y = np.array((self.canvasx(0), self.canvasy(0))) + (event.x, event.y)
             subscriber.trigger(x, y)
 
     def __button_object(self, button, target):
         if target:
-            for subscriber in self.subscription[button]['object']:
-                subscriber.trigger(target.info())
+            for subscriber in self.subscription[button]['object'].copy():
                 subscriber.set_variable(target)
+                subscriber.trigger(target.info())
+
+    def __button_empty(self, button, target):
+        if target:
+            for subscriber in self.subscription[button]['empty'].copy():
+                subscriber.set_variable(target)
+                subscriber.trigger()
+
 
     def subscribe(self, func, *args):
         if func in self.cache:
@@ -258,9 +268,7 @@ class Canvas(tk.Canvas):
         if function not in location:
             return
         location.remove(function)
-        self.cache.remove(func)
-        if func in self.variable:
-            del self.variable[func]
+        del self.cache[func]
 
     @staticmethod
     def convert(canvas):

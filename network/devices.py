@@ -34,6 +34,15 @@ class Interface:
     def attach(self, other):
         self.other = other
 
+    def disconnect(self, init=True):
+        if init:
+            if isinstance(self.other, Interface):
+                self.other.disconnect(False)
+            else:
+                self.other.disconnect(self, True)
+        self.other = None
+
+
     def attach_device(self, device):
         self.device = device
 
@@ -73,6 +82,9 @@ class Host:
         interface.attachment = self.__receive
         self.arp_table = kwargs.get('arp_table') or dict()
         self.name = kwargs.get('name')
+
+    def disconnect(self, other):
+        self.interface.disconnect(other)
 
     def send(self, canvas, ip_target, segment=None):
         if not self.interface:
@@ -118,8 +130,15 @@ class Hub:
         self.name = kwargs.get('name')
         self.others = set()
 
+    def disconnect(self, other, init=True):
+        self.others.remove(other)
+
     def attach(self, other):
         self.others.add(other)
+
+    def connect(self, other):
+        self.others.add(other)
+        other.attach(self)
 
     def receive(self, source, frame, canvas=None):
         for other in self.others:

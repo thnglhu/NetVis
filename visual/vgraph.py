@@ -100,6 +100,9 @@ class Graph(ig.Graph):
         self.add_edge(interface.device.ig_vertex, device.device.ig_vertex)
         interface.connect(device)
 
+    def delete_edges(self, *args, **kwds):
+        return super().delete_edges(*args, **kwds)
+
     def get_vs(self, **kwargs):
         seq = ItemSequence(self.vertices, *self.vertices)
         return seq.select(**kwargs)
@@ -201,6 +204,9 @@ class CanvasItem(ABC):
     @abstractmethod
     def info(self): pass
 
+    @abstractmethod
+    def destroy(self, canvas): pass
+
     def motion(self, canvas, delta_x, delta_y): pass
 
 
@@ -235,6 +241,10 @@ class Vertex(CanvasItem, ABC):
     def subscribe(self, edge):
         self.link_edges.add(edge)
 
+    def unsubscribe(self, edge):
+        if edge in self.link_edges:
+            self.link_edges.remove(edge)
+
     def reallocate(self, canvas):
         att = self.attributes
         canvas.coords_mapped(self, att['x'], att['y'])
@@ -245,6 +255,8 @@ class Vertex(CanvasItem, ABC):
     def unfocus(self, canvas):
         pass
 
+    def destroy(self, canvas):
+        pass
 
 class Edge(CanvasItem):
     def __init__(self, ig_edge, graph):
@@ -295,6 +307,17 @@ class Edge(CanvasItem):
 
     def graph(self):
         return self.ig_edge.graph
+
+    def destroy(self, canvas):
+        graph = self.graph()
+        a = self.points[0]
+        b = self.points[1]
+        graph.delete_edges([(a.ig_vertex, b.ig_vertex)])
+        graph.edges.remove(self)
+        a.unsubscribe(self)
+        b.unsubscribe(self)
+        canvas.remove(self)
+
 
     def info(self):
         return {
