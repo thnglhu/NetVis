@@ -32,7 +32,8 @@ class Interface:
             'name': self.name,
             'ip_address': self.ip_address,
             'ip_network': self.ip_network,
-            'default_gateway': self.default_gateway
+            'default_gateway': self.default_gateway,
+
         }
 
     def modify(self, info):
@@ -91,6 +92,16 @@ class Interface:
                 f.start_animation()
         else:
             self.other.receive(self, frame, canvas)
+
+    def json(self):
+        return {
+            'name': self.name,
+            'id': id(self),
+            'mac_address': self.mac_address,
+            'ip_address': str(self.ip_address),
+            'ip_network': str(self.ip_network),
+            'default_gateway': str(self.default_gateway)
+        }
 
 
 class Host:
@@ -153,6 +164,12 @@ class Host:
                     self.interface.send(frame, canvas)
             else:
                 print('receive something')
+    def json(self):
+        return {
+            'type': 'host',
+            'name': self.name,
+            'interface': self.interface.json()
+        }
 
 
 class Hub:
@@ -204,6 +221,13 @@ class Hub:
         else:
             target.receive(self, frame, canvas)
 
+    def json(self):
+        return {
+            'type': 'hub',
+            'id': id(self),
+            'name': self.name
+        }
+
 
 class Switch(Hub):
     def __init__(self, **kwargs):
@@ -225,6 +249,11 @@ class Switch(Hub):
             if frame.mac_target in self.mac_table:
                 # print(self.name, frame.mac_target, 'is cached')
                 self.send(frame, self.mac_table[frame.mac_target], canvas)
+
+    def json(self):
+        json = super().json()
+        json['type'] = 'switch'
+        return json
 
 
 class Router:
@@ -305,6 +334,12 @@ class Router:
             if interface.name == name:
                 return interface
 
+    def json(self):
+        return {
+            'type': 'router',
+            'name': self.name,
+            'interfaces': [interface.json() for interface in self.interfaces]
+        }
 
 if __name__ == '__main__':
     pass

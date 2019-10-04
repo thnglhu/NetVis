@@ -79,6 +79,12 @@ class Host(VVertex, dv.Host):
             graph = self.get_graph()
         return None
 
+    def json(self):
+        json = super().json()
+        json['x'] = self['x']
+        json['y'] = self['y']
+        return json
+
 
 class Switch(VVertex, dv.Switch):
     def __init__(self, ig_vertex, **kwargs):
@@ -101,6 +107,12 @@ class Switch(VVertex, dv.Switch):
 
     def modify(self, info):
         print(info)
+
+    def json(self):
+        json = super().json()
+        json['x'] = self['x']
+        json['y'] = self['y']
+        return json
 
 
 class Router(VVertex, dv.Router):
@@ -127,6 +139,12 @@ class Router(VVertex, dv.Router):
 
     def modify(self, info):
         print(info)
+
+    def json(self):
+        json = super().json()
+        json['x'] = self['x']
+        json['y'] = self['y']
+        return json
 
 
 class Frame(vg.CanvasItem):

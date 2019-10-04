@@ -89,7 +89,6 @@ class Graph(ig.Graph):
         return vertex
 
     def add_edge(self, source, target, *args, **kwargs):
-        print(source, target)
         super().add_edge(source.device.ig_vertex, target.device.ig_vertex, **kwargs)
         edge = self.es[self.ecount() - 1]
         self.__set_default_values(edge, self.__defaults['edge'])
@@ -98,8 +97,9 @@ class Graph(ig.Graph):
         return self.edges[-1]
 
     def connect_interface(self, interface, device):
-        self.add_edge(interface, device)
+        edge = self.add_edge(interface, device)
         interface.connect(device)
+        return edge
 
     def delete_edges(self, *args, **kwds):
         return super().delete_edges(*args, **kwds)
@@ -107,6 +107,12 @@ class Graph(ig.Graph):
     def get_vs(self, **kwargs):
         seq = ItemSequence(self.vertices, *self.vertices)
         return seq.select(**kwargs)
+
+    def json(self):
+        return {
+            "devices": [device.json() for device in self.vertices],
+            "connection": [link.json() for link in self.edges],
+        }
 
     @staticmethod
     def convert(igraph):
@@ -348,5 +354,14 @@ class Edge(CanvasItem):
     def info(self):
         return {
             'type': (False, 'edge'),
-            'bandwidth': (True, '10bps'),
+            'bandwidth': (True, str(self['bandwidth']) + 'bps'),
+        }
+
+    def json(self):
+        return {
+            'link': list(map(
+                lambda interface: id(interface),
+                self.interfaces
+            )),
+            'bandwidth': self['bandwidth'],
         }

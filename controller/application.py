@@ -2,6 +2,7 @@ from visual import vgraph, vcanvas
 from visual import vnetwork as vn
 import ipaddress as ipa
 import os
+import json
 
 
 class Controller:
@@ -16,6 +17,47 @@ class Controller:
         if not Controller.__instance:
             Controller.__instance = Controller()
         return Controller.__instance
+
+    def init(self, canvas):
+        vcanvas.Canvas.convert(canvas)
+        self.__canvas = canvas
+        self.__graph = vgraph.Graph()
+
+    def load_file(self, file):
+        with open(file.name) as json_file:
+            data = json.load(json_file)
+            connectable = dict()
+            for device in data['devices']:
+                from network import devices as dv
+                if device['type'] == 'host':
+                    interface = connectable[device['interface']['id']] = dv.Interface.load(device['interface'])
+                    vertex = self.__graph.add_vertex(interface, type='host', name=device['name'])
+                elif device['type'] == 'switch':
+                    vertex = self.__graph.add_vertex(type='switch', name=device['name'])
+                    connectable[device['id']] = vertex
+                elif device['type'] == 'router':
+                    interfaces = list()
+                    for json_info in device['interfaces']:
+                        interface = dv.Interface.load(json_info)
+                        connectable[json_info['id']] = interface
+                        interfaces.append(interface)
+                    vertex = self.__graph.add_vertex(*interfaces, type='router', name=device['name'])
+                else:
+                    raise KeyError
+                vertex['x'] = device['x']
+                vertex['y'] = device['y']
+            for json_info in data['connection']:
+                edge = self.__graph.connect_interface(
+                    connectable[json_info['link'][0]],
+                    connectable[json_info['link'][1]]
+                )
+                edge['bandwidth'] = json_info['bandwidth']
+            self.__graph.display(self.__canvas)
+            self.__graph.fit_canvas(self.__canvas)
+
+    def save_file(self, file):
+        with open(file.name, 'w') as json_file:
+            json.dump(self.__graph.json(), json_file, sort_keys=True, indent=4)
 
     def exit(self):
         pass
@@ -81,7 +123,7 @@ class Controller:
         else:
             self.prepare_connecting()
 
-    save = None
+    __save = None
 
     def __isolate(self, interface):
         device = interface.device
@@ -133,11 +175,11 @@ class Controller:
         self.require = False
 
     def prepare_connecting(self, *args):
-        if self.save:
-            self.save.unfocus(self.__canvas)
+        if self.__save:
+            self.__save.unfocus(self.__canvas)
             self.__canvas.unsubscribe(self.__connect_with, 'button-1', 'empty')
-        self.save = self.right_click().get_variable()
-        self.save.focus(self.__canvas)
+        self.__save = self.right_click().get_variable()
+        self.__save.focus(self.__canvas)
         self.__canvas.subscribe(self.__connect_with, 'button-1', 'empty')
 
     def send_message(self, *args):
@@ -161,38 +203,5 @@ class Controller:
     def left_click(self):
         return self.__canvas.cache[self.__cache['inspect']]
 
-    def load(self, file, canvas):
-        vcanvas.Canvas.convert(canvas)
-        self.__canvas = canvas
-        self.__graph = vgraph.Graph()
-        import json
-        from network import devices as dv
-        with open(file.name) as json_file:
-            data = json.load(json_file)
-            connectable = dict()
-            for device in data['devices']:
-                if device['type'] == 'host':
-                    interface = connectable[device['interface']['id']] = dv.Interface.load(device['interface'])
-                    vertex = self.__graph.add_vertex(interface, type='host', name=device['name'])
-                elif device['type'] == 'switch':
-                    vertex = self.__graph.add_vertex(type='switch', name=device['name'])
-                    connectable[device['id']] = vertex
-                elif device['type'] == 'router':
-                    interfaces = list()
-                    for json in device['interfaces']:
-                        interface = dv.Interface.load(json)
-                        connectable[json['id']] = interface
-                        interfaces.append(interface)
-                    vertex = self.__graph.add_vertex(*interfaces, type='router', name=device['name'])
-                else:
-                    raise KeyError
-                vertex['x'] = device['x']
-                vertex['y'] = device['y']
-            for json in data['connection']:
-                self.__graph.connect_interface(
-                    connectable[json['link'][0]],
-                    connectable[json['link'][1]]
-                )
-            self.__graph.display(self.__canvas)
-            self.__graph.fit_canvas(self.__canvas)
+
 

@@ -12,7 +12,7 @@ import tkinter.ttk as ttk
 import random  # Testing
 
 node_info = dict()
-
+existed = False
 
 def get_random_number():
     point = random.randint(1, 500)
@@ -26,14 +26,37 @@ scale = 1
 dy = 0
 
 
+def init(top, gui, *args, **kwargs):
+    global w, top_level, root, x, y
+    w = gui
+    top_level = top
+    root = top
+    controller.init(w.main_canvas)
+
 def open_file():
     file = filedialog.askopenfile(
         title="Select file",
-        filetypes=(("JSON", "*.json"), ))
-    controller.load(file, w.main_canvas)
-    controller.subscribe_inspection(update_node_info)
-    controller.subscribe_coords(update_canvas_coords)
-    controller.subscribe_property(context_menu)
+        filetypes=(("JSON", "*.json"), )
+    )
+    if file:
+        global existed
+        controller.load_file(file)
+        controller.subscribe_inspection(update_node_info)
+        controller.subscribe_coords(update_canvas_coords)
+        controller.subscribe_property(context_menu)
+        existed = True
+    sys.stdout.flush()
+
+
+def save_file():
+    if existed:
+        file = filedialog.asksaveasfile(
+            title='Save file as ...',
+            defaultextension='.json',
+            filetypes=(("JSON", "*.json"),)
+        )
+        if file:
+            controller.save_file(file)
     sys.stdout.flush()
 
 
@@ -45,7 +68,8 @@ def exit_window():
 
 
 def save_popup_window():
-    save_popup = tk.Tk()
+    pass
+    """save_popup = tk.Tk()
 
     save_popup.geometry("230x100")
     save_popup.title("Save file...")
@@ -68,7 +92,7 @@ def save_popup_window():
     no_button = ttk.Button(save_popup, text="No", command=refresh_canvas)
     no_button.place(relx=0.5, rely=0.5)
 
-    save_popup.mainloop()
+    save_popup.mainloop()"""
 
 
 node_info_dict = dict()
@@ -160,16 +184,6 @@ def create_new_file():
 
 def open_recent_file():
     print("Recent")
-
-
-def save_file():
-    global filename
-    if filename == '':
-        filename = filedialog.asksaveasfile(mode='w')
-    if filename is not None:
-        # TODO fix this ??
-        data = textentry.get('1.0', 'end')
-        filename.write(data)
 
 
 def save_file_as():
@@ -311,13 +325,6 @@ def change_all_edges_weight():
 def settings():
     print('gui_support.settings')
     sys.stdout.flush()
-
-
-def init(top, gui, *args, **kwargs):
-    global w, top_level, root, x, y
-    w = gui
-    top_level = top
-    root = top
 
 
 def destroy_window():
