@@ -197,7 +197,7 @@
                 },
                 {
                     "id" : 18,
-                    "name": "eth1",
+                    "name": "eth2",
                     "mac_address" : "8e:51:48:b7:9d:a7",
                     "ip_address": "16.0.0.1",
                     "ip_network": "16.0.0.0/24",
@@ -229,7 +229,7 @@
                 },
                 {
                     "id" : 21,
-                    "name": "eth1",
+                    "name": "eth2",
                     "mac_address" : "b8:d2:02:f1:78:20",
                     "ip_address": "18.0.0.1",
                     "ip_network": "18.0.0.0/24",
@@ -261,7 +261,7 @@
                 },
                 {
                     "id" : 24,
-                    "name": "eth1",
+                    "name": "eth2",
                     "mac_address" : "c7:1b:0e:b7:04:15",
                     "ip_address": "17.0.0.2",
                     "ip_network": "17.0.0.0/24",

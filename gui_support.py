@@ -441,7 +441,7 @@ def router_connect(info):
     interfaces_combobox = ttk.Combobox(select_interface_popup, values=[])
     interfaces_combobox.place(relx=0.02, rely=0.02)
     for number, interface in info['interfaces'][1].items():
-        interfaces_combobox['values'][1] += (interface,)
+        interfaces_combobox['values'] += (interface,)
     interfaces_combobox.current(0)
 
     # OK & Cancel buttons
