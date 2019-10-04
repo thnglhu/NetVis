@@ -2,6 +2,7 @@ import ipaddress as ipa
 from . import data
 from visual import vnetwork as vn
 from network import protocol_handler as ph
+import time
 
 
 class Interface:
@@ -126,16 +127,16 @@ class Host:
             print('No connection')
             return
 
-        if ip_target in self.arp_table:
+        if self.cache_contains(ip_target):
             packet = data.Packet(self.interface.ip_address, ip_target, segment)
-            frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
+            frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target]['mac_address'], packet)
         elif ip_target in self.interface.ip_network:
             from functools import partial
             packet = data.ARP(self.interface.ip_address, ip_target, partial(self.send, canvas, ip_target, segment))
             frame = data.BroadcastFrame(self.interface.mac_address, packet)
-        elif self.interface.default_gateway in self.arp_table:
+        elif self.cache_contains(self.interface.default_gateway):
             packet = data.Packet(self.interface.ip_address, ip_target, segment)
-            frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
+            frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway]['mac_address'], packet)
         else:
             packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
             frame = data.BroadcastFrame(self.interface.mac_address, packet)
@@ -143,7 +144,26 @@ class Host:
 
     def cache_arp(self, frame):
         if frame.mac_target == self.interface.mac_address:
-            self.arp_table[frame.packet.ip_source] = frame.mac_source
+            self.arp_table[frame.packet.ip_source] = {
+                'type': 'dynamic',
+                'mac_address': frame.mac_source,
+                'time_stamp': time.time() + 5
+            }
+
+    def cache_contains(self, ip_address):
+        if ip_address in self.arp_table:
+            info = self.arp_table[ip_address]
+            if info['type'] == 'static' or time.time() <= info['time_stamp']:
+                return True
+            else:
+                self.arp_table.pop(ip_address)
+        return False
+
+    def clean_cache(self):
+        for ip_address in self.arp_table.copy():
+            info = self.arp_table[ip_address]
+            if info['type'] == 'dynamic' and time.time() > info['time_stamp']:
+                self.arp_table.pop(ip_address)
 
     def __receive(self, source, frame, canvas=None):
         try:

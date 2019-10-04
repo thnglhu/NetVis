@@ -2,6 +2,7 @@ from . import vgraph as vg
 import resource
 import tkinter as tk
 import numpy as np
+import itertools as it
 from abc import ABC, abstractmethod
 from threading import Thread
 from network import devices as dv
@@ -48,11 +49,14 @@ class Host(VVertex, dv.Host):
         att['offline'] = resource.get_image('pc-off')
 
     def info(self):
+        self.clean_cache()
         return {
             'type': (False, 'host'),
             'name': (True, self.name),
             'interface': (True, self.interface.info()),
-            'arp table': (True, self.arp_table),
+            'arp table': (True, {
+                key: value['mac_address'] for key, value in self.arp_table.items()
+            }),
         }
 
     def focus(self, canvas):
