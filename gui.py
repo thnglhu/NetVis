@@ -136,6 +136,7 @@ class top_level:
         top.configure(highlightcolor="black")
         # FULLSCREEN
         root.attributes('-fullscreen', True)
+        root.geometry("1024x1024")
 
         self.menubar = tk.Menu(top, font="TkMenuFont", bg=_bgcolor, fg=_fgcolor)
 
@@ -302,6 +303,7 @@ class top_level:
             foreground="#000000",
             label="Select All")
 
+        '''
         # ---------------------------Toolbar: Node-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_node,
@@ -392,7 +394,8 @@ class top_level:
             font="TkMenuFont",
             foreground="#000000",
             label="Change All Node's Label Color")
-
+        
+        
         # ---------------------------Toolbar: Edge-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_edge,
@@ -463,6 +466,7 @@ class top_level:
             foreground="#000000",
             label="Change Edge Weight")
 
+        '''
         # ---------------------------Toolbar: Network-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_network,
@@ -522,8 +526,6 @@ class top_level:
         self.main_canvas.configure(
             borderwidth="0",
             background="#DCDCDC")
-
-        self.main_canvas.create_rectangle(50, 25, 150, 75, fill="blue")
 
         # ---------------------------Control Panel-------------------------#
         self.control_panel = tk.Frame(top)
@@ -1067,6 +1069,17 @@ class top_level:
             relheight=0.3,
             relwidth=1)
         self.edge_data_panel.configure(background="#fafbf0")
+
+        # ---------------------------Log Text-------------------------------------------#
+        self.log_text = tk.Text(self.edge_data_panel, wrap="word", state="disabled")
+        self.log_text.place(
+            relx=0.02,
+            rely=0.02,
+            width=350,
+            height=300,
+        )
+        self.log_scrollbar = tk.Scrollbar(command=self.log_text.yview())
+        self.log_text['yscrollcommand'] = self.log_scrollbar.set
 
         # ---------------------------Coordinates-------------------------#
         self.coordinate_x_label = tk.Label(top, font=("Helvetica", 9))
