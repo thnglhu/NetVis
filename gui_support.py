@@ -29,7 +29,7 @@ dy = 0
 def open_file():
     file = filedialog.askopenfile(
         title="Select file",
-        filetypes=(("GraphML", "*.graphml"), ("Text file", "*.txt")))
+        filetypes=(("JSON", "*.json"), ))
     controller.load(file, w.main_canvas)
     controller.subscribe_inspection(update_node_info)
     controller.subscribe_coords(update_canvas_coords)

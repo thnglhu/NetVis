@@ -1,0 +1,347 @@
+{
+    "devices": [
+        {
+            "type": "host",
+            "name": "A",
+            "x": -2,
+            "y": -1,
+            "interface": {
+                "id" : 1,
+                "name": "eth0",
+                "mac_address" : "d0:c9:f2:d7:59:cd",
+                "ip_address": "192.0.0.2",
+                "ip_network": "192.0.0.0/24",
+                "default_gateway": "192.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "B",
+            "x": -3,
+            "y": 0,
+            "interface": {
+                "id" : 2,
+                "name": "eth0",
+                "mac_address" : "57:98:eb:54:58:f6",
+                "ip_address": "192.0.0.3",
+                "ip_network": "192.0.0.0/24",
+                "default_gateway": "192.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "C",
+            "x": -2,
+            "y": 1,
+            "interface": {
+                "id" : 3,
+                "name": "eth0",
+                "mac_address" : "cf:19:0b:2f:d0:9e",
+                "ip_address": "192.0.0.4",
+                "ip_network": "192.0.0.0/24",
+                "default_gateway": "192.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "D",
+            "x": -1,
+            "y": 3,
+            "interface": {
+                "id" : 4,
+                "name": "eth0",
+                "mac_address" : "91:9c:8f:0e:29:d1",
+                "ip_address": "10.0.0.2",
+                "ip_network": "10.0.0.0/24",
+                "default_gateway": "10.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "E",
+            "x": 1,
+            "y": 3,
+            "interface": {
+                "id" : 5,
+                "name": "eth0",
+                "mac_address" : "08:79:fa:e8:bd:ab",
+                "ip_address": "10.0.0.3",
+                "ip_network": "10.0.0.0/24",
+                "default_gateway": "10.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "F",
+            "x": -1,
+            "y": -3,
+            "interface": {
+                "id" : 6,
+                "name": "eth0",
+                "mac_address" : "23:62:41:27:06:8e",
+                "ip_address": "27.0.0.2",
+                "ip_network": "27.0.0.0/24",
+                "default_gateway": "27.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "G",
+            "x": 1,
+            "y": -3,
+            "interface": {
+                "id" : 7,
+                "name": "eth0",
+                "mac_address" : "35:91:19:72:5e:ba",
+                "ip_address": "27.0.0.3",
+                "ip_network": "27.0.0.0/24",
+                "default_gateway": "27.0.0.1"
+            }
+        },
+        {
+            "type": "host",
+            "name": "H",
+            "x": 2,
+            "y": 0,
+            "interface": {
+                "id" : 8,
+                "name": "eth0",
+                "mac_address" : "34:7c:03:79:f4:a0",
+                "ip_address": "172.0.0.2",
+                "ip_network": "172.0.0.0/24",
+                "default_gateway": "172.0.0.1"
+            }
+        },
+        {
+            "type": "switch",
+            "id": 9,
+            "name": "S1",
+            "x": -2,
+            "y": 0
+        },
+        {
+            "type": "switch",
+            "id": 10,
+            "name": "S2",
+            "x": 0,
+            "y": 2
+        },
+        {
+            "type": "switch",
+            "id": 11,
+            "name": "S3",
+            "x": 0,
+            "y": -2
+        },
+        {
+            "type": "router",
+            "name": "R1",
+            "x": -1,
+            "y": 0,
+            "interfaces": [
+                {
+                    "id" : 12,
+                    "name": "eth0",
+                    "mac_address" : "64:90:43:1d:5d:19",
+                    "ip_address": "192.0.0.1",
+                    "ip_network": "192.0.0.0/24",
+                    "default_gateway": "192.0.0.1"
+                },
+                {
+                    "id" : 13,
+                    "name": "eth1",
+                    "mac_address" : "c3:c8:67:f9:bc:b4",
+                    "ip_address": "15.0.0.1",
+                    "ip_network": "15.0.0.0/24",
+                    "default_gateway": "15.0.0.1"
+                },
+                {
+                    "id" : 14,
+                    "name": "eth2",
+                    "mac_address" : "37:18:89:1f:23:0d",
+                    "ip_address": "17.0.0.1",
+                    "ip_network": "17.0.0.0/24",
+                    "default_gateway": "17.0.0.1"
+                },
+                {
+                    "id" : 15,
+                    "name": "eth3",
+                    "mac_address" : "38:0b:d9:a3:3a:e2",
+                    "ip_address": "19.0.0.1",
+                    "ip_network": "19.0.0.0/24",
+                    "default_gateway": "19.0.0.1"
+                }
+            ]
+        },
+        {
+            "type": "router",
+            "name": "R2",
+            "x": 0,
+            "y": 1,
+            "interfaces": [
+                {
+                    "id" : 16,
+                    "name": "eth0",
+                    "mac_address" : "38:72:f3:50:bf:56",
+                    "ip_address": "10.0.0.1",
+                    "ip_network": "10.0.0.0/24",
+                    "default_gateway": "10.0.0.1"
+                },
+                {
+                    "id" : 17,
+                    "name": "eth1",
+                    "mac_address" : "33:a7:fb:c2:c6:1f",
+                    "ip_address": "15.0.0.2",
+                    "ip_network": "15.0.0.0/24",
+                    "default_gateway": "15.0.0.2"
+                },
+                {
+                    "id" : 18,
+                    "name": "eth1",
+                    "mac_address" : "8e:51:48:b7:9d:a7",
+                    "ip_address": "16.0.0.1",
+                    "ip_network": "16.0.0.0/24",
+                    "default_gateway": "16.0.0.1"
+                }
+            ]
+        },
+        {
+            "type": "router",
+            "name": "R3",
+            "x": 0,
+            "y": -1,
+            "interfaces": [
+                {
+                    "id" : 19,
+                    "name": "eth0",
+                    "mac_address" : "9f:75:f6:72:c4:0a",
+                    "ip_address": "27.0.0.1",
+                    "ip_network": "27.0.0.0/24",
+                    "default_gateway": "27.0.0.1"
+                },
+                {
+                    "id" : 20,
+                    "name": "eth1",
+                    "mac_address" : "ab:39:0d:3f:d9:06",
+                    "ip_address": "19.0.0.2",
+                    "ip_network": "19.0.0.0/24",
+                    "default_gateway": "19.0.0.2"
+                },
+                {
+                    "id" : 21,
+                    "name": "eth1",
+                    "mac_address" : "b8:d2:02:f1:78:20",
+                    "ip_address": "18.0.0.1",
+                    "ip_network": "18.0.0.0/24",
+                    "default_gateway": "18.0.0.1"
+                }
+            ]
+        },
+        {
+            "type": "router",
+            "name": "R4",
+            "x": 1,
+            "y": 0,
+            "interfaces": [
+                {
+                    "id" : 22,
+                    "name": "eth0",
+                    "mac_address" : "ba:b1:bf:28:de:b2",
+                    "ip_address": "172.0.0.1",
+                    "ip_network": "172.0.0.0/24",
+                    "default_gateway": "172.0.0.1"
+                },
+                {
+                    "id" : 23,
+                    "name": "eth1",
+                    "mac_address" : "5d:17:47:d3:85:4f",
+                    "ip_address": "16.0.0.2",
+                    "ip_network": "16.0.0.0/24",
+                    "default_gateway": "16.0.0.2"
+                },
+                {
+                    "id" : 24,
+                    "name": "eth1",
+                    "mac_address" : "c7:1b:0e:b7:04:15",
+                    "ip_address": "17.0.0.2",
+                    "ip_network": "17.0.0.0/24",
+                    "default_gateway": "17.0.0.2"
+                },
+                {
+                    "id" : 25,
+                    "name": "eth2",
+                    "mac_address" : "18:7a:71:5a:6b:07",
+                    "ip_address": "18.0.0.2",
+                    "ip_network": "18.0.0.0/24",
+                    "default_gateway": "18.0.0.2"
+                }
+            ]
+        }
+    ],
+    "connection": [
+        {
+            "link": [1, 9],
+            "bandwidth": 10
+        },
+        {
+            "link": [2, 9],
+            "bandwidth": 10
+        },
+        {
+            "link": [3, 9],
+            "bandwidth": 10
+        },
+        {
+            "link": [12, 9],
+            "bandwidth": 10
+        },
+        {
+            "link": [4, 10],
+            "bandwidth": 10
+        },
+        {
+            "link": [5, 10],
+            "bandwidth": 10
+        },
+        {
+            "link": [16, 10],
+            "bandwidth": 10
+        },
+        {
+            "link": [6, 11],
+            "bandwidth": 10
+        },
+        {
+            "link": [7, 11],
+            "bandwidth": 10
+        },
+        {
+            "link": [19, 11],
+            "bandwidth": 10
+        },
+        {
+            "link": [8, 22],
+            "bandwidth": 10
+        },
+        {
+            "link": [13, 17],
+            "bandwidth": 10
+        },
+        {
+            "link": [14, 24],
+            "bandwidth": 10
+        },
+        {
+            "link": [15, 20],
+            "bandwidth": 10
+        },
+        {
+            "link": [18, 23],
+            "bandwidth": 10
+        },
+        {
+            "link": [21, 25],
+            "bandwidth": 10
+        }
+    ]
+}

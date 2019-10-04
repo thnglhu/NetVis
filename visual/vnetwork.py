@@ -35,7 +35,7 @@ class VVertex(vg.Vertex, ABC):
         canvas.itemconfig_mapped(self, image=self['image'].get_image(), tag=tuple(self['tag']))
 
 
-class PC(VVertex, dv.Host):
+class Host(VVertex, dv.Host):
     def __init__(self, ig_vertex, interface, **kwargs):
         VVertex.__init__(self, ig_vertex)
         dv.Host.__init__(self, interface, **kwargs)
@@ -198,6 +198,6 @@ class Frame(vg.CanvasItem):
 
 
 classification = dict()
-classification['pc'] = PC
+classification['host'] = Host
 classification['switch'] = Switch
 classification['router'] = Router

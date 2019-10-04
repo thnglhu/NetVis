@@ -7,19 +7,32 @@ class Interface:
     device = None
     name = 'unknown'
 
-    def __init__(self, **kwargs):
+    def __init__(self, name, mac_address, ip_address, ip_network, default_gateway):
         self.other = None
         self.attachment = None
         self.params = []
-        for att in kwargs:
-            setattr(self, str(att), kwargs[att])
+        self.name = name
+        self.mac_address = mac_address
+        self.ip_address = ipa.ip_address(ip_address)
+        self.ip_network = ipa.ip_network(ip_network)
+        self.default_gateway = ipa.ip_address(default_gateway)
+
+    @staticmethod
+    def load(json):
+        return Interface(
+            json['name'],
+            json['mac_address'],
+            json['ip_address'],
+            json['ip_network'],
+            json['default_gateway']
+        )
 
     def info(self):
         return {
             'name': self.name,
             'ip_address': self.ip_address,
             'ip_network': self.ip_network,
-            'default_gateway': self.__getattribute__('default_gateway')
+            'default_gateway': self.default_gateway
         }
 
     def modify(self, info):
@@ -118,6 +131,7 @@ class Host:
                 packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
                 frame = data.BroadcastFrame(self.interface.mac_address, packet)
             self.interface.send(frame, canvas)
+
         function()
 
     def __receive(self, source, frame, canvas=None):
@@ -276,6 +290,7 @@ class Router:
                 packet = data.ARP(interface.ip_address, frame.packet.ip_target, func)
                 next_frame = data.BroadcastFrame(interface.mac_address, packet)
             interface.send(next_frame, canvas)
+
         func()
 
     def add_interface(self, interface_info):
@@ -290,9 +305,9 @@ class Router:
             if interface.name == name:
                 return interface
 
+
 if __name__ == '__main__':
     pass
     # print(pc1, pc2, switch, i1, i2, sep='\n')
     # pc1.send(None, ipa.ip_address('192.168.0.3'))
     # pc1.send("pc1 wanna say hi", ipa.ip_address('10.10.0.3'))
-

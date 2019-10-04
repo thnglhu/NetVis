@@ -85,7 +85,7 @@ class Controller:
 
     def __isolate(self, interface):
         device = interface.device
-        if isinstance(device, vn.PC) or isinstance(device, vn.Router):
+        if isinstance(device, vn.Host) or isinstance(device, vn.Router):
             other = interface.other
             if other:
                 intersection = device.link_edges.intersection(other.device.link_edges)
@@ -102,7 +102,7 @@ class Controller:
             self.device_1 = self.right_click().get_variable()
             if isinstance(self.device_1, vn.Router):
                 self.device_1 = self.device_1.get_interface(self.name)
-            elif isinstance(self.device_1, vn.PC):
+            elif isinstance(self.device_1, vn.Host):
                 self.device_1 = self.device_1.interface
             self.require = True
         device_2 = self.__canvas.cache[self.__connect_with].get_variable()
@@ -114,7 +114,7 @@ class Controller:
                     router_connect(info)
                     return
                 device_2 = device_2.get_interface(self.name)
-            elif isinstance(device_2, vn.PC):
+            elif isinstance(device_2, vn.Host):
                 device_2 = device_2.interface
             intersection = self.device_1.device.link_edges.intersection(device_2.device.link_edges)
             if len(intersection) > 0:
@@ -145,7 +145,7 @@ class Controller:
 
         def trigger_message():
             receiver = self.left_click().get_variable()
-            if sender is not receiver and isinstance(receiver, vn.PC):
+            if sender is not receiver and isinstance(receiver, vn.Host):
                 sender.send(self.__canvas, receiver.interface.ip_address)
             self.__canvas.unsubscribe(trigger_message, 'button-1', 'empty')
 
@@ -162,14 +162,43 @@ class Controller:
         return self.__canvas.cache[self.__cache['inspect']]
 
     def load(self, file, canvas):
-        # _, extension = os.path.splitext(file.name)
-        # self.__controller.load(file, canvas, extension=extension[1:])
-
         vcanvas.Canvas.convert(canvas)
         self.__canvas = canvas
+        self.__graph = vgraph.Graph()
+        import json
+        from network import devices as dv
+        with open(file.name) as json_file:
+            data = json.load(json_file)
+            connectable = dict()
+            for device in data['devices']:
+                if device['type'] == 'host':
+                    interface = connectable[device['interface']['id']] = dv.Interface.load(device['interface'])
+                    vertex = self.__graph.add_vertex(interface, type='host', name=device['name'])
+                elif device['type'] == 'switch':
+                    vertex = self.__graph.add_vertex(type='switch', name=device['name'])
+                    connectable[device['id']] = vertex
+                elif device['type'] == 'router':
+                    interfaces = list()
+                    for json in device['interfaces']:
+                        interface = dv.Interface.load(json)
+                        connectable[json['id']] = interface
+                        interfaces.append(interface)
+                    vertex = self.__graph.add_vertex(*interfaces, type='router', name=device['name'])
+                else:
+                    raise KeyError
+                vertex['x'] = device['x']
+                vertex['y'] = device['y']
+            for connect in data['connection']:
+                self.__graph.connect_interface(
+                    connectable[connect[0]],
+                    connectable[connect[1]]
+                )
+            self.__graph.display(self.__canvas)
+            self.__graph.fit_canvas(self.__canvas)
 
-        # Testing
-        g = self.__graph = vgraph.Graph()
+
+
+        """
         from network import devices as dv
         interface0 = {
             'name': 'interface0',
@@ -267,3 +296,4 @@ class Controller:
 
         g.display(self.__canvas)
         g.fit_canvas(self.__canvas)
+        """
