@@ -67,6 +67,11 @@ class Canvas(tk.Canvas):
             end_b = self.convert_position(x, y)
             self.__graph_objects[base] = tk.Canvas.create_line(self, *end_a, *end_b, **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
+            from visual import vgraph as vg
+            canvas_object = self.__graph_objects.get(base)
+            if isinstance(base, vg.Edge):
+                self.tag_bind(canvas_object, '<Button-1>', self.__edge_button, ('button-1', base))
+
         return self.__graph_objects[base]
 
     def create_mapped_image(self, base, *args, **kw):
@@ -95,7 +100,7 @@ class Canvas(tk.Canvas):
     def coords_mapped(self, base, *args):
         from visual import vgraph as vg
         canvas_object = self.__graph_objects.get(base)
-        if canvas_object is not None:
+        if canvas_object:
             position = self.convert_position(*args[:2]).astype(float)
             from visual import vnetwork as vn
             if isinstance(base, vn.Frame):
@@ -221,6 +226,9 @@ class Canvas(tk.Canvas):
         if button == 'button-1':
             self.__movable = True
 
+    def __edge_button(self, event, button, link):
+        self.__button_object(button, link)
+
     def __resize(self, event):
         self.__size[0] = event.width
         self.__size[1] = event.height
@@ -247,7 +255,6 @@ class Canvas(tk.Canvas):
             for subscriber in self.subscription[button]['empty'].copy():
                 subscriber.set_variable(target)
                 subscriber.trigger()
-
 
     def subscribe(self, func, *args):
         if func in self.cache:

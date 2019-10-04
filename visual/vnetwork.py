@@ -49,10 +49,10 @@ class PC(VVertex, dv.Host):
 
     def info(self):
         return {
-            'type': 'host',
-            'name': self.name,
-            'interface': self.interface.info(),
-            'arp table': self.arp_table
+            'type': (False, 'host'),
+            'name': (True, self.name),
+            'interface': (True, self.interface.info()),
+            'arp table': (True, self.arp_table),
         }
 
     def focus(self, canvas):
@@ -91,9 +91,9 @@ class Switch(VVertex, dv.Switch):
 
     def info(self):
         return {
-            'type': 'switch',
-            'name': self.name,
-            'mac table': self.__get_mac_table()
+            'type': (False, 'switch'),
+            'name': (True, self.name),
+            'mac table': (True, self.__get_mac_table())
         }
 
     def __get_mac_table(self):
@@ -114,11 +114,11 @@ class Router(VVertex, dv.Router):
 
     def info(self):
         return {
-            'type': 'router',
-            'name': self.name,
-            'arp table': self.arp_table,
-            'interfaces': dict(enumerate(map(lambda interface: interface.name, self.interfaces))),
-            'routing table': self.__get_routing_table()
+            'type': (False, 'router'),
+            'name': (True, self.name),
+            'arp table': (True, self.arp_table),
+            'interfaces': (True, dict(enumerate(map(lambda interface: interface.name, self.interfaces)))),
+            'routing table': (True, self.__get_routing_table())
         }
 
     def __get_routing_table(self):
@@ -192,7 +192,7 @@ class Frame(vg.CanvasItem):
 
     def info(self):
         return {
-            'type': 'frame'
+            'type': (False, 'frame')
         }
 
 

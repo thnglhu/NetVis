@@ -39,12 +39,12 @@ class Graph(ig.Graph):
         from . import vnetwork as vn
         self.vertices = list()
         self.edges = list()
-        for vertex in self.vs:
-            self.__set_default_values(vertex, self.__defaults['vertex'])
-            self.vertices.append(vn.classification[vertex['type']](vertex))
-        for edge in self.es:
-            self.__set_default_values(edge, self.__defaults['edge'])
-            self.vertices.append(Edge(edge, self))
+        # for vertex in self.vs:
+        #     self.__set_default_values(vertex, self.__defaults['vertex'])
+        #     self.vertices.append(vn.classification[vertex['type']](vertex))
+        # for edge in self.es:
+        #     self.__set_default_values(edge, self.__defaults['edge'])
+        #     self.vertices.append(Edge(edge, self))
         self.__backup = self.copy()
         self.load()
 
@@ -89,15 +89,16 @@ class Graph(ig.Graph):
         return vertex
 
     def add_edge(self, source, target, *args, **kwargs):
-        super().add_edge(source, target, **kwargs)
+        print(source, target)
+        super().add_edge(source.device.ig_vertex, target.device.ig_vertex, **kwargs)
         edge = self.es[self.ecount() - 1]
         self.__set_default_values(edge, self.__defaults['edge'])
-        self.edges.append(Edge(edge, self))
+        self.edges.append(Edge(edge, source, target))
         self.edges[-1].load()
         return self.edges[-1]
 
     def connect_interface(self, interface, device):
-        self.add_edge(interface.device.ig_vertex, device.device.ig_vertex)
+        self.add_edge(interface, device)
         interface.connect(device)
 
     def delete_edges(self, *args, **kwds):
@@ -209,6 +210,7 @@ class CanvasItem(ABC):
     @abstractmethod
     def destroy(self, canvas): pass
 
+    # @abstractmethod
     def disable(self, canvas):
         self.active = False
 
@@ -267,12 +269,21 @@ class Vertex(CanvasItem, ABC):
         pass
 
 class Edge(CanvasItem):
-    def __init__(self, ig_edge, graph):
+
+    def __init__(self, ig_edge, interface_1, interface_2):
         super().__init__()
         self.ig_edge = ig_edge
-        self.points = tuple(map(lambda v: graph.vertices[v], ig_edge.tuple))
-        self.points[0].subscribe(self)
-        self.points[1].subscribe(self)
+        self.interfaces = (interface_1, interface_2)
+        self.points = (interface_1.device, interface_2.device)
+        interface_1.device.subscribe(self)
+        interface_2.device.subscribe(self)
+
+    # def __init__(self, ig_edge, graph):
+    #     super().__init__()
+    #     self.ig_edge = ig_edge
+    #     self.points = tuple(map(lambda v: graph.vertices[v], ig_edge.tuple))
+    #     self.points[0].subscribe(self)
+    #     self.points[1].subscribe(self)
 
     def load(self):
         for key in self.ig_edge.attribute_names():
@@ -291,7 +302,9 @@ class Edge(CanvasItem):
                                   width=att['width'],
                                   fill=att['color'],
                                   tag=tuple(att['tag']),
-                                  activewidth=att['width'] + 1)
+                                  activewidth=att['width'] + 1,
+                                  dash=(10, 5) if not self.active else None,
+                                  )
 
     def reallocate(self, canvas):
         canvas.coords_mapped(self, *self.packed_points())
@@ -302,7 +315,9 @@ class Edge(CanvasItem):
                                  width=att['width'],
                                  fill=att['color'],
                                  tag=tuple(att['tag']),
-                                 activewidth=att['width'] + 1)
+                                 activewidth=att['width'] + 1,
+                                 dash=(10, 5) if not self.active else None,
+                                 )
 
     def visual(self):
         att = self.attributes
@@ -326,8 +341,12 @@ class Edge(CanvasItem):
         b.unsubscribe(self)
         canvas.remove(self)
 
+    def disable(self, canvas):
+        self.active = False
+        self.reconfigure(canvas)
 
     def info(self):
         return {
-            'bandwidth': '10bps'
+            'type': (False, 'edge'),
+            'bandwidth': (True, '10bps'),
         }

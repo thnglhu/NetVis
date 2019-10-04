@@ -52,7 +52,6 @@ class Interface:
         except AttributeError:
             pass
         if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
-            print(self, source, frame, canvas, self.params)
             self.attachment(source, frame, canvas, *self.params)
         else:
             print('drop at', self.name)

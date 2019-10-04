@@ -90,7 +90,8 @@ class Controller:
             if other:
                 intersection = device.link_edges.intersection(other.device.link_edges)
                 for edge in intersection.copy():
-                    edge.destroy(self.__canvas)
+                    if interface in edge.interfaces:
+                        edge.destroy(self.__canvas)
                 interface.other = None
 
     def __connect_with(self):
@@ -105,26 +106,27 @@ class Controller:
                 self.device_1 = self.device_1.interface
             self.require = True
         device_2 = self.__canvas.cache[self.__connect_with].get_variable()
-        if isinstance(device_2, vn.Router):
-            if self.require:
-                info = self.left_click().get_variable().info()
-                from gui_support import router_connect
-                router_connect(info)
-                return
-            device_2 = device_2.get_interface(self.name)
-        elif isinstance(device_2, vn.PC):
-            device_2 = device_2.interface
-        intersection = self.device_1.device.link_edges.intersection(device_2.device.link_edges)
-        if len(intersection) > 0:
-            pass
-            # print(device_1.name, 'and', device_2.name, 'are already connected')
-        else:
-            self.__isolate(self.device_1)
-            self.__isolate(device_2)
-            edge = self.__graph.add_edge(self.device_1.device.ig_vertex, device_2.device.ig_vertex)
-            self.device_1.connect(device_2)
-            edge.display(self.__canvas)
-            self.__canvas.tag_lower('edge')
+        if isinstance(device_2, vgraph.Vertex):
+            if isinstance(device_2, vn.Router):
+                if self.require:
+                    info = self.left_click().get_variable().info()
+                    from gui_support import router_connect
+                    router_connect(info)
+                    return
+                device_2 = device_2.get_interface(self.name)
+            elif isinstance(device_2, vn.PC):
+                device_2 = device_2.interface
+            intersection = self.device_1.device.link_edges.intersection(device_2.device.link_edges)
+            if len(intersection) > 0:
+                pass
+                # print(device_1.name, 'and', device_2.name, 'are already connected')
+            else:
+                self.__isolate(self.device_1)
+                self.__isolate(device_2)
+                edge = self.__graph.add_edge(self.device_1, device_2)
+                self.device_1.connect(device_2)
+                edge.display(self.__canvas)
+                self.__canvas.tag_lower('edge')
         self.device_1.device.unfocus(self.__canvas)
         self.__canvas.unsubscribe(self.__connect_with, 'button-1', 'empty')
         self.device_1 = None
@@ -143,7 +145,7 @@ class Controller:
 
         def trigger_message():
             receiver = self.left_click().get_variable()
-            if isinstance(receiver, vn.PC):
+            if sender is not receiver and isinstance(receiver, vn.PC):
                 sender.send(self.__canvas, receiver.interface.ip_address)
             self.__canvas.unsubscribe(trigger_message, 'button-1', 'empty')
 
