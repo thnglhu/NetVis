@@ -63,9 +63,9 @@ class Graph(ig.Graph):
     def fit_canvas(self, canvas):
         x = sorted(self.get_vs()['x'])
         y = sorted(self.get_vs()['y'])
-        top_left = x[0]-2, y[0]-2
-        bottom_right = x[-1]+5, y[-1]+2
-        canvas.scale_to_fit(top_left, bottom_right)
+        top_left = x[0], y[0]
+        bottom_right = x[-1], y[-1]
+        canvas.scale_to_fit(top_left, bottom_right, (50, 50))
 
     def load(self):
         for v in self.vertices:

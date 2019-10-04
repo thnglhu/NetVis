@@ -135,17 +135,16 @@ class Canvas(tk.Canvas):
     def invert_position(self, *position):
         return (position - self.__size / 2) / self.__scale
 
-    def scale_to_fit(self, top_left, bottom_right):
+    def scale_to_fit(self, top_left, bottom_right, offset):
         top_left = np.array(top_left)
         bottom_right = np.array(bottom_right)
         top_left[0], bottom_right[0] = sorted((top_left[0], bottom_right[0]))
         top_left[1], bottom_right[1] = sorted((top_left[1], bottom_right[1]))
         size = bottom_right - top_left
-        print(size)
         if (size == 0).any():
             self.__scale = 1
         else:
-            scale = self.__size / size
+            scale = (self.__size - offset) / size
             self.__scale = max(min(scale), 1)
         self.center_to((bottom_right + top_left) / 2)
         self.reallocate()

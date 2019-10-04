@@ -1,6 +1,7 @@
 import ipaddress as ipa
 from . import data
 from visual import vnetwork as vn
+from network import protocol_handler as ph
 
 
 class Interface:
@@ -65,10 +66,8 @@ class Interface:
                 return
         except AttributeError:
             pass
-        if isinstance(frame, data.BroadcastFrame) or frame.mac_target == self.mac_address:
-            self.attachment(source, frame, canvas, *self.params)
-        else:
-            print('drop at', self.name)
+        self.attachment(source, frame, canvas, *self.params)
+        ph.interface_arp_handler(self, frame, source=source, canvas=canvas)
 
     def send(self, frame, canvas=None):
         try:
@@ -127,23 +126,24 @@ class Host:
             print('No connection')
             return
 
-        def function():
-            if ip_target in self.arp_table:
-                packet = data.Packet(self.interface.ip_address, ip_target, segment)
-                frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
-            elif ip_target in self.interface.ip_network:
-                packet = data.ARP(self.interface.ip_address, ip_target, function)
-                frame = data.BroadcastFrame(self.interface.mac_address, packet)
-            elif self.interface.default_gateway in self.arp_table:
-                packet = data.Packet(self.interface.ip_address, ip_target, segment)
-                frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
-            else:
-                print(self.name, 'is looking for the default gateway', self.interface.default_gateway)
-                packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
-                frame = data.BroadcastFrame(self.interface.mac_address, packet)
-            self.interface.send(frame, canvas)
+        if ip_target in self.arp_table:
+            packet = data.Packet(self.interface.ip_address, ip_target, segment)
+            frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target], packet)
+        elif ip_target in self.interface.ip_network:
+            from functools import partial
+            packet = data.ARP(self.interface.ip_address, ip_target, partial(self.send, canvas, ip_target, segment))
+            frame = data.BroadcastFrame(self.interface.mac_address, packet)
+        elif self.interface.default_gateway in self.arp_table:
+            packet = data.Packet(self.interface.ip_address, ip_target, segment)
+            frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway], packet)
+        else:
+            packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
+            frame = data.BroadcastFrame(self.interface.mac_address, packet)
+        self.interface.send(frame, canvas)
 
-        function()
+    def cache_arp(self, frame):
+        if frame.mac_target == self.interface.mac_address:
+            self.arp_table[frame.packet.ip_source] = frame.mac_source
 
     def __receive(self, source, frame, canvas=None):
         try:
@@ -151,8 +151,10 @@ class Host:
                 return
         except AttributeError:
             pass
-        self.arp_table[frame.packet.ip_source] = frame.mac_source
+
+        self.cache_arp(frame)
         # print(self.name, 'update arp table')
+        """
         if frame.packet.ip_target == self.interface.ip_address:
             if isinstance(frame.packet, data.ARP):
                 if frame.packet.is_reply:
@@ -163,7 +165,7 @@ class Host:
                     frame = data.Frame(self.interface.mac_address, frame.mac_source, reply_arp)
                     self.interface.send(frame, canvas)
             else:
-                print('receive something')
+                print('receive something')"""
     def json(self):
         return {
             'type': 'host',
@@ -194,9 +196,12 @@ class Hub:
                 return
         except AttributeError:
             pass
+        ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
+        """
         for other in self.others:
             if other is not source:
                 self.send(frame, other, canvas)
+        """
 
     def send(self, frame, target, canvas=None):
         try:
@@ -268,6 +273,14 @@ class Router:
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
 
+    def cache_arp(self, frame):
+        packet = frame.packet
+        if packet:
+            for interface in self.interfaces:
+                if interface.mac_address == frame.mac_target:
+                    self.arp_table[packet.ip_source] = frame.mac_source
+                    return
+
     def __receive(self, source, frame, canvas, receiver):
         try:
             if not self.__getattribute__('active'):
@@ -275,7 +288,9 @@ class Router:
         except AttributeError:
             pass
         # print(self.name, 'update arp table')
-        self.arp_table[frame.packet.ip_source] = frame.mac_source
+        self.cache_arp(frame)
+        ph.router_forward_handler(self, frame, source=source, canvas=canvas)
+        """
         if frame.packet.ip_target == receiver.ip_address:
             if isinstance(frame.packet, data.ARP):
                 if frame.packet.is_reply:
@@ -298,7 +313,7 @@ class Router:
                         self.send(self.routing_table[network], frame, canvas)
                     break
             else:
-                print('drop')
+                print('drop')"""
 
     def send(self, interface, frame, canvas=None):
         try:
@@ -306,7 +321,7 @@ class Router:
                 return
         except AttributeError:
             pass
-        if interface.other is None:
+        """if interface.other is None:
             print("Connection is not avaiable")
             return
 
@@ -320,7 +335,26 @@ class Router:
                 next_frame = data.BroadcastFrame(interface.mac_address, packet)
             interface.send(next_frame, canvas)
 
-        func()
+        func()"""
+        pass
+
+    def forward(self, interface, frame, canvas=None):
+        try:
+            if not self.__getattribute__('active'):
+                return
+        except AttributeError:
+            pass
+
+        packet = frame.packet
+        if packet:
+            if packet.ip_target in self.arp_table:
+                forward_frame = data.Frame(interface.mac_address, self.arp_table[frame.packet.ip_target], packet)
+                interface.send(forward_frame, canvas)
+            else:
+                from functools import partial
+                arp = data.ARP(interface.ip_address, packet.ip_target, partial(self.forward, interface, frame, canvas))
+                arp_frame = data.BroadcastFrame(interface.mac_address, arp)
+                interface.send(arp_frame, canvas)
 
     def add_interface(self, interface_info):
         interface = Interface(**interface_info)
