@@ -327,14 +327,14 @@ def destroy_window():
     top_level = None
 
 
-def add_widget(type, text, relx):
+def add_widget(type, text, relx, **kwargs):
     if type is "label":
-        label = tk.Label(w.node_data_panel, text=text, font=("Helvetica", 12))
+        label = tk.Label(w.node_data_panel, text=text, font=("Helvetica", 12), state=kwargs.get('state'))
         label.configure(bg="#f0f0f0")
         label.place(relx=relx, rely=dy)
         return label
     elif type is "entry":
-        entry = tk.Entry(w.node_data_panel, font=("Helvetica", 12))
+        entry = tk.Entry(w.node_data_panel, font=("Helvetica", 12), state=kwargs.get('state'))
         if text is not None:
             entry.insert(0, str(text))
         entry.place(relx=relx, rely=dy)
@@ -377,10 +377,11 @@ def update_node_info(info):
         node_info[table_label] = table_info
 
     for key, value in info.items():
-        if isinstance(value, dict):
-            add_table_info(key, value)
-        else:
-            add_node_info(key, value)
+        if value[0]:
+            if isinstance(value[1], dict):
+                add_table_info(key, value[1])
+            else:
+                add_node_info(key, value[1])
 
 
 def node_modify():
@@ -415,10 +416,10 @@ def context_menu(info):
             'Disable': controller.disable_device,
         }
     }
-    if info['type'] not in menu_dictionary:
+    if info['type'][1] not in menu_dictionary:
         raise KeyError
     from functools import partial
-    for text, function in menu_dictionary[info['type']].items():
+    for text, function in menu_dictionary[info['type'][1]].items():
         menu.add_command(label=text, command=partial(function, info) if function is not None else None)
 
     try:
@@ -432,15 +433,15 @@ def context_menu(info):
 def router_connect(info):
     select_interface_popup = tk.Tk()
     select_interface_popup.geometry("500x500")
-    select_interface_popup.title("Select an Interface of Router " + info['type'])
+    select_interface_popup.title("Select an Interface of Router " + info['type'][1])
     select_interface_popup.geometry("+%d+%d" % (
     (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
 
     # Combo box handling
     interfaces_combobox = ttk.Combobox(select_interface_popup, values=[])
     interfaces_combobox.place(relx=0.02, rely=0.02)
-    for number, interface in info['interfaces'].items():
-        interfaces_combobox['values'] += (interface,)
+    for number, interface in info['interfaces'][1].items():
+        interfaces_combobox['values'][1] += (interface,)
     interfaces_combobox.current(0)
 
     # OK & Cancel buttons
@@ -458,12 +459,12 @@ def router_connect(info):
 
 
 def add_interface(info):
-    if info['type'] != "router":
+    if info['type'][1] != "router":
         return
 
     add_interface_popup = tk.Tk()
     add_interface_popup.geometry("500x500")
-    add_interface_popup.title("Add New Interface to Router: " + info['name'])
+    add_interface_popup.title("Add New Interface to Router: " + info['name'][1])
     add_interface_popup.geometry("+%d+%d" % (
     (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
 

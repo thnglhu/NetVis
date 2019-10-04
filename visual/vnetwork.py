@@ -118,6 +118,7 @@ class Router(VVertex, dv.Router):
             'name': (True, self.name),
             'arp table': (True, self.arp_table),
             'interfaces': (True, dict(enumerate(map(lambda interface: interface.name, self.interfaces)))),
+            'interfaces-info': (False, [interface.info() for interface in self.interfaces]),
             'routing table': (True, self.__get_routing_table())
         }
 
