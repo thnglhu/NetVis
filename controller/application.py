@@ -26,15 +26,20 @@ class Controller:
     def load_file(self, file):
         with open(file.name) as json_file:
             data = json.load(json_file)
+            time_stamp = data['time_stamp']
             connectable = dict()
+            switches = dict()
+            routers = dict()
             for device in data['devices']:
                 from network import devices as dv
                 if device['type'] == 'host':
                     interface = connectable[device['interface']['id']] = dv.Interface.load(device['interface'])
-                    vertex = self.__graph.add_vertex(interface, type='host', name=device['name'])
+                    vertex = self.__graph.add_vertex(interface, type='host', name=device['name'], arp_table=device['arp_table'])
+                    vertex.fix_time_stamp(time_stamp)
                 elif device['type'] == 'switch':
                     vertex = self.__graph.add_vertex(type='switch', name=device['name'])
                     connectable[device['id']] = vertex
+                    switches[vertex] = device
                 elif device['type'] == 'router':
                     interfaces = list()
                     for json_info in device['interfaces']:
@@ -42,10 +47,21 @@ class Controller:
                         connectable[json_info['id']] = interface
                         interfaces.append(interface)
                     vertex = self.__graph.add_vertex(*interfaces, type='router', name=device['name'])
+                    routers[vertex] = device
                 else:
                     raise KeyError
                 vertex['x'] = device['x']
                 vertex['y'] = device['y']
+            for switch, device in switches.items():
+                switch.set_mac_table({
+                    key: connectable[value] for key, value in device['mac_table'].items()
+                })
+            for router, device in routers.items():
+                router.set_routing_table({
+                    key: connectable[value] for key, value in device['routing_table'].items()
+                })
+
+
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(
                     connectable[json_info['link'][0]],

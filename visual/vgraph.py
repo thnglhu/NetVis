@@ -5,6 +5,7 @@ from collections.abc import Iterable
 import igraph as ig
 import numpy as np
 import operator
+import time
 from scipy.spatial import ConvexHull
 
 
@@ -112,6 +113,7 @@ class Graph(ig.Graph):
         return {
             "devices": [device.json() for device in self.vertices],
             "connection": [link.json() for link in self.edges],
+            "time_stamp": time.time(),
         }
 
     @staticmethod

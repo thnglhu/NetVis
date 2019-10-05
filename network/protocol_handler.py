@@ -11,6 +11,8 @@ def interface_arp_handler(interface, frame, **kwargs):
         else:
             reply = dt.Frame(interface.mac_address, frame.mac_source, arp.reply())
             interface.send(reply, kwargs.get('canvas'))
+        return True
+    return False
 
 
 def hub_broadcast_handler(hub, frame, **kwargs):
@@ -22,7 +24,7 @@ def hub_broadcast_handler(hub, frame, **kwargs):
 
 def router_forward_handler(router, frame, **kwargs):
     packet = frame.packet
-    if packet:
+    if packet and kwargs.get('receiver').mac_address == frame.mac_target:
         for network in router.routing_table:
             interface = router.routing_table[network]
             if packet.ip_target in network \
