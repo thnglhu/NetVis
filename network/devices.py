@@ -34,6 +34,7 @@ class Interface:
     def info(self):
         return {
             'name': self.name,
+            'mac_address': self.mac_address,
             'ip_address': self.ip_address,
             'ip_network': self.ip_network,
             'default_gateway': self.default_gateway,
@@ -87,8 +88,9 @@ class Interface:
             for edge in edges:
                 from resource import get_image
                 is_inverted = not edge.points[0] == my_device
-                image = get_image('arp' if isinstance(frame.packet, data.ARP) else 'mail')
-                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image)
+                image = frame.packet.get_image()
+                speed = edge['bandwidth'] / frame.get_size() * 8
+                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
                 f.display(canvas)
                 f.start_animation()
         else:
@@ -132,13 +134,13 @@ class Host:
             return
 
         if self.cache_contains(ip_target):
-            packet = data.Packet(self.interface.ip_address, ip_target, segment)
+            packet = data.ICMP(self.interface.ip_address, ip_target, self.interface, segment)
             frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target]['mac_address'], packet)
         elif ip_target in self.interface.ip_network:
             packet = data.ARP(self.interface.ip_address, ip_target, partial(self.send, canvas, ip_target, segment))
             frame = data.BroadcastFrame(self.interface.mac_address, packet)
         elif self.cache_contains(self.interface.default_gateway):
-            packet = data.Packet(self.interface.ip_address, ip_target, segment)
+            packet = data.ICMP(self.interface.ip_address, ip_target, self.interface, segment)
             frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway]['mac_address'], packet)
         else:
             function = partial(self.send, canvas, ip_target, segment)
@@ -181,6 +183,7 @@ class Host:
             pass
 
         self.cache_arp(frame)
+        ph.interface_icmp_handler(self.interface, frame, source=source, canvas=canvas)
         ph.interface_arp_handler(self.interface, frame, source=source, canvas=canvas)
 
     def json(self):
@@ -242,8 +245,9 @@ class Hub:
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
                 from resource import get_image
-                image = get_image('arp' if isinstance(frame.packet, data.ARP) else 'mail')
-                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, image=image)
+                image = frame.packet.get_image()
+                speed = edge['bandwidth'] / frame.get_size() * 8
+                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
                 f.display(canvas)
                 f.start_animation()
             return
@@ -323,15 +327,28 @@ class Router:
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
 
+
+    def set_routing_table(self, info):
+        self.routing_table = {
+            ipa.ip_network(sub['destination']): {
+                'next_hop': sub['next_hop'],
+                'interface': self.get_interface_by_ip(sub['interface']),
+                'type': sub['type']
+            } for sub in info
+        }
+
+
     def __hello(self):
         for interface in self.interfaces:
             hello_packet = data.Hello()
             interface.send()
 
+    """
     def set_routing_table(self, routing_table):
         self.routing_table = {
             ipa.ip_network(key): value for key, value in routing_table.items()
         }
+    """
 
     def cache_arp(self, frame):
         packet = frame.packet
@@ -361,7 +378,7 @@ class Router:
             pass
         pass
 
-    def forward(self, interface, frame, canvas=None):
+    def forward(self, interface, frame, rule, canvas=None):
         try:
             if not self.__getattribute__('active'):
                 return
@@ -370,20 +387,22 @@ class Router:
 
         packet = frame.packet
         if packet:
+            next_hop = ipa.ip_address(rule['next_hop'])
+            """
             if packet.ip_target in self.arp_table:
                 forward_frame = data.Frame(interface.mac_address, self.arp_table[frame.packet.ip_target], packet)
                 interface.send(forward_frame, canvas)
             elif packet.ip_target in interface.ip_network:
-                function = partial(self.forward, interface, frame, canvas)
+                function = partial(self.forward, interface, frame, rule, canvas)
                 arp = data.ARP(interface.ip_address, packet.ip_target, function)
                 arp_frame = data.BroadcastFrame(interface.mac_address, arp)
-                interface.send(arp_frame, canvas)
-            elif interface.default_gateway in self.arp_table:
-                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface.default_gateway], packet)
+                interface.send(arp_frame, canvas)"""
+            if next_hop in self.arp_table:
+                forward_frame = data.Frame(interface.mac_address, self.arp_table[next_hop], packet)
                 interface.send(forward_frame, canvas)
             else:
-                function = partial(self.forward, interface, frame, canvas)
-                arp = data.ARP(interface.ip_address, interface.default_gateway, function)
+                function = partial(self.forward, interface, frame, rule, canvas)
+                arp = data.ARP(interface.ip_address, next_hop, function)
                 arp_frame = data.BroadcastFrame(interface.mac_address, arp)
                 interface.send(arp_frame, canvas)
 
@@ -399,6 +418,12 @@ class Router:
             if interface.name == name:
                 return interface
 
+    def get_interface_by_ip(self, ip):
+        ip = ipa.ip_address(ip)
+        for interface in self.interfaces:
+            if interface.ip_address == ip:
+                return interface
+
     def json(self):
         return {
             'type': 'router',
@@ -406,8 +431,17 @@ class Router:
             'interfaces': [
                 interface.json() for interface in self.interfaces
             ],
-            'routing_table': {
-                str(key): id(value) for key, value in self.routing_table.items()
-            }
+            # 'routing_table': {
+            #     str(key): id(value) for key, value in self.routing_table.items()
+            # }
+            'routing_table': [
+                {
+                    'destination': str(key),
+                    'next_hop': str(value.default_gateway),
+                    'interface': str(value.ip_address),
+                    'type': 'static'
+                }
+                for key, value in self.routing_table.items()
+            ]
         }
 

@@ -51,12 +51,12 @@ class Host(VVertex, dv.Host):
     def info(self):
         self.clean_cache()
         return {
-            'type': (False, 'host'),
-            'name': (True, self.name),
-            'interface': (True, self.interface.info()),
-            'arp table': (True, {
+            'type': 'host',
+            'name': self.name,
+            'interface': self.interface.info(),
+            'arp_table': {
                 key: value['mac_address'] for key, value in self.arp_table.items()
-            }),
+            },
         }
 
     def focus(self, canvas):
@@ -101,16 +101,16 @@ class Switch(VVertex, dv.Switch):
 
     def info(self):
         return {
-            'type': (False, 'switch'),
-            'name': (True, self.name),
-            'mac table': (True, self.__get_mac_table())
+            'type': 'switch',
+            'name': self.name,
+            'mac_table': self.__get_mac_table()
         }
 
     def __get_mac_table(self):
         return {str(k): v.name for k, v in self.mac_table.items()}
 
     def modify(self, info):
-        print(info)
+        self.name = info['name']
 
     def json(self):
         json = super().json()
@@ -130,19 +130,26 @@ class Router(VVertex, dv.Router):
 
     def info(self):
         return {
-            'type': (False, 'router'),
-            'name': (True, self.name),
-            'arp table': (True, self.arp_table),
-            'interfaces': (True, dict(enumerate(map(lambda interface: interface.name, self.interfaces)))),
-            'interfaces-info': (False, [interface.info() for interface in self.interfaces]),
-            'routing table': (True, self.__get_routing_table())
+            'type': 'router',
+            'name': self.name,
+            'arp_table': self.arp_table,
+            # 'interfaces': dict(enumerate(map(lambda interface: interface.name, self.interfaces))),
+            'interfaces': [interface.info() for interface in self.interfaces],
+            'routing_table': {
+                str(key): value for key, value in self.routing_table.items()
+            }
         }
 
-    def __get_routing_table(self):
-        return {str(k): v.name for k, v in self.routing_table.items()}
-
     def modify(self, info):
-        print(info)
+        import ipaddress as ipa
+        self.name = info['name']
+        self.routing_table = {
+            ipa.ip_network(destination): {
+                'next_hop': next_hop,
+                'interface': self.get_interface_by_ip(interface),
+                'type': _type
+            } for destination, next_hop, interface, _type in info['routing_table']
+        }
 
     def json(self):
         json = super().json()
@@ -164,11 +171,12 @@ class Frame(vg.CanvasItem):
         self.func = func
         self.params = params
         self['image'] = kwargs.get('image')
+        self.speed = kwargs.get('speed', 10)
 
     def __animate(self, canvas):
         att = self.attributes
         while att['percent'] < 100.0:
-            att['percent'] += 5
+            att['percent'] += self.speed
             self.load()
             self.reallocate(canvas)
             time.sleep(0.05)

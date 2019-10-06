@@ -57,10 +57,7 @@ class Controller:
                     key: connectable[value] for key, value in device['mac_table'].items()
                 })
             for router, device in routers.items():
-                router.set_routing_table({
-                    key: connectable[value] for key, value in device['routing_table'].items()
-                })
-
+                router.set_routing_table(device['routing_table'])
 
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(
@@ -96,15 +93,32 @@ class Controller:
 
     def create(self, info):
         device_type = info['type']
+        print(device_type)
         g = self.__graph
 
         def my_create(x, y):
+            from network import devices as dv
             device = None
-            if device_type == 'pc':
-                device = g.add_vertex(info['interface'],
-                                      type='pc',
-                                      name=info.get('name', ''),
-                                      arp_table=info.get('interface'))
+            if device_type == 'host':
+                interface = dv.Interface.load(info['interface'])
+                device = self.__graph.add_vertex(
+                    interface,
+                    type='host',
+                    name=info['name'],
+                )
+            elif device_type == 'switch':
+                device = self.__graph.add_vertex(
+                    type='switch',
+                    name=info['name']
+                )
+            elif device_type == 'router':
+                interfaces = list(map(lambda interface_info: dv.Interface.load(interface_info), info['interfaces']))
+                device = self.__graph.add_vertex(
+                    *interfaces,
+                    type='router',
+                    name=info['name']
+                )
+                device.set_routing_table(info.get('routing_table'))
             if device:
                 device['x'], device['y'] = self.__canvas.invert_position(x, y)
                 device.display(self.__canvas)
@@ -183,6 +197,7 @@ class Controller:
                 self.__isolate(device_2)
                 edge = self.__graph.add_edge(self.device_1, device_2)
                 self.device_1.connect(device_2)
+                edge['bandwidth'] = 50
                 edge.display(self.__canvas)
                 self.__canvas.tag_lower('edge')
         self.device_1.device.unfocus(self.__canvas)
