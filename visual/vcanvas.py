@@ -8,11 +8,13 @@ class Canvas(tk.Canvas):
         'button-1': {
             'location': set(),
             'location-motion': set(),
+            'empty': set(),
             'object': set()
         },
         'button-2': dict(),
         'button-3': {
-            'object': set()
+            'object': set(),
+            'empty': set()
         },
         'motion': set(),
     }
@@ -65,6 +67,11 @@ class Canvas(tk.Canvas):
             end_b = self.convert_position(x, y)
             self.__graph_objects[base] = tk.Canvas.create_line(self, *end_a, *end_b, **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
+            from visual import vgraph as vg
+            canvas_object = self.__graph_objects.get(base)
+            if isinstance(base, vg.Edge):
+                self.tag_bind(canvas_object, '<Button-1>', self.__edge_button, ('button-1', base))
+
         return self.__graph_objects[base]
 
     def create_mapped_image(self, base, *args, **kw):
@@ -76,12 +83,13 @@ class Canvas(tk.Canvas):
 
             from visual import vnetwork as vn
             canvas_object = self.__graph_objects.get(base)
-            self.tag_bind(canvas_object, '<Button-1>', self.__vertex_button, ('button-1', base))
-            self.tag_bind(canvas_object, '<B1-Motion>', self.__vertex_button_motion, ('button-1', base))
-            self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__vertex__button_release, ('button-1', ))
-            self.tag_bind(canvas_object, '<Button-3>', self.__vertex_button, ('button-3', base))
-            self.tag_bind(canvas_object, '<B3-Motion>', self.__vertex_button_motion, ('button-3', base))
-            self.tag_bind(canvas_object, '<ButtonRelease-3>', self.__vertex__button_release, ('button-3',))
+            if isinstance(base, vn.VVertex):
+                self.tag_bind(canvas_object, '<Button-1>', self.__vertex_button, ('button-1', base))
+                self.tag_bind(canvas_object, '<B1-Motion>', self.__vertex_button_motion, ('button-1', base))
+                self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__vertex__button_release, ('button-1', ))
+                self.tag_bind(canvas_object, '<Button-3>', self.__vertex_button, ('button-3', base))
+                self.tag_bind(canvas_object, '<B3-Motion>', self.__vertex_button_motion, ('button-3', base))
+                self.tag_bind(canvas_object, '<ButtonRelease-3>', self.__vertex__button_release, ('button-3',))
 
     def tag_bind(self, tagOrId, sequence=None, func=None, args=None):
         def _func(event):
@@ -92,12 +100,11 @@ class Canvas(tk.Canvas):
     def coords_mapped(self, base, *args):
         from visual import vgraph as vg
         canvas_object = self.__graph_objects.get(base)
-        if canvas_object is not None:
+        if canvas_object:
             position = self.convert_position(*args[:2]).astype(float)
             from visual import vnetwork as vn
             if isinstance(base, vn.Frame):
-                rad = args[2]
-                position = np.concatenate((position - rad, position + rad))
+                pass
             elif isinstance(base, vn.VVertex):
                 pass
             elif isinstance(base, vg.Edge):
@@ -128,17 +135,16 @@ class Canvas(tk.Canvas):
     def invert_position(self, *position):
         return (position - self.__size / 2) / self.__scale
 
-    def scale_to_fit(self, top_left, bottom_right):
+    def scale_to_fit(self, top_left, bottom_right, offset):
         top_left = np.array(top_left)
         bottom_right = np.array(bottom_right)
         top_left[0], bottom_right[0] = sorted((top_left[0], bottom_right[0]))
         top_left[1], bottom_right[1] = sorted((top_left[1], bottom_right[1]))
         size = bottom_right - top_left
-        print(size)
         if (size == 0).any():
             self.__scale = 1
         else:
-            scale = self.__size / size
+            scale = (self.__size - offset) / size
             self.__scale = max(min(scale), 1)
         self.center_to((bottom_right + top_left) / 2)
         self.reallocate()
@@ -204,6 +210,7 @@ class Canvas(tk.Canvas):
     def __vertex_button(self, event, button, device):
         self.__button_object(button, device)
         self.__update_mouse_location(event.x, event.y)
+        self.__button_empty(button, device)
         if button == 'button-1':
             self.__movable = False
 
@@ -218,6 +225,9 @@ class Canvas(tk.Canvas):
         if button == 'button-1':
             self.__movable = True
 
+    def __edge_button(self, event, button, link):
+        self.__button_object(button, link)
+
     def __resize(self, event):
         self.__size[0] = event.width
         self.__size[1] = event.height
@@ -225,19 +235,25 @@ class Canvas(tk.Canvas):
 
     def __update_mouse_location(self, x, y):
         self.last = x, y
-        for subscriber in self.subscription['motion']:
+        for subscriber in self.subscription['motion'].copy():
             subscriber.trigger(x + self.canvasx(0), y + self.canvasy(0))
 
     def __button_location(self, button, event):
-        for subscriber in self.subscription[button]['location']:
+        for subscriber in self.subscription[button]['location'].copy():
             x, y = np.array((self.canvasx(0), self.canvasy(0))) + (event.x, event.y)
             subscriber.trigger(x, y)
 
     def __button_object(self, button, target):
         if target:
-            for subscriber in self.subscription[button]['object']:
-                subscriber.trigger(target.info())
+            for subscriber in self.subscription[button]['object'].copy():
                 subscriber.set_variable(target)
+                subscriber.trigger(target.info())
+
+    def __button_empty(self, button, target):
+        if target:
+            for subscriber in self.subscription[button]['empty'].copy():
+                subscriber.set_variable(target)
+                subscriber.trigger()
 
     def subscribe(self, func, *args):
         if func in self.cache:
@@ -258,9 +274,7 @@ class Canvas(tk.Canvas):
         if function not in location:
             return
         location.remove(function)
-        self.cache.remove(func)
-        if func in self.variable:
-            del self.variable[func]
+        del self.cache[func]
 
     @staticmethod
     def convert(canvas):

@@ -28,7 +28,9 @@ from tkinter import StringVar
 
 
 def vp_start_gui():
-    #Starting point when module is the main routine.
+
+    # Starting point when module is the main routine.
+
     global val, w, root
     root = tk.Tk()
     top = top_level(root)
@@ -1066,7 +1068,7 @@ class top_level:
         self.edge_data_panel.place(
             relx=0,
             rely=0.47,
-            relheight=0.3,
+            relheight=0.5,
             relwidth=1)
         self.edge_data_panel.configure(background="#fafbf0")
 
@@ -1076,7 +1078,7 @@ class top_level:
             relx=0.02,
             rely=0.02,
             width=350,
-            height=300,
+            height=800
         )
         self.log_scrollbar = tk.Scrollbar(command=self.log_text.yview())
         self.log_text['yscrollcommand'] = self.log_scrollbar.set

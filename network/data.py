@@ -11,7 +11,7 @@ class Segment:
 
 
 class Packet:
-    def __init__(self, source, target, segment, func=None):
+    def __init__(self, source, target, segment=None, func=None):
         self.ip_source = source
         self.ip_target = target
         self.segment = segment
@@ -38,8 +38,15 @@ class ARP(Packet):
         return reply_arp
 
     def get_size(self):
-        return 2
+        return 28
 
+
+class Hello(Packet):
+    def __init__(self, source, target):
+        super().__init__(source, target)
+
+    def get_size(self):
+        return 28
 
 class Frame:
     def __init__(self, source, target, packet):
