@@ -657,7 +657,8 @@ def router_connect(info):
     # Combo box handling
     interfaces_combobox = ttk.Combobox(select_interface_popup, values=[])
     interfaces_combobox.place(relx=0.02, rely=0.02)
-    for number, interface in info['interfaces'].items():
+    print(info)
+    for interface in map(lambda each: each['name'], info['interfaces']):
         interfaces_combobox['values'] += (interface,)
     interfaces_combobox.current(0)
 
