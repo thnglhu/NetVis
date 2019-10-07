@@ -59,3 +59,11 @@ def router_forward_handler(router, frame, **kwargs):
                 icmp.unreachable = True
                 reply = dt.Frame(receiver.mac_address, frame.mac_source, icmp)
                 receiver.send(reply, kwargs.get('canvas'))
+
+
+def switch_stp_handler(switch, port, frame, **kwargs):
+    if isinstance(frame, dt.STP):
+        root_id, bridge_id, path_cost = frame.get_bpdu()
+        if root_id < switch.root_id:
+            switch.root_id = ro
+

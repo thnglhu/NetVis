@@ -21,6 +21,7 @@ class Controller:
     def init(self, canvas):
         vcanvas.Canvas.convert(canvas)
         self.__canvas = canvas
+        self.__graph = vgraph.Graph()
 
     def load_file(self, file):
         self.clear()

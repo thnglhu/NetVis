@@ -28,13 +28,17 @@ num = 0
 
 
 def init(top, gui, *args, **kwargs):
-    global w, top_level, root, x, y
+    global w, top_level, root, x, y, existed
     w = gui
     top_level = top
     root = top
     style = ttk.Style(root)
     style.configure('Treeview', rowheight=15)
     controller.init(w.main_canvas)
+    controller.subscribe_inspection(update_node_info)
+    controller.subscribe_coords(update_canvas_coords)
+    controller.subscribe_property(context_menu)
+    existed = True
 
 
 def open_file():
@@ -43,12 +47,7 @@ def open_file():
         filetypes=(("JSON", "*.json"), )
     )
     if file:
-        global existed
         controller.load_file(file)
-        controller.subscribe_inspection(update_node_info)
-        controller.subscribe_coords(update_canvas_coords)
-        controller.subscribe_property(context_menu)
-        existed = True
     sys.stdout.flush()
 
 

@@ -99,3 +99,14 @@ class ICMP(Packet):
 
     def get_size(self):
         return 74
+
+
+class STP(Frame):
+    def __init__(self, source, root_id, bridge_id, path_cost):
+        super().__init__(source, None, None)
+        self.root_id = root_id
+        self.bridge_id = bridge_id
+        self.path_cost = path_cost
+
+    def get_bpdu(self):
+        return self.root_id, self.bridge_id, self.path_cost

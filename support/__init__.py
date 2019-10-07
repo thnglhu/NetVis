@@ -12,6 +12,8 @@ class Form:
     def __setitem__(self, key, value):
         self.data[key] = value
 
+
+
     @staticmethod
     def grid(item, **kwargs):
         item.grid(
