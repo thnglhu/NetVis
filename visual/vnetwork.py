@@ -91,9 +91,9 @@ class Host(VVertex, dv.Host):
 
 
 class Switch(VVertex, dv.Switch):
-    def __init__(self, ig_vertex, **kwargs):
+    def __init__(self, ig_vertex, mac_address, **kwargs):
         VVertex.__init__(self, ig_vertex)
-        dv.Switch.__init__(self, **kwargs)
+        dv.Switch.__init__(self, mac_address, **kwargs)
 
     def _set_image(self):
         att = self.attributes
@@ -102,6 +102,7 @@ class Switch(VVertex, dv.Switch):
     def info(self):
         return {
             'type': 'switch',
+            'mac_address': self.mac_address,
             'name': self.name,
             'mac_table': self.__get_mac_table()
         }

@@ -198,15 +198,24 @@ class Host:
 
 
 class Hub:
-    def __init__(self, **kwargs):
+    def __init__(self, mac_address, **kwargs):
+        self.mac_address = mac_address
         self.device = self
         self.name = kwargs.get('name')
+        self.ports = dict()
         self.others = set()
 
     def disconnect(self, other, init=True):
         self.others.remove(other)
+        interface = None
+        for key, value in self.ports.items():
+            if value['interface'] == other:
+                interface = key
+        if interface:
+            self.ports.pop(key)
 
-    def attach(self, other):
+
+    def attach(self, other, port_name=None):
         self.others.add(other)
 
     def connect(self, other):
@@ -257,14 +266,15 @@ class Hub:
         return {
             'type': 'hub',
             'id': id(self),
-            'name': self.name
+            'name': self.name,
+            'mac_address': self.mac_address,
         }
 
 
 class Switch(Hub):
-    def __init__(self, **kwargs):
+    def __init__(self, mac_address, **kwargs):
         self.mac_table = kwargs.get('mac_table') or dict()
-        super().__init__(**kwargs)
+        super().__init__(mac_address, **kwargs)
 
     def set_mac_table(self, mac_table):
         self.mac_table = mac_table

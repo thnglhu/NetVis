@@ -38,7 +38,7 @@ class Controller:
                     vertex = self.__graph.add_vertex(interface, type='host', name=device['name'], arp_table=device['arp_table'])
                     vertex.fix_time_stamp(time_stamp)
                 elif device['type'] == 'switch':
-                    vertex = self.__graph.add_vertex(type='switch', name=device['name'])
+                    vertex = self.__graph.add_vertex(device['mac_address'], type='switch', name=device['name'])
                     connectable[device['id']] = vertex
                     switches[vertex] = device
                 elif device['type'] == 'router':

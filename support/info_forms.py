@@ -46,14 +46,15 @@ class SwitchInfo(SwitchForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
         Form.entry_set(self['name'], info['name'])
+        Form.entry_set(self['mac_address'], info['mac_address'])
         for mac_address, interface in info['mac_table'].items():
             Form.tree_append(self['mac_table'], mac_address, interface)
 
     def exclusive(self):
-        self.label(text="Mac table: ", row=1, column=1)
+        self.label(text="Mac table: ", row=5, column=1)
         self['mac_table'] = self.tree_view(
             headers=("MAC address", "interface"),
-            row=2,
+            row=6,
             column=0,
             columnspan=4,
             padx=10,

@@ -46,6 +46,8 @@ class SwitchForm(Form):
         self.trigger = trigger
         self.label(text="Name: ", row=0, column=1)
         self['name'] = self.entry(row=0, column=2)
+        self.label(text="Mac address: ", row=1, column=1)
+        self['mac_address'] = self.entry(row=1, column=2)
         self.exclusive()
 
     def exclusive(self):
