@@ -199,6 +199,7 @@ class Canvas(tk.Canvas):
 
     def __motion_init(self, event):
         self.__update_mouse_location(event.x, event.y)
+        self.__button_location('button-1', event)
 
     def __motion(self, event):
         new = event.x, event.y
