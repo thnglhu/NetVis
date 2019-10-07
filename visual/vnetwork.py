@@ -2,6 +2,7 @@ from . import vgraph as vg
 import resource
 import tkinter as tk
 import numpy as np
+import itertools as it
 from abc import ABC, abstractmethod
 from threading import Thread
 from network import devices as dv
@@ -28,17 +29,14 @@ class VVertex(vg.Vertex, ABC):
         # att = self.attributes
 
     def display(self, canvas):
-        att = self.attributes
-        # print(att)
-        canvas.create_mapped_image(self, att['x'], att['y'], image=att['image'], tag=tuple(att['tag']))
+        canvas.create_mapped_image(self, self['x'], self['y'], image=self['image'].get_image(), tag=tuple(self['tag']))
+        self['image'].subscribe(self, self.reconfigure, canvas)
 
     def reconfigure(self, canvas):
-        att = self.attributes
-        self.reallocate(canvas)
-        canvas.itemconfig_mapped(self, image=att['image'], tag=tuple(att['tag']))
+        canvas.itemconfig_mapped(self, image=self['image'].get_image(), tag=tuple(self['tag']))
 
 
-class PC(VVertex, dv.Host):
+class Host(VVertex, dv.Host):
     def __init__(self, ig_vertex, interface, **kwargs):
         VVertex.__init__(self, ig_vertex)
         dv.Host.__init__(self, interface, **kwargs)
@@ -48,27 +46,48 @@ class PC(VVertex, dv.Host):
         att['image'] = resource.get_image("pc-on")
         att['deactivate'] = resource.get_image("pc-on")
         att['activate'] = resource.get_image("pc-on-focus")
-        att['size'] = att['image'].width(), att['image'].height()
+        att['offline'] = resource.get_image('pc-off')
 
     def info(self):
+        self.clean_cache()
         return {
             'type': 'host',
             'name': self.name,
             'interface': self.interface.info(),
-            'arp table': self.arp_table
+            'arp_table': {
+                key: value['mac_address'] for key, value in self.arp_table.items()
+            },
         }
 
     def focus(self, canvas):
-        self['image'] = self['activate']
-        self.reconfigure(canvas)
+        if self.active:
+            self['image'] = self['activate']
+            self.reconfigure(canvas)
 
     def unfocus(self, canvas):
-        self['image'] = self['deactivate']
-        self.reconfigure(canvas)
+        if self.active:
+            self['image'] = self['deactivate']
+            self.reconfigure(canvas)
 
     def modify(self, info):
         self.name = info['name']
         self.interface.modify(info['interface'])
+
+    def disable(self, canvas):
+        self.active = False
+        self['image'] = self['offline']
+        self.reconfigure(canvas)
+
+    def get_edge(self):
+        if self.other:
+            graph = self.get_graph()
+        return None
+
+    def json(self):
+        json = super().json()
+        json['x'] = self['x']
+        json['y'] = self['y']
+        return json
 
 
 class Switch(VVertex, dv.Switch):
@@ -79,20 +98,25 @@ class Switch(VVertex, dv.Switch):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("switch")
-        att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
         return {
             'type': 'switch',
             'name': self.name,
-            'mac table': self.__get_mac_table()
+            'mac_table': self.__get_mac_table()
         }
 
     def __get_mac_table(self):
         return {str(k): v.name for k, v in self.mac_table.items()}
 
     def modify(self, info):
-        print(info)
+        self.name = info['name']
+
+    def json(self):
+        json = super().json()
+        json['x'] = self['x']
+        json['y'] = self['y']
+        return json
 
 
 class Router(VVertex, dv.Router):
@@ -103,24 +127,38 @@ class Router(VVertex, dv.Router):
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("router")
-        att['size'] = att['image'].width(), att['image'].height()
 
     def info(self):
         return {
-            'type': 'switch',
+            'type': 'router',
             'name': self.name,
-            'arp table': self.arp_table,
-            'routing table': self.__get_routing_table()
+            'arp_table': self.arp_table,
+            # 'interfaces': dict(enumerate(map(lambda interface: interface.name, self.interfaces))),
+            'interfaces': [interface.info() for interface in self.interfaces],
+            'routing_table': {
+                str(key): value for key, value in self.routing_table.items()
+            }
         }
 
-    def __get_routing_table(self):
-        return {str(k): v.name for k, v in self.routing_table.items()}
-
     def modify(self, info):
-        print(info)
+        import ipaddress as ipa
+        self.name = info['name']
+        self.routing_table = {
+            ipa.ip_network(destination): {
+                'next_hop': next_hop,
+                'interface': self.get_interface_by_ip(interface),
+                'type': _type
+            } for destination, next_hop, interface, _type in info['routing_table']
+        }
+
+    def json(self):
+        json = super().json()
+        json['x'] = self['x']
+        json['y'] = self['y']
+        return json
+
 
 class Frame(vg.CanvasItem):
-    rad = 10
     __thread = None
 
     def __init__(self, edge, func=None, params=(), is_inverted=False, **kwargs):
@@ -132,21 +170,25 @@ class Frame(vg.CanvasItem):
         self.load()
         self.func = func
         self.params = params
-        self.color = kwargs.get('fill')
+        self['image'] = kwargs.get('image')
+        self.speed = kwargs.get('speed', 10)
 
     def __animate(self, canvas):
         att = self.attributes
-        while att['percent'] < 100.0:
-            att['percent'] += 1
+        while att['percent'] < 100.0 and self.active:
+            att['percent'] += self.speed
+            if att['percent'] > 100.0:
+                att['percent'] = 100
             self.load()
             self.reallocate(canvas)
-            time.sleep(0.01)
-        if att['percent'] > 100.0:
-            att['percent'] = 100.0
-            self.load()
-            self.reallocate(canvas)
-        if self.func:
-            self.func(*self.params)
+            time.sleep(0.05)
+        if self.active:
+            if att['percent'] > 100.0:
+                att['percent'] = 100.0
+                self.load()
+                self.reallocate(canvas)
+            if self.func:
+                self.func(*self.params)
         canvas.remove(self)
 
     def load(self):
@@ -160,7 +202,8 @@ class Frame(vg.CanvasItem):
     def display(self, canvas):
         att = self.attributes
         self.__thread = Thread(target=self.__animate, args=(canvas,))
-        canvas.create_mapped_circle(self, *att['position'], self.rad, fill=self.color, tag='frame')
+        canvas.create_mapped_image(self, *self['position'], image=self['image'].get_image(), tag='frame')
+        self['image'].subscribe(self, self.reconfigure, canvas)
 
     def start_animation(self):
         if self.__thread:
@@ -170,21 +213,26 @@ class Frame(vg.CanvasItem):
 
     def reallocate(self, canvas):
         att = self.attributes
-        canvas.coords_mapped(self, *att['position'], self.rad)
+        canvas.coords_mapped(self, *att['position'])
 
     def reconfigure(self, canvas):
-        canvas.itemconfig_mapped()
+        canvas.itemconfig_mapped(image=self['image'].get_image())
 
     def focus(self, canvas): pass
 
     def unfocus(self, canvas): pass
+
+    def destroy(self, canvas):
+        self.active = False
+        self['image'].unsubscribe()
 
     def info(self):
         return {
             'type': 'frame'
         }
 
+
 classification = dict()
-classification['pc'] = PC
+classification['host'] = Host
 classification['switch'] = Switch
 classification['router'] = Router

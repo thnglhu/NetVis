@@ -1,0 +1,590 @@
+{
+    "connection": [
+        {
+            "bandwidth": 100,
+            "link": [
+                390371024,
+                366562736
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                390373040,
+                366562736
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                390373232,
+                366562736
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366560304,
+                366562736
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366559344,
+                366562960
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366559440,
+                366562960
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366559696,
+                366562960
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366559728,
+                366563088
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366559856,
+                366563088
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366561584,
+                366563088
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366560048,
+                366562096
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366560496,
+                366561264
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366560656,
+                366562448
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366560816,
+                366561776
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366561424,
+                366562288
+            ]
+        },
+        {
+            "bandwidth": 100,
+            "link": [
+                366561936,
+                366562608
+            ]
+        }
+    ],
+    "devices": [
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "192.0.0.1",
+                "id": 390371024,
+                "ip_address": "192.0.0.2",
+                "ip_network": "192.0.0.0/24",
+                "mac_address": "d0:c9:f2:d7:59:cd",
+                "name": "eth0"
+            },
+            "name": "A",
+            "type": "host",
+            "x": -0.4421639055856923,
+            "y": -1.6844863629206095
+        },
+        {
+            "arp_table": {
+                "192.0.0.2": {
+                    "mac_address": "d0:c9:f2:d7:59:cd",
+                    "time_stamp": 1570356915.0593596,
+                    "type": "dynamic"
+                }
+            },
+            "interface": {
+                "default_gateway": "192.0.0.1",
+                "id": 390373040,
+                "ip_address": "192.0.0.3",
+                "ip_network": "192.0.0.0/24",
+                "mac_address": "57:98:eb:54:58:f6",
+                "name": "eth0"
+            },
+            "name": "B",
+            "type": "host",
+            "x": -2.2589473684210524,
+            "y": -1.024
+        },
+        {
+            "arp_table": {
+                "192.0.0.1": {
+                    "mac_address": "64:90:43:1d:5d:19",
+                    "time_stamp": 1570356967.4882445,
+                    "type": "dynamic"
+                }
+            },
+            "interface": {
+                "default_gateway": "192.0.0.1",
+                "id": 390373232,
+                "ip_address": "192.0.0.4",
+                "ip_network": "192.0.0.0/24",
+                "mac_address": "cf:19:0b:2f:d0:9e",
+                "name": "eth0"
+            },
+            "name": "C",
+            "type": "host",
+            "x": -0.9021269608561799,
+            "y": -2.5083113912915995
+        },
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "10.0.0.1",
+                "id": 366559344,
+                "ip_address": "10.0.0.2",
+                "ip_network": "10.0.0.0/24",
+                "mac_address": "91:9c:8f:0e:29:d1",
+                "name": "eth0"
+            },
+            "name": "D",
+            "type": "host",
+            "x": -2.1587368421052626,
+            "y": 0.9654736842105258
+        },
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "10.0.0.1",
+                "id": 366559440,
+                "ip_address": "10.0.0.3",
+                "ip_network": "10.0.0.0/24",
+                "mac_address": "08:79:fa:e8:bd:ab",
+                "name": "eth0"
+            },
+            "name": "E",
+            "type": "host",
+            "x": -2.2202105263157885,
+            "y": -0.11242105263157913
+        },
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "27.0.0.1",
+                "id": 366559728,
+                "ip_address": "27.0.0.2",
+                "ip_network": "27.0.0.0/24",
+                "mac_address": "23:62:41:27:06:8e",
+                "name": "eth0"
+            },
+            "name": "F",
+            "type": "host",
+            "x": 1.142315789473684,
+            "y": -2.0298947368421048
+        },
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "27.0.0.1",
+                "id": 366559856,
+                "ip_address": "27.0.0.3",
+                "ip_network": "27.0.0.0/24",
+                "mac_address": "35:91:19:72:5e:ba",
+                "name": "eth0"
+            },
+            "name": "G",
+            "type": "host",
+            "x": 2.5629473684210526,
+            "y": -0.8846315789473683
+        },
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "172.0.0.1",
+                "id": 366560048,
+                "ip_address": "172.0.0.2",
+                "ip_network": "172.0.0.0/24",
+                "mac_address": "34:7c:03:79:f4:a0",
+                "name": "eth0"
+            },
+            "name": "H",
+            "type": "host",
+            "x": 0.9835789473684216,
+            "y": 0.9642105263157883
+        },
+        {
+            "interfaces": [
+                {
+                    "default_gateway": "192.0.0.2",
+                    "id": 366560304,
+                    "ip_address": "192.0.0.1",
+                    "ip_network": "192.0.0.0/24",
+                    "mac_address": "64:90:43:1d:5d:19",
+                    "name": "eth0"
+                },
+                {
+                    "default_gateway": "15.0.0.2",
+                    "id": 366560496,
+                    "ip_address": "15.0.0.1",
+                    "ip_network": "15.0.0.0/24",
+                    "mac_address": "c3:c8:67:f9:bc:b4",
+                    "name": "eth1"
+                },
+                {
+                    "default_gateway": "17.0.0.2",
+                    "id": 366560656,
+                    "ip_address": "17.0.0.1",
+                    "ip_network": "17.0.0.0/24",
+                    "mac_address": "37:18:89:1f:23:0d",
+                    "name": "eth2"
+                },
+                {
+                    "default_gateway": "19.0.0.2",
+                    "id": 366560816,
+                    "ip_address": "19.0.0.1",
+                    "ip_network": "19.0.0.0/24",
+                    "mac_address": "38:0b:d9:a3:3a:e2",
+                    "name": "eth3"
+                }
+            ],
+            "name": "R1",
+            "routing_table": [
+                {
+                    "destination": "10.0.0.0/24",
+                    "interface": "15.0.0.1",
+                    "next_hop": "15.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "15.0.0.0/24",
+                    "interface": "15.0.0.1",
+                    "next_hop": "15.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "17.0.0.0/24",
+                    "interface": "17.0.0.1",
+                    "next_hop": "17.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "172.0.0.0/24",
+                    "interface": "17.0.0.1",
+                    "next_hop": "17.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "19.0.0.0/24",
+                    "interface": "19.0.0.1",
+                    "next_hop": "19.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "192.0.0.0/24",
+                    "interface": "192.0.0.1",
+                    "next_hop": "192.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "27.0.0.0/24",
+                    "interface": "19.0.0.1",
+                    "next_hop": "19.0.0.2",
+                    "type": "static"
+                }
+            ],
+            "type": "router",
+            "x": -1,
+            "y": 0
+        },
+        {
+            "interfaces": [
+                {
+                    "default_gateway": "10.0.0.2",
+                    "id": 366559696,
+                    "ip_address": "10.0.0.1",
+                    "ip_network": "10.0.0.0/24",
+                    "mac_address": "38:72:f3:50:bf:56",
+                    "name": "eth0"
+                },
+                {
+                    "default_gateway": "15.0.0.1",
+                    "id": 366561264,
+                    "ip_address": "15.0.0.2",
+                    "ip_network": "15.0.0.0/24",
+                    "mac_address": "33:a7:fb:c2:c6:1f",
+                    "name": "eth1"
+                },
+                {
+                    "default_gateway": "16.0.0.2",
+                    "id": 366561424,
+                    "ip_address": "16.0.0.1",
+                    "ip_network": "16.0.0.0/24",
+                    "mac_address": "8e:51:48:b7:9d:a7",
+                    "name": "eth2"
+                }
+            ],
+            "name": "R2",
+            "routing_table": [
+                {
+                    "destination": "10.0.0.0/24",
+                    "interface": "10.0.0.1",
+                    "next_hop": "10.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "15.0.0.0/24",
+                    "interface": "15.0.0.2",
+                    "next_hop": "15.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "16.0.0.0/24",
+                    "interface": "16.0.0.1",
+                    "next_hop": "16.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "192.0.0.0/24",
+                    "interface": "15.0.0.2",
+                    "next_hop": "15.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "27.0.0.0/24",
+                    "interface": "15.0.0.2",
+                    "next_hop": "15.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "172.0.0.0/24",
+                    "interface": "16.0.0.1",
+                    "next_hop": "16.0.0.2",
+                    "type": "static"
+                }
+            ],
+            "type": "router",
+            "x": 0,
+            "y": 1
+        },
+        {
+            "interfaces": [
+                {
+                    "default_gateway": "27.0.0.2",
+                    "id": 366561584,
+                    "ip_address": "27.0.0.1",
+                    "ip_network": "27.0.0.0/24",
+                    "mac_address": "9f:75:f6:72:c4:0a",
+                    "name": "eth0"
+                },
+                {
+                    "default_gateway": "19.0.0.1",
+                    "id": 366561776,
+                    "ip_address": "19.0.0.2",
+                    "ip_network": "19.0.0.0/24",
+                    "mac_address": "ab:39:0d:3f:d9:06",
+                    "name": "eth1"
+                },
+                {
+                    "default_gateway": "18.0.0.2",
+                    "id": 366561936,
+                    "ip_address": "18.0.0.1",
+                    "ip_network": "18.0.0.0/24",
+                    "mac_address": "b8:d2:02:f1:78:20",
+                    "name": "eth2"
+                }
+            ],
+            "name": "R3",
+            "routing_table": [
+                {
+                    "destination": "18.0.0.0/24",
+                    "interface": "18.0.0.1",
+                    "next_hop": "18.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "19.0.0.0/24",
+                    "interface": "19.0.0.2",
+                    "next_hop": "19.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "27.0.0.0/24",
+                    "interface": "27.0.0.1",
+                    "next_hop": "27.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "192.0.0.0/24",
+                    "interface": "19.0.0.2",
+                    "next_hop": "19.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "172.0.0.0/24",
+                    "interface": "18.0.0.1",
+                    "next_hop": "18.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "10.0.0.0/24",
+                    "interface": "18.0.0.1",
+                    "next_hop": "18.0.0.2",
+                    "type": "static"
+                }
+            ],
+            "type": "router",
+            "x": 0,
+            "y": -1
+        },
+        {
+            "interfaces": [
+                {
+                    "default_gateway": "172.0.0.2",
+                    "id": 366562096,
+                    "ip_address": "172.0.0.1",
+                    "ip_network": "172.0.0.0/24",
+                    "mac_address": "ba:b1:bf:28:de:b2",
+                    "name": "eth0"
+                },
+                {
+                    "default_gateway": "16.0.0.1",
+                    "id": 366562288,
+                    "ip_address": "16.0.0.2",
+                    "ip_network": "16.0.0.0/24",
+                    "mac_address": "5d:17:47:d3:85:4f",
+                    "name": "eth1"
+                },
+                {
+                    "default_gateway": "17.0.0.1",
+                    "id": 366562448,
+                    "ip_address": "17.0.0.2",
+                    "ip_network": "17.0.0.0/24",
+                    "mac_address": "c7:1b:0e:b7:04:15",
+                    "name": "eth2"
+                },
+                {
+                    "default_gateway": "18.0.0.1",
+                    "id": 366562608,
+                    "ip_address": "18.0.0.2",
+                    "ip_network": "18.0.0.0/24",
+                    "mac_address": "18:7a:71:5a:6b:07",
+                    "name": "eth2"
+                }
+            ],
+            "name": "R4",
+            "routing_table": [
+                {
+                    "destination": "16.0.0.0/24",
+                    "interface": "16.0.0.2",
+                    "next_hop": "16.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "17.0.0.0/24",
+                    "interface": "17.0.0.2",
+                    "next_hop": "17.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "172.0.0.0/24",
+                    "interface": "172.0.0.1",
+                    "next_hop": "172.0.0.2",
+                    "type": "static"
+                },
+                {
+                    "destination": "18.0.0.0/24",
+                    "interface": "18.0.0.2",
+                    "next_hop": "18.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "192.0.0.0/24",
+                    "interface": "17.0.0.2",
+                    "next_hop": "17.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "10.0.0.0/24",
+                    "interface": "16.0.0.2",
+                    "next_hop": "16.0.0.1",
+                    "type": "static"
+                },
+                {
+                    "destination": "27.0.0.0/24",
+                    "interface": "18.0.0.2",
+                    "next_hop": "18.0.0.1",
+                    "type": "static"
+                }
+            ],
+            "type": "router",
+            "x": 1,
+            "y": 0
+        },
+        {
+            "id": 366562736,
+            "mac_table": {
+                "57:98:eb:54:58:f6": 390373040,
+                "64:90:43:1d:5d:19": 366560304,
+                "cf:19:0b:2f:d0:9e": 390373232,
+                "d0:c9:f2:d7:59:cd": 390371024
+            },
+            "name": "S1",
+            "type": "switch",
+            "x": -0.9894736842105272,
+            "y": -1.0913684210526315
+        },
+        {
+            "id": 366562960,
+            "mac_table": {
+                "38:72:f3:50:bf:56": 366559696
+            },
+            "name": "S2",
+            "type": "switch",
+            "x": -0.9296842105263154,
+            "y": 0.9086315789473685
+        },
+        {
+            "id": 366563088,
+            "mac_table": {},
+            "name": "S3",
+            "type": "switch",
+            "x": 1.1183157894736842,
+            "y": -1.0164210526315793
+        }
+    ],
+    "time_stamp": 1570356952.3756702
+}

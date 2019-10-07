@@ -28,7 +28,9 @@ from tkinter import StringVar
 
 
 def vp_start_gui():
-    #Starting point when module is the main routine.
+
+    # Starting point when module is the main routine.
+
     global val, w, root
     root = tk.Tk()
     top = top_level(root)
@@ -109,14 +111,9 @@ class CreateToolTip(object):
         # Leaves only the label and removes the app window
         self.tw.wm_overrideredirect(True)
         self.tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(
-            self.tw,
-            text=self.text,
-            justify='left',
-            background="#ffffff",
-            relief='solid',
-            borderwidth=1,
-            wraplength=self.wraplength)
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                       background="#ffffff", relief='solid', borderwidth=1,
+                       wraplength = self.wraplength)
         label.pack(ipadx=1)
 
     def hidetip(self):
@@ -136,11 +133,12 @@ class top_level:
         _ana2color = '#ececec'  # Closest X11 color: 'gray92'
 
         top.title("PocketNet")
-        top.configure(background="#ffffff")
+        top.configure(background="#F0F0F0")
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
         # FULLSCREEN
-        root.attributes('-fullscreen', True)
+        # root.attributes('-fullscreen', True)
+        root.geometry("1024x1024")
 
         self.menubar = tk.Menu(top, font="TkMenuFont", bg=_bgcolor, fg=_fgcolor)
 
@@ -205,15 +203,6 @@ class top_level:
             font="TkMenuFont",
             foreground="#000000",
             label="Save as...")
-
-        self.sub_menu.add_separator()
-
-        self.sub_menu.add_command(
-            background="#ffffff",
-            command=gui_support.print_file,
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Print")
 
         self.sub_menu.add_separator()
 
@@ -286,13 +275,6 @@ class top_level:
             foreground="#000000",
             label="Find Node")
 
-        self.nested_menu_edit.add_command(
-            background="#ffffff",
-            command=gui_support.find_edge,
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Find Edge")
-
         self.nested_menu_edit.add_separator()
 
         self.sub_menu_edit.add_command(
@@ -323,6 +305,7 @@ class top_level:
             foreground="#000000",
             label="Select All")
 
+        '''
         # ---------------------------Toolbar: Node-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_node,
@@ -413,7 +396,8 @@ class top_level:
             font="TkMenuFont",
             foreground="#000000",
             label="Change All Node's Label Color")
-
+        
+        
         # ---------------------------Toolbar: Edge-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_edge,
@@ -484,6 +468,7 @@ class top_level:
             foreground="#000000",
             label="Change Edge Weight")
 
+        '''
         # ---------------------------Toolbar: Network-------------------------#
         self.menubar.add_cascade(
             menu=self.sub_menu_network,
@@ -536,45 +521,45 @@ class top_level:
 
         self.main_canvas = tk.Canvas(top)
         self.main_canvas.place(
-            relx=0.25,
-            rely=0.115,
-            relheight=0.85,
-            relwidth=0.55)
+            #relx=0.25,
+            relx=0.01,
+            # rely=0.065,
+            rely = 0.1,
+            relheight=0.89,
+            relwidth=0.75)
         self.main_canvas.configure(
             borderwidth="0",
             background="#DCDCDC")
 
-        self.main_canvas.create_rectangle(50, 25, 150, 75, fill="blue")
-
         # ---------------------------Control Panel-------------------------#
-        self.control_panel = tk.Frame(top)
+        """self.control_panel = tk.Frame(top)
         self.control_panel.place(
             relx=0.005,
             rely=0.105,
             relheight=0.90,
             relwidth=0.24)
         self.control_panel.configure(
-            background="#FaFaFa",
-            takefocus="0")
+            background="#FAFAFA",
+            takefocus="0")"""
 
         # ---------------------------Data Panel-------------------------#
         self.data_panel = tk.Frame(top)
 
         self.data_panel.place(
-            relx=0.805,
-            rely=0.105,
-            relheight=0.90,
-            relwidth=0.19)
-        self.data_panel.configure(background="#ffffff")
+            relx=0.805 - 0.24 + 0.2,
+            rely=0.105 - 0.05,
+            relheight=0.9,
+            relwidth=0.19 + 0.24 - 0.2)
+        self.data_panel.configure(background="#FFFFFF")
 
         # ---------------------------Top Panel-------------------------#
         self.top_panel = tk.Frame(top)
         self.top_panel.place(
             relx=0.005,
             rely=0.005,
-            relheight=0.1,
+            relheight=0.075,
             relwidth=0.99)
-        self.top_panel.configure(background="#ffffff")
+        self.top_panel.configure(background="#FFFFFF")
 
         # ---------------------------Top Panel: Open-------------------------#
         self.add_file_image = ImageTk.PhotoImage(file="resource/icons/add_file.png")
@@ -588,7 +573,8 @@ class top_level:
         self.add_file_button.configure(
             image=self.add_file_image,
             command=gui_support.open_file,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         add_file_tooltip = CreateToolTip(self.add_file_button, "Open a graph. The file extension should be GraphML, GDF or GEXF")
 
@@ -604,7 +590,8 @@ class top_level:
         self.new_file_button.configure(
             borderwidth=0,
             image=self.new_file_image,
-            command=gui_support.create_new_file)
+            command=gui_support.create_new_file,
+            bg="#ffffff")
 
         new_file_tooltip = CreateToolTip(self.new_file_button,"Create an empty GraphML file")
 
@@ -620,7 +607,8 @@ class top_level:
         self.save_file_button.configure(
             image=self.save_file_image,
             command=gui_support.save_file,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.14, rely=0.2, width=4, height=42)
@@ -638,7 +626,8 @@ class top_level:
             width=55)
         self.search_button.configure(
             image=self.search_image,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
         self.search_box = tk.Text(self.top_panel)
         self.search_box.place(
             anchor=tk.CENTER,
@@ -649,9 +638,9 @@ class top_level:
         self.search_box.configure(bg="#DCDCDC")
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
-        self.separator.place(relx=0.32, rely=0.2, width=4, height=42)
+        self.separator.place(relx=0.32,rely=0.2,width=4, height=42)
 
-        search_button_tooltip = CreateToolTip(self.search_button, "Enter the node's name to search for it")
+        search_tooltip = CreateToolTip(self.search_button, "Enter the node's name to search for it")
 
         # ---------------------------Top Panel: Add Node-------------------------#
         self.add_node_image = ImageTk.PhotoImage(file="resource/icons/add_node.png")
@@ -665,7 +654,8 @@ class top_level:
         self.add_node_button.configure(
             image=self.add_node_image,
             command=gui_support.add_node,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         add_node_tooltip = CreateToolTip(self.add_node_button, "Add node")
 
@@ -681,7 +671,8 @@ class top_level:
         self.remove_node_button.configure(
             image=self.remove_node_image,
             command=gui_support.remove_node,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         remove_node_tooltip = CreateToolTip(self.remove_node_button, "Remove node")
 
@@ -700,7 +691,8 @@ class top_level:
         self.zoom_in_button.configure(
             image=self.zoom_in_image,
             command=gui_support.zoom_in,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         zoom_in_tooltip = CreateToolTip(self.zoom_in_button, "Zoom in")
 
@@ -716,7 +708,8 @@ class top_level:
         self.zoom_out_button.configure(
             image=self.zoom_out_image,
             command=gui_support.zoom_out,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.53, rely=0.2, width=4, height=42)
@@ -735,7 +728,8 @@ class top_level:
         self.node_properties_button.configure(
             image=self.node_properties_image,
             command=gui_support.select_node_properties,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         node_properties_tooltip = CreateToolTip(self.node_properties_button, "Edit a node's properties such as device type, label, color, connectivity,... ")
 
@@ -751,7 +745,8 @@ class top_level:
         self.edge_properties_button.configure(
             image=self.edge_properties_image,
             command=gui_support.select_edge_properties,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.635, rely=0.2, width=4, height=42)
@@ -769,7 +764,8 @@ class top_level:
             width=55)
         self.filter_button.configure(
             image=self.filter_image,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.695, rely=0.2, width=4, height=42)
@@ -788,7 +784,8 @@ class top_level:
         self.settings_button.configure(
             image=self.settings_image,
             command=settings_popup_window,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.94, rely=0.2, width=4, height=42)
@@ -806,22 +803,22 @@ class top_level:
             width=55)
         self.help_button.configure(
             image=self.help_image,
-            borderwidth=0)
+            borderwidth=0,
+            bg="#ffffff")
 
         help_tooltip = CreateToolTip(self.help_button, "Help")
 
         # ---------------------------Control Panel: Title-------------------------#
-        self.control_panel_title = tk.Label(self.control_panel, text="Control Panel", font=("Helvetica", 12, "bold"))
+        """self.control_panel_title = tk.Label(self.control_panel, text="Control Panel", font=("Helvetica", 12, "bold"))
         self.control_panel_title.place(
             anchor=tk.CENTER,
             relx=0.16,
             rely=0.05)
 
-        self.control_panel_title.configure(bg="#fafafa")
+        self.control_panel_title.configure(bg="#F0F0F0")"""
 
-        self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
+        """self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
-
         # ---------------------------Control Panel: Node-------------------------#
         self.node_title = tk.Label(self.control_panel, text="Node", font=("Helvetica", 12, "bold"))
         self.node_title.place(
@@ -829,52 +826,10 @@ class top_level:
             relx=0.12,
             rely=0.095)
 
-        self.node_title.configure(bg="#fafafa")
+        self.node_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.11, width=280, height=4)
-
-        '''
-        # ---------------------------Control Panel: Node: Add a node-------------------------#
-        self.add_node_title = tk.Label(self.control_panel, text="Add Devices:", font=("Helvetica", 12))
-        self.add_node_title.place(
-            anchor='w',
-            relx=0.05,
-            rely=0.14)
-
-        self.add_node_title.configure(bg="#fafafa")
-
-        self.node_type = StringVar()
-        self.add_node_combobox = ttk.Combobox(self.control_panel, state='readonly', textvariable=self.node_type, width=10)
-        self.add_node_combobox['values'] = ("Computer", "Hub", "Modem", "Router", "Switch")
-        self.add_node_combobox.current(0)
-        self.add_node_combobox.place(
-            anchor='w',
-            relx=0.4,
-            rely=0.14)
-
-        self.node_button = tk.Button(self.control_panel, text="Apply", command=gui_support.add_node)
-        self.node_button.place(anchor='w', relx=0.8, rely=0.14)
-        self.node_button.configure(bg="#fafafa")
-
-        '''
-        # ---------------------------Control Panel: Node: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
-        self.sample_title.place(
-            anchor='w',
-            relx=0.05,
-            rely=0.14)
-
-        self.sample_title.configure(bg="#fafafa")
-
-        # ---------------------------Control Panel: Node: Sample-------------------------#
-        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
-        self.sample_title.place(
-            anchor='w',
-            relx=0.05,
-            rely=0.18)
-
-        self.sample_title.configure(bg="#fafafa")
 
         # ---------------------------Control Panel: Node: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -890,9 +845,27 @@ class top_level:
         self.sample_title.place(
             anchor='w',
             relx=0.05,
+            rely=0.18)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
+            rely=0.22)
+
+        self.sample_title.configure(bg="#F0F0F0")
+
+        # ---------------------------Control Panel: Node: Sample-------------------------#
+        self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
+        self.sample_title.place(
+            anchor='w',
+            relx=0.05,
             rely=0.26)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Node: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -901,7 +874,7 @@ class top_level:
             relx=0.05,
             rely=0.3)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Node: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -910,7 +883,7 @@ class top_level:
             relx=0.05,
             rely=0.34)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.37, width=280, height=4)
@@ -922,7 +895,7 @@ class top_level:
             relx=0.12,
             rely=0.395)
 
-        self.edge_title.configure(bg="#fafafa")
+        self.edge_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.41, width=280, height=4)
@@ -934,7 +907,7 @@ class top_level:
             relx=0.05,
             rely=0.44)
 
-        self.add_edge_title.configure(bg="#fafafa")
+        self.add_edge_title.configure(bg="#F0F0F0")
 
         self.edge_type = StringVar()
         self.add_edge_combobox = ttk.Combobox(self.control_panel, state='readonly', textvariable=self.edge_type)
@@ -952,7 +925,7 @@ class top_level:
             relx=0.05,
             rely=0.48)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -961,7 +934,7 @@ class top_level:
             relx=0.05,
             rely=0.52)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -970,7 +943,7 @@ class top_level:
             relx=0.05,
             rely=0.56)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Edge: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -979,7 +952,7 @@ class top_level:
             relx=0.05,
             rely=0.6)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.63, width=280, height=4)
@@ -991,7 +964,7 @@ class top_level:
             relx=0.05,
             rely=0.655)
 
-        self.analyze_title.configure(bg="#fafafa")
+        self.analyze_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.control_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.675, width=280, height=4)
@@ -1003,7 +976,7 @@ class top_level:
             relx=0.05,
             rely=0.71)
 
-        self.bottleneck_title.configure(bg="#fafafa")
+        self.bottleneck_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -1012,7 +985,7 @@ class top_level:
             relx=0.05,
             rely=0.75)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -1021,7 +994,7 @@ class top_level:
             relx=0.05,
             rely=0.79)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -1030,7 +1003,7 @@ class top_level:
             relx=0.05,
             rely=0.83)
 
-        self.sample_title.configure(bg="#fafafa")
+        self.sample_title.configure(bg="#F0F0F0")
 
         # ---------------------------Control Panel: Analyze: Sample-------------------------#
         self.sample_title = tk.Label(self.control_panel, text="Sample", font=("Helvetica", 12))
@@ -1040,6 +1013,7 @@ class top_level:
             rely=0.87)
 
         self.sample_title.configure(bg="#F0F0F0")
+        """
 
         # ---------------------------Data Panel: Title-------------------------#
         self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Helvetica", 12, "bold"))
@@ -1047,13 +1021,82 @@ class top_level:
             anchor=tk.CENTER,
             relx=0.15,
             rely=0.05)
+        self.data_panel_title.configure(bg="#F0F0F0")
 
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=280, height=4)
 
-        self.data_panel_title.configure(bg="#F0F0F0")
+        # ---------------------------Data Panel: Node Title-------------------------#
+        self.node_data_title = tk.Label(self.data_panel, text="Data", font=("Helvetica", 12, "bold"))
+        self.node_data_title.place(
+            anchor=tk.CENTER,
+            relx=0.5,
+            rely=0.09)
+        self.node_data_title.configure(bg="#F0F0F0")
 
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.105, width=280, height=4)
+
+        self.node_data_button = tk.Button(self.data_panel, text="Modify")
+        self.node_data_button.place(
+            relx=0.8,
+            rely=0.07)
+        self.node_data_button.configure(bg="#F0F0F0", command=gui_support.node_modify)
+
+        # ---------------------------Data Panel: Node Data Panel-------------------------#
+        self.node_data_panel = tk.Frame(self.data_panel)
+        self.node_data_panel.place(
+            relx=0,
+            rely=0.11,
+            relheight=0.3 + 0.2,
+            relwidth=1)
+        self.node_data_panel.configure(background="#fafbf0")
+        """
+        # ---------------------------Data Panel: Edge Title-------------------------#
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.43, width=280, height=4)
+
+        self.edge_data_title = tk.Label(self.data_panel, text="Edge Data", font=("Helvetica", 12, "bold"))
+        self.edge_data_title.place(
+            anchor=tk.CENTER,
+            relx=0.2,
+            rely=0.455)
+        self.edge_data_title.configure(bg="#F0F0F0")
+
+        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
+        self.separator.place(relx=0.05, rely=0.465, width=280, height=4)
+
+        # ---------------------------Data Panel: Edge Data Panel-------------------------#
+        self.edge_data_panel = tk.Frame(self.data_panel)
+        self.edge_data_panel.place(
+            relx=0,
+            rely=0.47,
+            relheight=0.5,
+            relwidth=1)
+        self.edge_data_panel.configure(background="#fafbf0")
+
+        # ---------------------------Log Text-------------------------------------------#
+        self.log_text = tk.Text(self.edge_data_panel, wrap="word", state="disabled")
+        self.log_text.place(
+            relx=0.02,
+            rely=0.02,
+            width=350,
+            height=800
+        )
+        self.log_scrollbar = tk.Scrollbar(command=self.log_text.yview())
+        self.log_text['yscrollcommand'] = self.log_scrollbar.set
+
+        # ---------------------------Coordinates-------------------------#
+        self.coordinate_x_label = tk.Label(top, font=("Helvetica", 9))
+        self.coordinate_x_label.place(relx=0.0, rely=0.99, anchor='w')
+        self.coordinate_x_label.configure(bg="#F0F0F0")
+
+        self.coordinate_y_label = tk.Label(top, font=("Helvetica", 9))
+        self.coordinate_y_label.place(relx=0.015, rely=0.99, anchor='w')
+        self.coordinate_y_label.configure(bg="#F0F0F0")
+        """
         top.configure(menu=self.menubar)
+
 
 if __name__ == '__main__':
     vp_start_gui()

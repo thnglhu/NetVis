@@ -4,14 +4,22 @@ from mathplus.geometry import *
 
 
 class Canvas(tk.Canvas):
-    subscription = dict()
-    variable = dict()
-    """
-        inspect: information an object
-        mouse: location of the mouse
-    """
+    subscription = {
+        'button-1': {
+            'location': set(),
+            'location-motion': set(),
+            'empty': set(),
+            'object': set()
+        },
+        'button-2': dict(),
+        'button-3': {
+            'object': set(),
+            'empty': set()
+        },
+        'motion': set(),
+    }
+    cache = dict()
     last = (0, 0)
-    __scale = 1.0
 
     def __init__(self, master=None, cnf=None, **kwargs):
         tk.Canvas.__init__(self, master, cnf, **kwargs)
@@ -21,6 +29,7 @@ class Canvas(tk.Canvas):
 
     def __init_subclass(self, cnf=None, **kwargs):
         self.__size = np.array([kwargs['width'], kwargs['height']])
+        self.__scale = 1.0
         self.__graph_objects = dict()
         self.__invert_objects = dict()
         self.__scan_obj = None
@@ -31,17 +40,13 @@ class Canvas(tk.Canvas):
         self.subscriber = dict()
         self.bind("<MouseWheel>", self.__scroll)
         self.bind("<Motion>", self.__scan)
-        self.bind("<Double-Button-3>", self.__double)
         self.bind("<Button-1>", self.__motion_init)
         self.bind("<B1-Motion>", self.__motion)
-        self.bind("<Button-3>", self.__option)
         self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
-        if args:
-            pass
-        else:
-            tk.Canvas.delete(self, "all")
+        self.delete("all")
+        self.__graph_objects = dict()
 
     def create_mapped_circle(self, base, *args, **kw):
         canvas_object = self.__graph_objects.get(base)
@@ -60,6 +65,11 @@ class Canvas(tk.Canvas):
             end_b = self.convert_position(x, y)
             self.__graph_objects[base] = tk.Canvas.create_line(self, *end_a, *end_b, **kw)
             self.__invert_objects[self.__graph_objects[base], ] = base
+            from visual import vgraph as vg
+            canvas_object = self.__graph_objects.get(base)
+            if isinstance(base, vg.Edge):
+                self.tag_bind(canvas_object, '<Button-1>', self.__edge_button, ('button-1', base))
+
         return self.__graph_objects[base]
 
     def create_mapped_image(self, base, *args, **kw):
@@ -67,17 +77,32 @@ class Canvas(tk.Canvas):
         if canvas_object is None:
             position = self.convert_position(*args)
             self.__graph_objects[base] = tk.Canvas.create_image(self, *position, **kw)
-            self.__invert_objects[self.__graph_objects[base],] = base
+            self.__invert_objects[self.__graph_objects[base], ] = base
+
+            from visual import vnetwork as vn
+            canvas_object = self.__graph_objects.get(base)
+            if isinstance(base, vn.VVertex):
+                self.tag_bind(canvas_object, '<Button-1>', self.__vertex_button, ('button-1', base))
+                self.tag_bind(canvas_object, '<B1-Motion>', self.__vertex_button_motion, ('button-1', base))
+                self.tag_bind(canvas_object, '<ButtonRelease-1>', self.__vertex__button_release, ('button-1', ))
+                self.tag_bind(canvas_object, '<Button-3>', self.__vertex_button, ('button-3', base))
+                self.tag_bind(canvas_object, '<B3-Motion>', self.__vertex_button_motion, ('button-3', base))
+                self.tag_bind(canvas_object, '<ButtonRelease-3>', self.__vertex__button_release, ('button-3',))
+
+    def tag_bind(self, tagOrId, sequence=None, func=None, args=None):
+        def _func(event):
+            if args: func(event, *args)
+            else: func(event)
+        super().tag_bind(tagOrId, sequence, _func)
 
     def coords_mapped(self, base, *args):
         from visual import vgraph as vg
         canvas_object = self.__graph_objects.get(base)
-        if canvas_object is not None:
+        if canvas_object:
             position = self.convert_position(*args[:2]).astype(float)
             from visual import vnetwork as vn
             if isinstance(base, vn.Frame):
-                rad = args[2]
-                position = np.concatenate((position - rad, position + rad))
+                pass
             elif isinstance(base, vn.VVertex):
                 pass
             elif isinstance(base, vg.Edge):
@@ -86,12 +111,13 @@ class Canvas(tk.Canvas):
                 raise ValueError
             self.coords(canvas_object, *position)
         else:
+            print(canvas_object)
             raise TypeError
 
     def itemconfig_mapped(self, base, **kwargs):
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is not None:
-            self.itemconfig(canvas_object, **kwargs)
+            self.itemconfigure(canvas_object, **kwargs)
         else:
             raise TypeError
 
@@ -107,7 +133,7 @@ class Canvas(tk.Canvas):
     def invert_position(self, *position):
         return (position - self.__size / 2) / self.__scale
 
-    def scale_to_fit(self, top_left, bottom_right):
+    def scale_to_fit(self, top_left, bottom_right, offset):
         top_left = np.array(top_left)
         bottom_right = np.array(bottom_right)
         top_left[0], bottom_right[0] = sorted((top_left[0], bottom_right[0]))
@@ -116,7 +142,7 @@ class Canvas(tk.Canvas):
         if (size == 0).any():
             self.__scale = 1
         else:
-            scale = self.__size / size
+            scale = (self.__size - offset) / size
             self.__scale = max(min(scale), 1)
         self.center_to((bottom_right + top_left) / 2)
         self.reallocate()
@@ -167,66 +193,39 @@ class Canvas(tk.Canvas):
         self.zoom((event.x, event.y), potential=1.2 if event.delta > 0 else 1 / 1.2)
 
     def __scan(self, event):
-        self.__scan_obj = self.find_withtag(tk.CURRENT)
         self.__update_mouse_location(event.x, event.y)
-
-    def __double(self, event):
-        if self.__sender_turn:
-            self.sender = self.__invert_objects.get(self.__scan_obj, None)
-            from visual import vnetwork as vn
-            if not isinstance(self.sender, vn.PC):
-                pass
-            else:
-                self.__sender_turn = False
-                self.sender.focus(self)
-        else:
-            self.receiver = self.__invert_objects.get(self.__scan_obj, None)
-            from visual import vnetwork as vn
-            if not isinstance(self.receiver, vn.PC):
-                pass
-            else:
-                print(self.sender, self.receiver)
-                self.sender.send(self, self.receiver.interface.ip_address)
-                self.sender.unfocus(self)
-                self.sender = self.receiver = None
-                self.__sender_turn = True
-
 
     def __motion_init(self, event):
         self.__update_mouse_location(event.x, event.y)
-        if self.subscription.get('create'):
-            x, y = np.array((self.canvasx(0), self.canvasy(0))) + self.last
-            self.subscription['create'](x, y)
-            return
-        if self.__scan_obj:
-            self.__target = self.__invert_objects.get(self.__scan_obj)
-            from visual import vgraph as vg
-            if self.__target is not None:
-                if self.subscription.get('inspect'):
-                    self.subscription['inspect'](self.__target.info())
-                    self.variable['inspect'] = self.__target
-            if not isinstance(self.__target, vg.Vertex):
-                self.__target = None
-        else:
-            self.__target = None
-
-    def __option(self, event):
-        if self.__scan_obj:
-            target = self.__invert_objects.get(self.__scan_obj)
-            if self.subscription.get('option'):
-                self.variable['option'] = target
-                self.subscription['option'](target.info())
+        self.__button_location('button-1', event)
 
     def __motion(self, event):
         new = event.x, event.y
-        if self.__movable and self.__target:
-            vector = self.invert_position(*new) - self.invert_position(*self.last)
-            self.__target.motion(self, *vector)
-        else:
-            new = event.x, event.y
+        if self.__movable:
             self.scan_mark(*self.last)
             self.scan_dragto(*new, gain=1)
         self.__update_mouse_location(*new)
+
+    def __vertex_button(self, event, button, device):
+        self.__button_object(button, device)
+        self.__update_mouse_location(event.x, event.y)
+        self.__button_empty(button, device)
+        if button == 'button-1':
+            self.__movable = False
+
+    def __vertex_button_motion(self, event, button, device):
+        new = event.x, event.y
+        if button == 'button-1':
+            vector = self.invert_position(*new) - self.invert_position(*self.last)
+            device.motion(self, *vector)
+        self.__update_mouse_location(event.x, event.y)
+
+    def __vertex__button_release(self, event, button):
+        if button == 'button-1':
+            self.__movable = True
+
+    def __edge_button(self, event, button, link):
+        self.__button_object(button, link)
 
     def __resize(self, event):
         self.__size[0] = event.width
@@ -235,8 +234,46 @@ class Canvas(tk.Canvas):
 
     def __update_mouse_location(self, x, y):
         self.last = x, y
-        if self.subscription.get('mouse'):
-            self.subscription['mouse'](x + self.canvasx(0), y + self.canvasy(0))
+        for subscriber in self.subscription['motion'].copy():
+            subscriber.trigger(x + self.canvasx(0), y + self.canvasy(0))
+
+    def __button_location(self, button, event):
+        for subscriber in self.subscription[button]['location'].copy():
+            x, y = np.array((self.canvasx(0), self.canvasy(0))) + (event.x, event.y)
+            subscriber.trigger(x, y)
+
+    def __button_object(self, button, target):
+        if target:
+            for subscriber in self.subscription[button]['object'].copy():
+                subscriber.set_variable(target)
+                subscriber.trigger(target.info())
+
+    def __button_empty(self, button, target):
+        if target:
+            for subscriber in self.subscription[button]['empty'].copy():
+                subscriber.set_variable(target)
+                subscriber.trigger()
+
+    def subscribe(self, func, *args):
+        if func in self.cache:
+            return
+        location = self.subscription
+        for sub in args:
+            location = location[sub]
+        self.cache[func] = Warp(func)
+        location.add(self.cache[func])
+
+    def unsubscribe(self, func, *args):
+        if func not in self.cache:
+            return
+        location = self.subscription
+        for sub in args:
+            location = location[sub]
+        function = self.cache[func]
+        if function not in location:
+            return
+        location.remove(function)
+        del self.cache[func]
 
     @staticmethod
     def convert(canvas):
@@ -247,3 +284,18 @@ class Canvas(tk.Canvas):
         width = canvas.winfo_width()
         canvas.__init_subclass(width=width, height=height)
         return canvas
+
+
+class Warp:
+    def __init__(self, function, variable=None):
+        self.function = function
+        self.variable = variable
+
+    def trigger(self, *args):
+        self.function(*args)
+
+    def set_variable(self, value):
+        self.variable = value
+
+    def get_variable(self):
+        return self.variable
