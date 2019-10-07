@@ -175,17 +175,20 @@ class Frame(vg.CanvasItem):
 
     def __animate(self, canvas):
         att = self.attributes
-        while att['percent'] < 100.0:
+        while att['percent'] < 100.0 and self.active:
             att['percent'] += self.speed
+            if att['percent'] > 100.0:
+                att['percent'] = 100
             self.load()
             self.reallocate(canvas)
             time.sleep(0.05)
-        if att['percent'] > 100.0:
-            att['percent'] = 100.0
-            self.load()
-            self.reallocate(canvas)
-        if self.func:
-            self.func(*self.params)
+        if self.active:
+            if att['percent'] > 100.0:
+                att['percent'] = 100.0
+                self.load()
+                self.reallocate(canvas)
+            if self.func:
+                self.func(*self.params)
         canvas.remove(self)
 
     def load(self):
@@ -219,11 +222,13 @@ class Frame(vg.CanvasItem):
 
     def unfocus(self, canvas): pass
 
-    def destroy(self, canvas): pass
+    def destroy(self, canvas):
+        self.active = False
+        self['image'].unsubscribe()
 
     def info(self):
         return {
-            'type': (False, 'frame')
+            'type': 'frame'
         }
 
 

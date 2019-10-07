@@ -45,10 +45,8 @@ class Canvas(tk.Canvas):
         self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
-        if args:
-            pass
-        else:
-            tk.Canvas.delete(self, "all")
+        self.delete("all")
+        self.__graph_objects = dict()
 
     def create_mapped_circle(self, base, *args, **kw):
         canvas_object = self.__graph_objects.get(base)

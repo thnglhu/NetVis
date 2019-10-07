@@ -93,4 +93,4 @@ class AnimatedImage(StaticImage):
 
     def unsubscribe(self, target):
         if target in self.subscribers:
-            self.subscribers.remove(target)
+            self.subscribers.pop(target)

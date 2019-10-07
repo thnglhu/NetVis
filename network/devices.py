@@ -350,13 +350,13 @@ class Router:
         }
     """
 
-    def cache_arp(self, frame):
+    def cache_arp(self, frame, receiver):
         packet = frame.packet
         if packet:
-            for interface in self.interfaces:
-                if interface.mac_address == frame.mac_target:
-                    self.arp_table[packet.ip_source] = frame.mac_source
-                    return
+            if receiver.mac_address == frame.mac_target:
+                if self.arp_table.get(receiver) is None:
+                    self.arp_table[receiver] = dict()
+                self.arp_table[receiver][packet.ip_source] = frame.mac_source
 
     def __receive(self, source, frame, canvas, receiver):
         try:
@@ -365,7 +365,7 @@ class Router:
         except AttributeError:
             pass
         # print(self.name, 'update arp table')
-        self.cache_arp(frame)
+        self.cache_arp(frame, receiver)
         if ph.interface_arp_handler(receiver, frame, source=source, canvas=canvas):
             return
         ph.router_forward_handler(self, frame, source=source, receiver=receiver, canvas=canvas)
@@ -388,17 +388,16 @@ class Router:
         packet = frame.packet
         if packet:
             next_hop = ipa.ip_address(rule['next_hop'])
-            """
-            if packet.ip_target in self.arp_table:
-                forward_frame = data.Frame(interface.mac_address, self.arp_table[frame.packet.ip_target], packet)
+            if self.arp_table.get(interface) and packet.ip_target in self.arp_table[interface]:
+                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface][frame.packet.ip_target], packet)
                 interface.send(forward_frame, canvas)
             elif packet.ip_target in interface.ip_network:
                 function = partial(self.forward, interface, frame, rule, canvas)
                 arp = data.ARP(interface.ip_address, packet.ip_target, function)
                 arp_frame = data.BroadcastFrame(interface.mac_address, arp)
-                interface.send(arp_frame, canvas)"""
-            if next_hop in self.arp_table:
-                forward_frame = data.Frame(interface.mac_address, self.arp_table[next_hop], packet)
+                interface.send(arp_frame, canvas)
+            elif self.arp_table.get(interface) and next_hop in self.arp_table[interface]:
+                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface][next_hop], packet)
                 interface.send(forward_frame, canvas)
             else:
                 function = partial(self.forward, interface, frame, rule, canvas)
@@ -425,6 +424,7 @@ class Router:
                 return interface
 
     def json(self):
+        print(self.routing_table)
         return {
             'type': 'router',
             'name': self.name,
@@ -437,9 +437,9 @@ class Router:
             'routing_table': [
                 {
                     'destination': str(key),
-                    'next_hop': str(value.default_gateway),
-                    'interface': str(value.ip_address),
-                    'type': 'static'
+                    'next_hop': str(value['next_hop']),
+                    'interface': str(value['interface'].ip_address),
+                    'type': value['type']
                 }
                 for key, value in self.routing_table.items()
             ]

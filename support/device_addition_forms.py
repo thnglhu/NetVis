@@ -76,18 +76,6 @@ class RouterForm(Form):
             padx=10,
             sticky="we"
         )
-        self.label(text="Interface: ", row=5, column=1)
-        interface = self['interface'] = dict()
-        self.label(text="Name: ", row=6, column=1, padx=15)
-        interface['name'] = self.entry(row=6, column=2)
-        self.label(text="MAC address: ", row=7, column=1, padx=15)
-        interface['mac_address'] = self.entry(row=7, column=2)
-        self.label(text="IP address: ", row=8, column=1, padx=15)
-        interface['ip_address'] = self.entry(row=8, column=2)
-        self.label(text="IP network: ", row=9, column=1, padx=15)
-        interface['ip_network'] = self.entry(row=9, column=2)
-        self.label(text="Default gateway: ", row=10, column=1, padx=15)
-        interface['default_gateway'] = self.entry(row=10, column=2)
 
         self['routing_table'] = self.tree_view(
             headers=("Destination", "Next hop", "Interface", "Type"),
@@ -123,6 +111,29 @@ class RouterForm(Form):
         self.exclusive()
 
     def exclusive(self):
+        self.label(text="Interface: ", row=5, column=3)
+        interface = self['interface'] = dict()
+        self.label(text="Name: ", row=6, column=1, padx=15)
+        interface['name'] = self.entry(row=6, column=2)
+        self.label(text="MAC address: ", row=7, column=1, padx=15)
+        interface['mac_address'] = self.entry(row=7, column=2)
+        self.label(text="IP address: ", row=8, column=1, padx=15)
+        interface['ip_address'] = self.entry(row=8, column=2)
+        self.label(text="IP network: ", row=9, column=1, padx=15)
+        interface['ip_network'] = self.entry(row=9, column=2)
+        self.label(text="Default gateway: ", row=10, column=1, padx=15)
+        interface['default_gateway'] = self.entry(row=10, column=2)
+        def add_interface():
+            Form.tree_append(
+                self['interfaces'],
+                interface['name'].get(),
+                interface['mac_address'].get(),
+                interface['ip_address'].get(),
+                interface['ip_network'].get(),
+                interface['default_gateway'].get()
+            )
+        self.button(text="Append", row=11, column=2, command=add_interface)
+
         self.button(text="Submit", row=50, column=1, command=self.__trigger)
 
     def __trigger(self):

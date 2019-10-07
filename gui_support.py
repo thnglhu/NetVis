@@ -85,11 +85,11 @@ def save_popup_window():
     new_label.place(relx=0.1, rely=0.1)
     new_label.configure(bg="#ffffff")
 
-    yes_button = ttk.Button(save_popup, text="Yes", command=save_file_as)
+    yes_button = ttk.Button(save_popup, text="Yes", command=save_file)
     yes_button.place(relx=0.1, rely=0.5)
 
     def refresh_canvas():
-        w.main_canvas.delete("all")
+        controller.clear()
         save_popup.destroy()
 
     no_button = ttk.Button(save_popup, text="No", command=refresh_canvas)
@@ -469,7 +469,7 @@ def update_node_info(info):
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
     from support import extension as ex
-    frame = ex.Scrollable(w.node_data_panel)
+    frame = ex.VerticalScrollable(w.node_data_panel)
     print(info['type'])
     if info['type'] == 'host':
         info_forms.HostInfo(frame, info, node_modify)

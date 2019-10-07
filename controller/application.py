@@ -21,9 +21,9 @@ class Controller:
     def init(self, canvas):
         vcanvas.Canvas.convert(canvas)
         self.__canvas = canvas
-        self.__graph = vgraph.Graph()
 
     def load_file(self, file):
+        self.clear()
         with open(file.name) as json_file:
             data = json.load(json_file)
             time_stamp = data['time_stamp']
@@ -165,6 +165,16 @@ class Controller:
                     if interface in edge.interfaces:
                         edge.destroy(self.__canvas)
                 interface.other = None
+        return
+        """
+        elif isinstance(device, vn.Switch):
+            for other in device.others.copy():
+                intersection = device.link_edges.intersection(other.device.link_edges)
+                for edge in intersection.copy():
+                    if interface in edge.interfaces:
+                        edge.destroy(self.__canvas)
+                device.others.remove(other)"""
+
 
     def __connect_with(self):
 
@@ -227,6 +237,10 @@ class Controller:
     def disable_device(self, *args):
         device = self.right_click().get_variable()
         device.disable(self.__canvas)
+
+    def clear(self):
+        self.__canvas.clear()
+        self.__graph = vgraph.Graph()
 
     def right_click(self):
         return self.__canvas.cache[self.__cache['props']]
