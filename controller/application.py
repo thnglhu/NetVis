@@ -165,15 +165,6 @@ class Controller:
                         edge.destroy(self.__canvas)
                 interface.other = None
         return
-        """
-        elif isinstance(device, vn.Switch):
-            for other in device.others.copy():
-                intersection = device.link_edges.intersection(other.device.link_edges)
-                for edge in intersection.copy():
-                    if interface in edge.interfaces:
-                        edge.destroy(self.__canvas)
-                device.others.remove(other)"""
-
 
     def __connect_with(self):
 
@@ -232,6 +223,11 @@ class Controller:
             self.__canvas.unsubscribe(trigger_message, 'button-1', 'empty')
 
         self.__canvas.subscribe(trigger_message, 'button-1', 'empty')
+
+    def activate_stp(self, *args):
+        device = self.right_click().get_variable()
+        if device['type'] == 'switch':
+            device.activate_stp(self.__canvas)
 
     def disable_device(self, *args):
         device = self.right_click().get_variable()

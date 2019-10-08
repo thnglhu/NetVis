@@ -217,6 +217,8 @@ class Switch:
     def send_elect(self, source, frame, canvas):
 
         for port, value in self.ports.items():
+            if value['status'] == 'root':
+                continue
             if self.ports[port]['interface'] is not source and canvas:
                 my_device = self.device
                 other_device = value['interface'].device
@@ -239,11 +241,15 @@ class Switch:
                     f.start_animation()
 
     def __elect(self, canvas):
+        from random import uniform
         time.sleep(1)
-        # while True:
-        frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
-        self.send_elect(None, frame, canvas)
-        time.sleep(5)
+        while True:
+            if self.root_id == id(self):
+                for value in self.ports.values():
+                    value['status'] = 'designated'
+                frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
+                self.send_elect(None, frame, canvas)
+            time.sleep(10)
 
     def disconnect(self, other, init=True):
         self.others.remove(other)
@@ -281,20 +287,29 @@ class Switch:
         self.mac_table[frame.mac_source] = source
         if isinstance(frame, data.STP):
             root_id, bridge_id, cost = frame.get_bpdu()
-            if root_id < self.root_id or root_id == self.root_id and cost < self.cost:
+            if root_id < self.root_id:
+                for port in self.ports.values():
+                    port['status'] = 'designated'
                 self.ports[source]['status'] = 'root'
-                for key, value in self.ports.items():
-                    if key is not source:
-                        if id(self) > root_id and value['status'] == 'root':
-                            value['status'] = 'blocked'
-                        else:
-                            value['status'] = 'designated'
                 self.root_id = root_id
-                next_frame = data.STP(self.mac_address, self.root_id, id(self), cost + 1)
+                self.cost = cost + 1
+                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
                 self.send_elect(source, next_frame, canvas)
+            elif root_id == self.root_id:
+                if self.cost < cost or self.cost == cost and id(self) > bridge_id:
+                    self.ports[source]['status'] = 'designated'
+                elif self.ports[source]['status'] != 'root':
+                    self.ports[source]['status'] = 'blocked'
+                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
+                self.send_elect(source, next_frame, canvas)
+                """
             elif id(self) > bridge_id:
-                self.ports[source]['status'] = 'blocked'
-                return
+                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost + 1)
+                self.send_elect(source, next_frame, canvas)
+            elif id(self) < bridge_id and id(self) != self.root_id:
+                pass
+                """
+            return
 
         elif isinstance(frame, data.BroadcastFrame):
             ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
@@ -312,7 +327,7 @@ class Switch:
         if target is None:
             print('Connection is not available')
             return
-        if self.ports[target]['status'] == 'blocked':
+        if self.ports[target]['status'] == 'blocked' and not isinstance(frame, data.STP):
             return
         if canvas:
             my_device = self.device

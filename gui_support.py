@@ -533,6 +533,7 @@ def context_menu(info):
         'switch': {
             'Connect': controller.prepare_connecting,
             'Disable': controller.disable_device,
+            'Activate STP': controller.activate_stp,
         },
         'router': {
             'Connect': router_connect,
