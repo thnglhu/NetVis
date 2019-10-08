@@ -469,8 +469,8 @@ def update_node_info(info):
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
     from support import extension as ex
+    print(info.get('status'))
     frame = ex.HorizontalScrollable(w.node_data_panel)
-    print(info['type'])
     if info['type'] == 'host':
         info_forms.HostInfo(frame, info, node_modify)
     elif info['type'] == 'switch':

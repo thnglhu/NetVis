@@ -30,7 +30,7 @@ class VerticalScrollable(tk.Frame):
         "Enlarge the windows item to the canvas width"
 
         canvas_width = event.width
-        self.canvas.itemconfig(self.windows_item, width = canvas_width)
+        self.canvas.itemconfig(self.windows_item, width=canvas_width)
 
     def update(self):
         "Update the canvas and the scrollregion"

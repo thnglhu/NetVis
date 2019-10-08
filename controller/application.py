@@ -92,7 +92,6 @@ class Controller:
 
     def create(self, info):
         device_type = info['type']
-        print(device_type)
         g = self.__graph
 
         def my_create(x, y):
@@ -107,7 +106,7 @@ class Controller:
                 )
             elif device_type == 'switch':
                 device = self.__graph.add_vertex(
-                    info['interface'],
+                    info['mac_address'],
                     type='switch',
                     name=info['name']
                 )

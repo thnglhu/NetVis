@@ -133,7 +133,6 @@ class Host:
         if not self.interface:
             print('No connection')
             return
-
         if self.cache_contains(ip_target):
             packet = data.ICMP(self.interface.ip_address, ip_target, self.interface, segment)
             frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target]['mac_address'], packet)
@@ -240,9 +239,11 @@ class Switch:
                     f.start_animation()
 
     def __elect(self, canvas):
-        time.sleep(3)
+        time.sleep(1)
+        # while True:
         frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
         self.send_elect(None, frame, canvas)
+        time.sleep(5)
 
     def disconnect(self, other, init=True):
         self.others.remove(other)
