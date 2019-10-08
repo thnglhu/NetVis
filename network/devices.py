@@ -211,6 +211,7 @@ class Switch:
         self.cost = 0
 
     def activate_stp(self, canvas):
+        self.stp = True
         self.thread = Thread(target=self.__elect, args=(canvas, ))
         self.thread.start()
 
@@ -249,7 +250,7 @@ class Switch:
                     value['status'] = 'designated'
                 frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
                 self.send_elect(None, frame, canvas)
-            time.sleep(10)
+            time.sleep(30)
 
     def disconnect(self, other, init=True):
         self.others.remove(other)
@@ -285,7 +286,7 @@ class Switch:
             return
         # print(self.name, 'update mac table')
         self.mac_table[frame.mac_source] = source
-        if isinstance(frame, data.STP):
+        if isinstance(frame, data.STP) and self.stp:
             root_id, bridge_id, cost = frame.get_bpdu()
             if root_id < self.root_id:
                 for port in self.ports.values():
@@ -311,7 +312,7 @@ class Switch:
                 """
             return
 
-        elif isinstance(frame, data.BroadcastFrame):
+        elif isinstance(frame, data.BroadcastFrame) and not isinstance(frame, data.STP):
             ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
         else:
             if frame.mac_target in self.mac_table:
