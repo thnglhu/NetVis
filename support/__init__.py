@@ -6,6 +6,7 @@ class Form:
     data = dict()
     head = None
 
+
     def __getitem__(self, item):
         return self.data[item]
 
@@ -27,7 +28,7 @@ class Form:
     def label(self, root=None, **kwargs):
         if root is None:
             root = self.head
-        label = tk.Label(root, text=kwargs.get('text'))
+        label = tk.Label(root, text=kwargs.get('text'), font=("Rockwell",13))
         Form.grid(label, **kwargs)
         return label
 
@@ -44,8 +45,9 @@ class Form:
         header = kwargs.get('headers')
         tree = ttk.Treeview(
             root,
-            columns=[str(i + 1) for i in range(len(header) - 1)],
+            columns=[str(i + 1) for i in range(len(header) - 1)]
         )
+
         tree.configure()
         Form.grid(tree, **kwargs)
         tree.heading('#0', text=header[0])

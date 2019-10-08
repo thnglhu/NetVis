@@ -334,7 +334,7 @@ class top_level:
         self.data_panel.place(
             relx=0.51,
             rely=0.105 - 0.05,
-            relheight=0.93,
+            relheight=0.85,
             relwidth=0.49)
         self.data_panel.configure(background="#ffffff")
 

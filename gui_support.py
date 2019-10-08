@@ -9,6 +9,7 @@ from tkinter import filedialog
 from controller import application
 from gui import *
 import tkinter.ttk as ttk
+from tkinter import font
 from support import device_addition_forms, info_forms
 
 existed = False
@@ -25,7 +26,6 @@ filename = ''
 scale = 1
 dy = 0
 num = 0
-
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root, x, y
@@ -447,12 +447,12 @@ def destroy_window():
 
 def add_widget(type, text, relx, **kwargs):
     if type is "label":
-        label = tk.Label(w.node_data_panel, text=text, font=("Helvetica", 12), state=kwargs.get('state'))
+        label = tk.Label(w.node_data_panel, text=text, font=("Rockwell", 12), state=kwargs.get('state'))
         label.configure(bg="#f0f0f0")
         label.place(relx=relx, rely=dy)
         return label
     elif type is "entry":
-        entry = tk.Entry(w.node_data_panel, font=("Helvetica", 12), state=kwargs.get('state'))
+        entry = tk.Entry(w.node_data_panel, font=("Rockwell", 12), state=kwargs.get('state'))
         if text is not None:
             entry.insert(0, str(text))
         entry.place(relx=relx, rely=dy)
@@ -601,41 +601,41 @@ def add_interface(info):
     # INPUT
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="Interface Name: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="Interface Name: ", font=("Rockwell", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
-    ifname_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifname_input = tk.Entry(add_interface_popup, font=("Rockwell", 12))
     ifname_input.place(relx=0.5, rely=dy)
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="Mac Address: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="Mac Address: ", font=("Rockwell", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
-    ifmac_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifmac_input = tk.Entry(add_interface_popup, font=("Rockwell", 12))
     ifmac_input.place(relx=0.5, rely=dy)
     ifmac_input.insert(0, 'ff.ff.ff.ff.ff.ff')
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="IP Address: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="IP Address: ", font=("Rockwell", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
-    ifaddress_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifaddress_input = tk.Entry(add_interface_popup, font=("Rockwell", 12))
     ifaddress_input.place(relx=0.5, rely=dy)
     ifaddress_input.insert(0, '0.0.0.0')
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="IP Network: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="IP Network: ", font=("Rockwell", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
-    ifnet_input = tk.Entry(add_interface_popup, font=("Helvetica", 12))
+    ifnet_input = tk.Entry(add_interface_popup, font=("Rockwell", 12))
     ifnet_input.place(relx=0.5, rely=dy)
     ifnet_input.insert(0, '0.0.0.0/24')
 
     dy += 0.1
-    label = tk.Label(add_interface_popup, text="Default Gateway: ", font=("Helvetica", 12))
+    label = tk.Label(add_interface_popup, text="Default Gateway: ", font=("Rockwell", 12))
     label.configure(bg="#f0f0f0")
     label.place(relx=0.02, rely=dy)
-    gateway_input = tk.Entry(add_interface_popup, font=("Helvetica", 12), text='ASDasdasd')
+    gateway_input = tk.Entry(add_interface_popup, font=("Rockwell", 12), text='ASDasdasd')
     gateway_input.place(relx=0.5, rely=dy)
     gateway_input.insert(0, '0.0.0.0')
 
