@@ -49,10 +49,10 @@ class Form:
         tree.configure()
         Form.grid(tree, **kwargs)
         tree.heading('#0', text=header[0])
-        tree.column('#0', minwidth=50, width=75)
+        tree.column('#0', width=70)
         for i in range(len(header) - 1):
             tree.heading(str(i + 1), text=header[i + 1])
-            tree.column(str(i + 1), minwidth=50, width=75)
+            tree.column(str(i + 1), width=70)
         return tree
 
     def button(self, root=None, **kwargs):

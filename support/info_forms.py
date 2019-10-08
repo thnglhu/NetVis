@@ -35,8 +35,8 @@ class HostInfo(HostForm):
             Form.entry_set(ip_address, '')
             Form.entry_set(mac_address, '')
 
-        self.button(text="Append", row=43, column=2, command=append)
-        self.button(text="Modify", row=50, column=1, command=self.__trigger)
+        self.button(text="Append", row=43, column=2, sticky="nes", command=append)
+        self.button(text="Modify", row=43, column=1, sticky="nes", command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())
@@ -57,9 +57,10 @@ class SwitchInfo(SwitchForm):
             column=0,
             columnspan=4,
             padx=10,
+            width=75,
             sticky="we"
         )
-        self.button(text="Modify", row=50, column=1, command=self.__trigger)
+        self.button(text="Modify", row=70, column=5, sticky="nes", command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())
@@ -92,13 +93,13 @@ class RouterInfo(RouterForm):
     def exclusive(self):
         self['arp_table'] = self.tree_view(
             headers=('IP address', 'MAC address'),
-            row=40,
+            row=4,
             column=0,
             columnspan=4,
-            padx=10,
+            rowspan = 6,
             sticky="we"
         )
-        self.button(text="Modify", row=50, column=1, command=self.__trigger)
+        self.button(text="Modify", row=8, column=7, sticky="es", command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())

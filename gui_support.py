@@ -427,6 +427,7 @@ def remove_node():
     pass
 
 
+
 def motion(event):
     x, y = event.x, event.y
     print('{}, {}'.format(x, y))
@@ -469,7 +470,7 @@ def update_node_info(info):
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
     from support import extension as ex
-    frame = ex.VerticalScrollable(w.node_data_panel)
+    frame = ex.HorizontalScrollable(w.node_data_panel)
     print(info['type'])
     if info['type'] == 'host':
         info_forms.HostInfo(frame, info, node_modify)
@@ -478,6 +479,7 @@ def update_node_info(info):
     elif info['type'] == 'router':
         info_forms.RouterInfo(frame, info, node_modify)
     pass
+
     frame.update()
     """
     # print('Do something with this info', info)
@@ -587,7 +589,8 @@ def add_interface(info):
         return
 
     add_interface_popup = tk.Tk()
-    add_interface_popup.geometry("500x500")
+    add_interface_popup.geometry("1000x500")
+    add_interface_popup.configure(bg="#ffffff")
     add_interface_popup.title("Add New Interface to Router: " + info['name'])
     add_interface_popup.geometry("+%d+%d" % (
     (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
