@@ -31,6 +31,7 @@ class HostForm(Form):
         self.button(text="Submit", row=11, column=1, command=self.__trigger)
 
     def __trigger(self):
+        print(self)
         self.trigger(self.get_info())
 
     def get_info(self):
@@ -54,6 +55,7 @@ class SwitchForm(Form):
         self.button(text="Submit", row=11, column=1, command=self.__trigger)
 
     def __trigger(self):
+        print(self)
         self.trigger(self.get_info())
 
     def get_info(self):
@@ -139,6 +141,7 @@ class RouterForm(Form):
         self.button(text="Submit", row=50, column=1, command=self.__trigger)
 
     def __trigger(self):
+        print(self)
         self.trigger(self.get_info())
 
     def get_info(self):

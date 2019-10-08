@@ -72,6 +72,9 @@ class Frame:
     def build(self):
         return self
 
+    def get_image(self):
+        return self.packet.get_image()
+
 
 class BroadcastFrame(Frame):
     def __init__(self, source, packet):
@@ -110,3 +113,9 @@ class STP(Frame):
 
     def get_bpdu(self):
         return self.root_id, self.bridge_id, self.path_cost
+
+    def get_size(self):
+        return 100
+
+    def get_image(self):
+        return resource.get_image('stp')

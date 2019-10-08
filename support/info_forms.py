@@ -4,6 +4,7 @@ from support.device_addition_forms import *
 class HostInfo(HostForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
+        self.trigger = trigger
         Form.entry_set(self['name'], info['name'])
         interface = self['interface']
         interface_info = info['interface']
@@ -38,6 +39,7 @@ class HostInfo(HostForm):
         self.button(text="Append", row=43, column=2, command=append)
         self.button(text="Modify", row=50, column=1, command=self.__trigger)
 
+
     def __trigger(self):
         self.trigger(self.get_info())
 
@@ -45,6 +47,7 @@ class HostInfo(HostForm):
 class SwitchInfo(SwitchForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
+        self.trigger = trigger
         Form.entry_set(self['name'], info['name'])
         Form.entry_set(self['mac_address'], info['mac_address'])
         for mac_address, interface in info['mac_table'].items():
@@ -69,6 +72,7 @@ class SwitchInfo(SwitchForm):
 class RouterInfo(RouterForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
+        self.trigger = trigger
         Form.entry_set(self['name'], info['name'])
         for interface in info['interfaces']:
             Form.tree_append(

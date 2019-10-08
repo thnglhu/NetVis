@@ -57,6 +57,7 @@ class Controller:
                 switch.set_mac_table({
                     key: connectable[value] for key, value in device['mac_table'].items()
                 })
+                switch.activate_stp(self.__canvas)
             for router, device in routers.items():
                 router.set_routing_table(device['routing_table'])
 
@@ -75,9 +76,6 @@ class Controller:
 
     def exit(self):
         pass
-
-    def test(self):
-        self.__controller.inspect()
 
     def subscribe_inspection(self, func):
         self.__subscribe(func, 'inspect', 'button-1', 'object')
@@ -109,6 +107,7 @@ class Controller:
                 )
             elif device_type == 'switch':
                 device = self.__graph.add_vertex(
+                    info['interface'],
                     type='switch',
                     name=info['name']
                 )

@@ -104,7 +104,12 @@ class Switch(VVertex, dv.Switch):
             'type': 'switch',
             'mac_address': self.mac_address,
             'name': self.name,
-            'mac_table': self.__get_mac_table()
+            'mac_table': self.__get_mac_table(),
+            'root_id': self.root_id,
+            'bridge_id': id(self),
+            'status': {
+                key.name: value['status'] for key, value in self.ports.items()
+            }
         }
 
     def __get_mac_table(self):
