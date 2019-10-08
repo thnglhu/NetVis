@@ -1,6 +1,7 @@
 import ipaddress as ipa
 import resource
 
+
 class Segment:
     def __init__(self, data=None):
         self.data = data

@@ -153,8 +153,8 @@ class top_level:
         self.sub_menu_settings = tk.Menu(top, tearoff=0)
         self.sub_menu_help = tk.Menu(top, tearoff=0)
 
-        default_font = font.nametofont("TkDefaultFont")
-        default_font.configure(family="Rockwell", size=13)
+        # default_font = font.nametofont("TkDefaultFont")
+        # default_font.configure(family="Rockwell", size=13)
 
         # ---------------------------Toolbar: File-------------------------#
         self.menubar.add_cascade(

@@ -26,7 +26,6 @@ class VerticalScrollable(tk.Frame):
         # assign this obj (the inner frame) to the windows item of the canvas
         self.windows_item = self.canvas.create_window(0,0, window=self, anchor=tk.NW)
 
-
     def __fill_canvas(self, event):
         "Enlarge the windows item to the canvas width"
 

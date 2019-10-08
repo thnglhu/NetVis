@@ -306,7 +306,7 @@ class Edge(CanvasItem):
     def display(self, canvas):
         att = self.attributes
         canvas.create_mapped_line(self,
-                                  *self.packed_points(),
+                                                  *self.packed_points(),
                                   width=att['width'],
                                   fill=att['color'],
                                   tag=tuple(att['tag']),
