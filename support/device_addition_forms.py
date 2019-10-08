@@ -28,7 +28,7 @@ class HostForm(Form):
         self.exclusive()
 
     def exclusive(self):
-        self.button(text="Submit", row=11, column=8, command=self.__trigger)
+        self.button(text="Submit", row=11, column=2, command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())
@@ -49,7 +49,7 @@ class SwitchForm(Form):
         self.exclusive()
 
     def exclusive(self):
-        self.button(text="Submit", row=11, column=8, command=self.__trigger)
+        self.button(text="Submit", row=11, column=2, command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())
@@ -109,7 +109,7 @@ class RouterForm(Form):
             Form.entry_set(routing_table['next_hop'], '')
             Form.entry_set(routing_table['interface'], '')
             Form.entry_set(routing_table['type'], '')
-        self.button(text="Append", row=8, sticky="es", column=8, command=add_rule)
+        self.button(text="Append", row=8, sticky="es", column=6, command=add_rule)
         self.exclusive()
 
     def exclusive(self):
@@ -136,7 +136,7 @@ class RouterForm(Form):
             )
         self.button(text="Append", row=11, column=1, sticky="nes", command=add_interface)
 
-        self.button(text="Submit", row=50, column=9, command=self.__trigger)
+        self.button(text="Submit", row=50, column=8, sticky="nes", command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())

@@ -97,7 +97,7 @@ def save_popup_window():
 
     save_popup.mainloop()
 
-
+'''
 class node_properties_popup_window():
 
     def create_node_type(self):
@@ -331,7 +331,7 @@ class node_properties_popup_window():
         self.node_button.place(relx=0.70, rely=0.55)
 
     def __init__(self):
-        '''
+    
         self.router_arp_textbox = None
         self.mac_textbox = None
         self.arp_textbox = None
@@ -339,7 +339,7 @@ class node_properties_popup_window():
         self.ipnetwork_interface_textbox = None
         self.default_gateway_interface_textbox = None
         self.node_interface_textbox = None
-        '''
+    
         self.node_popup = tk.Tk()
 
         self.node_popup_frame = tk.Frame(self.node_popup)
@@ -356,6 +356,7 @@ class node_properties_popup_window():
         self.create_node_type()
 
         self.node_type_combobox.bind('<<ComboboxSelected>>', self.draw)
+'''
 
 def enable(child_list):
     # TODO fix this childList ??
