@@ -393,50 +393,16 @@ def close():
         if not isinstance(child, ttk.Separator):
             child.configure(state=tk.DISABLED)
 
-
-def undo():
-    print("Undo")
-
-
-def redo():
-    print("Redo")
-
-
 def zoom_in():
-    w.main_canvas.scale("all", 450, 450, 0.9, 0.9)
+    w.main_canvas.zoom((450, 450), potential=0.8)
 
 
 def zoom_out():
-    w.main_canvas.scale("all", 450, 450, 1.1, 1.1)
+    w.main_canvas.zoom((450, 450), potential=1.2)
 
 
 def find_node():
     print("Find node")
-
-
-def cut():
-    print("Cut")
-
-
-def copy():
-    print("Copy")
-
-
-def paste():
-    print("Paste")
-
-
-def select_all():
-    print("select all")
-
-
-def select_all_nodes():
-    print("Select All Nodes")
-
-
-def deselect_all_nodes():
-    print("Deselect All Nodes")
-
 
 def add_node():
     if existed:
@@ -456,73 +422,14 @@ def add_node():
     # node_properties_popup_window()
 
 
-def motion(event):
-    x, y = event.x, event.y
-    print('{}, {}'.format(x, y))
-
-
 def remove_node():
     pass
 
 
-def rename_node():
-    print("Rename Node")
 
-
-def select_node_properties():
-    print("Properties of Node")
-
-
-def change_all_nodes_color():
-    print("Change all node color")
-
-
-def change_all_nodes_size():
-    print("Change all node size")
-
-
-def change_all_nodes_shape():
-    print("Change all node shape")
-
-
-def change_all_nodes_label_size():
-    print("Change all node's label size")
-
-
-def change_all_nodes_label_color():
-    print("Change all node's label color")
-
-
-def select_all_edges():
-    print("Select All Edges")
-
-
-def deselect_all_edges():
-    print("Deselect All Edges")
-
-
-def add_edge():
-    print("Add Edge")
-
-
-def remove_edge():
-    print("Remove Edge")
-
-
-def select_edge_properties():
-    print("Select Edge Properties")
-
-
-def change_all_edges_label():
-    print("Change All Edges Label")
-
-
-def change_all_edges_color():
-    print("Change All Edges color")
-
-
-def change_all_edges_weight():
-    print("Change All Edges Weight")
+def motion(event):
+    x, y = event.x, event.y
+    print('{}, {}'.format(x, y))
 
 
 def settings():
@@ -562,7 +469,7 @@ def update_node_info(info):
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
     from support import extension as ex
-    frame = ex.VerticalScrollable(w.node_data_panel)
+    frame = ex.HorizontalScrollable(w.node_data_panel)
     print(info['type'])
     if info['type'] == 'host':
         info_forms.HostInfo(frame, info, node_modify)
@@ -571,6 +478,7 @@ def update_node_info(info):
     elif info['type'] == 'router':
         info_forms.RouterInfo(frame, info, node_modify)
     pass
+
     frame.update()
     """
     # print('Do something with this info', info)
@@ -680,7 +588,8 @@ def add_interface(info):
         return
 
     add_interface_popup = tk.Tk()
-    add_interface_popup.geometry("500x500")
+    add_interface_popup.geometry("1000x500")
+    add_interface_popup.configure(bg="#ffffff")
     add_interface_popup.title("Add New Interface to Router: " + info['name'])
     add_interface_popup.geometry("+%d+%d" % (
     (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))

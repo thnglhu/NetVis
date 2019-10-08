@@ -8,7 +8,7 @@ class VerticalScrollable(tk.Frame):
        call the update() method to refresh the scrollable area.
     """
 
-    def __init__(self, frame, width=16):
+    def __init__(self, frame, width=14):
 
         scrollbar = tk.Scrollbar(frame, width=width)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=False)
@@ -49,7 +49,7 @@ class HorizontalScrollable(tk.Frame):
 
     def __init__(self, frame, width=16):
 
-        scrollbar = tk.Scrollbar(frame, width=width, orient='horizontal')
+        scrollbar = tk.Scrollbar(frame, width=width, orient=tk.HORIZONTAL)
         scrollbar.pack(side=tk.BOTTOM, fill=tk.X, expand=False)
 
         self.canvas = tk.Canvas(frame, xscrollcommand=scrollbar.set)
