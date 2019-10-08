@@ -15,10 +15,12 @@ def get_lines_intersect(a1, a2, b1, b2):
     if z == 0:                          # lines are parallel
         return (float('inf'), float('inf'))
     return (x/z, y/z)
+
 def segments_are_collided(a1, a2, b1, b2):
     point = np.array(get_lines_intersect(a1, a2, b1, b2))
     if (point == (float('inf'), float('inf'))).any(): return (a1 == b1).all() or (a2 == b2).all()
     else: return is_between(a1, point, a2) and is_between(b1, point, b2)
+
 def point_is_inside_rect(point, top_left, bottom_right):
     return np.logical_and(point >= top_left, point <= bottom_right).all()
 

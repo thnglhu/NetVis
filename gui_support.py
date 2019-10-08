@@ -586,7 +586,7 @@ def router_connect(info):
 def add_interface(info):
     if info['type'] != "router":
         return
-
+    print(info)
     add_interface_popup = tk.Tk()
     add_interface_popup.geometry("1000x500")
     add_interface_popup.configure(bg="#ffffff")
