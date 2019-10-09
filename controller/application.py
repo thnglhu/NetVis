@@ -91,6 +91,19 @@ class Controller:
         self.__cache[name] = func
         self.__canvas.subscribe(func, *args)
 
+    def delete(self):
+        inspect = self.__cache['inspect']
+        self.__canvas.unsubscribe(inspect, 'button-1', 'object')
+
+        def my_delete():
+            self.__canvas.cache[self.__cache['delete']].get_variable().deep_destroy(self.__canvas)
+            self.__canvas.unsubscribe(my_delete, 'button-1', 'empty')
+            self.__canvas.subscribe(inspect, 'button-1', 'object')
+
+        self.__subscribe(my_delete, 'delete', 'button-1', 'empty')
+
+
+
     def create(self, info):
         device_type = info['type']
 

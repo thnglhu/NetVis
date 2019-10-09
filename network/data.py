@@ -129,7 +129,7 @@ class Hello(Packet):
         self.flag = flag
 
     def get_image(self):
-        return resource.get_image('mail' if self.flag == 'echo' else 'opened-mail')
+        return resource.get_image('hello' if self.flag == 'echo' else 'hello-reply')
 
     def is_reply(self):
         return self.flag == 'reply'

@@ -84,8 +84,8 @@ class RouterInfo(RouterForm):
                 interface['ip_network'],
                 interface['default_gateway']
             )
-        for ip_address, mac_address in info['arp_table'].items():
-            Form.tree_append(self['arp_table'], ip_address, mac_address)
+        for row in info['arp_table']:
+            Form.tree_append(self['arp_table'], row['ip_address'], row['mac_address'])
         for rule, detail in info['routing_table'].items():
             Form.tree_append(
                 self['routing_table'],
@@ -94,17 +94,21 @@ class RouterInfo(RouterForm):
                 str(detail['interface'].ip_address),
                 str(detail['type']),
             )
+        print(info.get('RIP_routing_table'))
 
     def exclusive(self):
+        self.label(text='ARP table:', row=4, column=0)
         self['arp_table'] = self.tree_view(
             headers=('IP address', 'MAC address'),
-            row=4,
+            row=5,
             column=0,
             columnspan=4,
             rowspan=6,
-            sticky="we"
+            sticky="we",
+            padx=10
         )
-        self.button(text="Modify", row=8, column=7, sticky="es", command=self.__trigger)
+
+        self.button(text="Modify", row=11, column=7, sticky="es", command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())

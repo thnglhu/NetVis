@@ -41,7 +41,6 @@ class Interface:
             'ip_address': self.ip_address,
             'ip_network': self.ip_network,
             'default_gateway': self.default_gateway,
-
         }
 
     def modify(self, info):
@@ -57,13 +56,12 @@ class Interface:
     def attach(self, other):
         self.other = other
 
-    def disconnect(self, init=True):
-        if init:
-            if isinstance(self.other, Interface):
-                self.other.disconnect(False)
+    def disconnect(self, other, init=True):
+        if other and other is self.other:
+            if init:
+                self.other.disconnect(self, False)
             else:
-                self.other.disconnect(self, True)
-        self.other = None
+                self.other = None
 
     def attach_device(self, device):
         self.device = device
@@ -84,14 +82,12 @@ class Interface:
         except AttributeError:
             pass
         if self.other is None:
-            print('Connection is not available')
             return
         if canvas:
             my_device = self.device
             other_device = self.other.device
             edges = my_device.link_edges.intersection(other_device.link_edges)
             for edge in edges:
-                from resource import get_image
                 is_inverted = not edge.points[0] == my_device
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
@@ -111,6 +107,15 @@ class Interface:
             'default_gateway': str(self.default_gateway)
         }
 
+    def deep_destroy(self, **kwargs):
+        if self.other:
+            my_device = self.device
+            other_device = self.other.device
+            edges = my_device.link_edges.intersection(other_device.link_edges)
+            for edge in edges:
+                edge.deep_destroy(kwargs.get('canvas'))
+            self.disconnect(self.other)
+
 
 class Host:
     def __init__(self, interface, **kwargs):
@@ -124,9 +129,6 @@ class Host:
             ipa.ip_address(key): value for key, value in self.arp_table.items()
         }
         self.name = kwargs.get('name')
-
-    def disconnect(self, other):
-        self.interface.disconnect(other)
 
     def send(self, canvas, ip_target, segment=None):
         try:
@@ -145,7 +147,8 @@ class Host:
             frame = data.BroadcastFrame(self.interface.mac_address, packet)
         elif self.cache_contains(self.interface.default_gateway):
             packet = data.ICMP(self.interface.ip_address, ip_target, self.interface, segment)
-            frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway]['mac_address'], packet)
+            frame = data.Frame(self.interface.mac_address,
+                               self.arp_table[self.interface.default_gateway]['mac_address'], packet)
         else:
             function = partial(self.send, canvas, ip_target, segment)
             packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
@@ -216,7 +219,7 @@ class Switch:
 
     def activate_stp(self, canvas):
         self.stp = True
-        self.thread = Thread(target=self.__elect, args=(canvas, ))
+        self.thread = Thread(target=self.__elect, args=(canvas,))
         self.thread.start()
 
     def send_elect(self, source, frame, canvas):
@@ -249,20 +252,22 @@ class Switch:
         from random import uniform
         time.sleep(uniform(1, 5))
         flag = "topology change"
-        while True:
+        while True and not self.__getattribute__('is_destroyed'):
             if self.root_id == id(self):
                 frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
                 self.send_elect(None, frame, canvas)
             time.sleep(25)
 
     def disconnect(self, other, init=True):
-        self.others.remove(other)
-        interface = None
-        for key, value in self.ports.items():
-            if value['interface'] == other:
-                interface = key
-        if interface:
-            self.ports.pop(interface)
+        if other in self.others:
+            self.others.remove(other)
+            interface = None
+            for key, value in self.ports.items():
+                if value['interface'] == other:
+                    interface = key
+            if interface:
+                other.disconnect(self, False)
+                self.ports.pop(interface)
 
     def attach(self, other):
         self.others.add(other)
@@ -330,8 +335,7 @@ class Switch:
                 return
         except AttributeError:
             pass
-        if target is None:
-            print('Connection is not available')
+        if target is None or target not in self.ports:
             return
         if self.ports[target]['status'] == 'blocked' and not isinstance(frame, data.STP):
             return
@@ -344,7 +348,6 @@ class Switch:
                 return
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
-                from resource import get_image
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
                 f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
@@ -392,14 +395,8 @@ class Switch:
 
 class Router:
 
-    def __getitem__(self, item):
-        return self.data2.get(item)
-
-    def __setitem__(self, key, value):
-        self.data2[key] = value
-
     def __init__(self, *interfaces, **kwargs):
-        self.data2 = dict()
+        self.extend = dict()
         self.interfaces = list(interfaces)
         for interface in interfaces:
             interface.attach_device(self)
@@ -409,16 +406,6 @@ class Router:
         self.arp_table = kwargs.get('arp_table') or dict()
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
-        self['RIP'] = {
-            'hello_thread': None,
-            'table': {
-                interface.ip_network: {
-                    'ip_network': interface.ip_network,
-                    'via': None,
-                    'hop': 0,
-                } for interface in self.interfaces
-            }
-        }
         self.neighbors = dict()
 
     def set_routing_table(self, info):
@@ -431,30 +418,42 @@ class Router:
         }
 
     def start_sending_hello(self, canvas):
-        self['RIP']['hello_thread'] = Thread(target=self.__hello, args=(canvas, ))
-        self['RIP']['advertise_thread'] = Thread(target=self.__advertise, args=(canvas,))
-        self['RIP']['hello_thread'].start()
-        self['RIP']['advertise_thread'].start()
+        self.extend['RIP'] = {
+            'hello_thread': None,
+            'table': {
+                interface.ip_network: {
+                    'ip_network': interface.ip_network,
+                    'via': None,
+                    'hop': 0,
+                } for interface in self.interfaces
+            }
+        }
+        self.extend['RIP']['hello_thread'] = Thread(target=self.__hello, args=(canvas,))
+        self.extend['RIP']['advertise_thread'] = Thread(target=self.__advertise, args=(canvas,))
+        self.extend['RIP']['hello_thread'].start()
+        self.extend['RIP']['advertise_thread'].start()
 
     def __hello(self, canvas):
         from random import uniform
         time.sleep(uniform(1, 10))
-        while True:
+        while True and not self.__getattribute__('is_destroyed'):
             for interface in self.interfaces:
                 hello_frame = data.Hello(interface.ip_address).build(interface.mac_address)
                 interface.send(hello_frame, canvas)
             time.sleep(10)
 
     def __advertise(self, canvas):
-        while True:
+        from random import uniform
+        time.sleep(uniform(1, 10))
+        while True and not self.__getattribute__('is_destroyed'):
             for neighbor in self.neighbors.values():
                 ip_address = neighbor['ip_address']
                 mac_address = neighbor['mac_address']
                 via = neighbor['via']
-                frame = data.RIP(via.ip_address, ip_address, self['RIP']['table']).build(via.mac_address, mac_address)
+                frame = data.RIP(via.ip_address, ip_address, self.extend['RIP']['table']).build(via.mac_address,
+                                                                                                mac_address)
                 via.send(frame, canvas)
             time.sleep(5)
-
 
     """
     def set_routing_table(self, routing_table):
@@ -506,7 +505,8 @@ class Router:
         if packet:
             next_hop = ipa.ip_address(rule['next_hop'])
             if self.arp_table.get(interface) and packet.ip_target in self.arp_table[interface]:
-                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface][frame.packet.ip_target], packet)
+                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface][frame.packet.ip_target],
+                                           packet)
                 interface.send(forward_frame, canvas)
             elif packet.ip_target in interface.ip_network:
                 function = partial(self.forward, interface, frame, rule, canvas)
@@ -541,8 +541,7 @@ class Router:
                 return interface
 
     def json(self):
-        print(self.routing_table)
-        return {
+        result = {
             'type': 'router',
             'name': self.name,
             'interfaces': [
@@ -556,6 +555,6 @@ class Router:
                     'type': value['type']
                 }
                 for key, value in self.routing_table.items()
-            ]
+            ],
         }
-
+        return result

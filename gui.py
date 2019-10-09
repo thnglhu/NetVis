@@ -7,6 +7,7 @@
 
 import sys
 
+import resource
 
 try:
     import Tkinter as tk
@@ -202,7 +203,6 @@ class top_level:
 
         self.sub_menu.add_command(
             background="#ffffff",
-            command=gui_support.save_file_as,
             font="TkMenuFont",
             foreground="#000000",
             label="Save as...")
@@ -348,7 +348,7 @@ class top_level:
         self.top_panel.configure(background="#FFFFFF")
 
         # ---------------------------Top Panel: Open-------------------------#
-        self.add_file_image = ImageTk.PhotoImage(file="resource/icons/add_file.png")
+        # self.add_file_image = ImageTk.PhotoImage(file="resource/icons/add_file.png")
         self.add_file_button = tk.Button(self.top_panel)
         self.add_file_button.place(
             anchor=tk.CENTER,
@@ -357,7 +357,7 @@ class top_level:
             height=55,
             width=55)
         self.add_file_button.configure(
-            image=self.add_file_image,
+            image=resource.get_image('open-file').get_image(),
             command=gui_support.open_file,
             borderwidth=0,
             bg="#ffffff")
@@ -375,7 +375,7 @@ class top_level:
             width=55)
         self.new_file_button.configure(
             borderwidth=0,
-            image=self.new_file_image,
+            image=resource.get_image('new-file').get_image(),
             command=gui_support.create_new_file,
             bg="#ffffff")
 
@@ -391,7 +391,7 @@ class top_level:
             height=55,
             width=55)
         self.save_file_button.configure(
-            image=self.save_file_image,
+            image=resource.get_image('save-file').get_image(),
             command=gui_support.save_file,
             borderwidth=0,
             bg="#ffffff")
@@ -411,7 +411,7 @@ class top_level:
             height=55,
             width=55)
         self.search_button.configure(
-            image=self.search_image,
+            image=resource.get_image('find').get_image(),
             borderwidth=0,
             bg="#ffffff")
         self.search_box = tk.Text(self.top_panel)
@@ -438,7 +438,7 @@ class top_level:
             height=55,
             width=55)
         self.add_node_button.configure(
-            image=self.add_node_image,
+            image=resource.get_image('add-device').get_image(),
             command=gui_support.add_node,
             borderwidth=0,
             bg="#ffffff")
@@ -455,7 +455,7 @@ class top_level:
             height=55,
             width=55)
         self.remove_node_button.configure(
-            image=self.remove_node_image,
+            image=resource.get_image('remove-device').get_image(),
             command=gui_support.remove_node,
             borderwidth=0,
             bg="#ffffff")
@@ -475,7 +475,7 @@ class top_level:
             height=55,
             width=55)
         self.zoom_in_button.configure(
-            image=self.zoom_in_image,
+            image=resource.get_image('zoom-in').get_image(),
             command=gui_support.zoom_in,
             borderwidth=0,
             bg="#ffffff")
@@ -492,7 +492,7 @@ class top_level:
             height=55,
             width=55)
         self.zoom_out_button.configure(
-            image=self.zoom_out_image,
+            image=resource.get_image('zoom-out').get_image(),
             command=gui_support.zoom_out,
             borderwidth=0,
             bg="#ffffff")

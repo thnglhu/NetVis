@@ -62,11 +62,9 @@ def router_forward_handler(router, frame, **kwargs):
     packet = frame.packet
     if packet and kwargs.get('receiver').mac_address == frame.mac_target:
 
-        if True:
-            for network, info in router['RIP']['table'].items():
+        if router.extend.get('RIP'):
+            for network, info in router.extend['RIP']['table'].items():
                 if packet.ip_target in network:
-                    print(router.neighbors)
-                    print(router['RIP']['table'])
                     pass
                     if info['via'] is None:
                         static(router, frame, packet, **kwargs)
@@ -102,7 +100,7 @@ def router_hello_handler(router, frame, **kwargs):
 def router_rip_handler(router, frame, **kwargs):
     packet = frame.packet
     if packet and isinstance(packet, dt.RIP):
-        my_table = router['RIP']['table']
+        my_table = router.extend['RIP']['table']
         table = packet.table
         for network, rule in table.items():
             if network not in my_table:
