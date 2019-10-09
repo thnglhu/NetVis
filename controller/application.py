@@ -60,6 +60,7 @@ class Controller:
                 switch.activate_stp(self.__canvas)
             for router, device in routers.items():
                 router.set_routing_table(device['routing_table'])
+                router.start_sending_hello(self.__canvas)
 
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(

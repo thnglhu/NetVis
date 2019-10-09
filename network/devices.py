@@ -31,6 +31,9 @@ class Interface:
             json['default_gateway']
         )
 
+    def __str__(self):
+        return self.name
+
     def info(self):
         return {
             'name': self.name,
@@ -71,6 +74,7 @@ class Interface:
                 return
         except AttributeError:
             pass
+
         self.attachment(source, frame, canvas, *self.params)
 
     def send(self, frame, canvas=None):
@@ -243,11 +247,10 @@ class Switch:
 
     def __elect(self, canvas):
         from random import uniform
-        time.sleep(1)
+        time.sleep(uniform(1, 5))
+        flag = "topology change"
         while True:
             if self.root_id == id(self):
-                for value in self.ports.values():
-                    value['status'] = 'designated'
                 frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
                 self.send_elect(None, frame, canvas)
             time.sleep(25)
@@ -388,7 +391,15 @@ class Switch:
 
 
 class Router:
+
+    def __getitem__(self, item):
+        return self.data2.get(item)
+
+    def __setitem__(self, key, value):
+        self.data2[key] = value
+
     def __init__(self, *interfaces, **kwargs):
+        self.data2 = dict()
         self.interfaces = list(interfaces)
         for interface in interfaces:
             interface.attach_device(self)
@@ -398,7 +409,17 @@ class Router:
         self.arp_table = kwargs.get('arp_table') or dict()
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
-
+        self['RIP'] = {
+            'hello_thread': None,
+            'table': {
+                interface.ip_network: {
+                    'ip_network': interface.ip_network,
+                    'via': None,
+                    'hop': 0,
+                } for interface in self.interfaces
+            }
+        }
+        self.neighbors = dict()
 
     def set_routing_table(self, info):
         self.routing_table = {
@@ -409,11 +430,31 @@ class Router:
             } for sub in info
         }
 
+    def start_sending_hello(self, canvas):
+        self['RIP']['hello_thread'] = Thread(target=self.__hello, args=(canvas, ))
+        self['RIP']['advertise_thread'] = Thread(target=self.__advertise, args=(canvas,))
+        self['RIP']['hello_thread'].start()
+        self['RIP']['advertise_thread'].start()
 
-    def __hello(self):
-        for interface in self.interfaces:
-            hello_packet = data.Hello()
-            interface.send()
+    def __hello(self, canvas):
+        from random import uniform
+        time.sleep(uniform(1, 10))
+        while True:
+            for interface in self.interfaces:
+                hello_frame = data.Hello(interface.ip_address).build(interface.mac_address)
+                interface.send(hello_frame, canvas)
+            time.sleep(10)
+
+    def __advertise(self, canvas):
+        while True:
+            for neighbor in self.neighbors.values():
+                ip_address = neighbor['ip_address']
+                mac_address = neighbor['mac_address']
+                via = neighbor['via']
+                frame = data.RIP(via.ip_address, ip_address, self['RIP']['table']).build(via.mac_address, mac_address)
+                via.send(frame, canvas)
+            time.sleep(5)
+
 
     """
     def set_routing_table(self, routing_table):
@@ -439,6 +480,10 @@ class Router:
         # print(self.name, 'update arp table')
         self.cache_arp(frame, receiver)
         if ph.interface_arp_handler(receiver, frame, source=source, canvas=canvas):
+            return
+        if ph.router_hello_handler(self, frame, canvas=canvas, receiver=receiver):
+            return
+        if ph.router_rip_handler(self, frame, receiver=receiver):
             return
         ph.router_forward_handler(self, frame, source=source, receiver=receiver, canvas=canvas)
 

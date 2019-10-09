@@ -1,0 +1,76 @@
+{
+    "connection": [
+        {
+            "bandwidth": 50,
+            "link": [
+                2055263290312,
+                2055248612744
+            ]
+        },
+        {
+            "bandwidth": 50,
+            "link": [
+                2055263468808,
+                2055248612360
+            ]
+        }
+    ],
+    "devices": [
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "1.1.1.1",
+                "id": 2055263290312,
+                "ip_address": "1.1.1.2",
+                "ip_network": "1.1.1.0/24",
+                "mac_address": "a",
+                "name": "a"
+            },
+            "name": "a",
+            "type": "host",
+            "x": -243.5,
+            "y": -72.0
+        },
+        {
+            "arp_table": {},
+            "interface": {
+                "default_gateway": "1.1.2.1",
+                "id": 2055263468808,
+                "ip_address": "1.1.2.2",
+                "ip_network": "1.1.2.0/24",
+                "mac_address": "b",
+                "name": "b"
+            },
+            "name": "b",
+            "type": "host",
+            "x": 188.5,
+            "y": -75.0
+        },
+        {
+            "interfaces": [
+                {
+                    "default_gateway": "1.1.2.2",
+                    "id": 2055248612360,
+                    "ip_address": "1.1.2.1",
+                    "ip_network": "1.1.2.0/24",
+                    "mac_address": "B",
+                    "name": "BBB"
+                },
+                {
+                    "default_gateway": "1.1.1.2",
+                    "id": 2055248612744,
+                    "ip_address": "1.1.1.1",
+                    "ip_network": "1.1.1.0/24",
+                    "mac_address": "A",
+                    "name": "AAA"
+                }
+            ],
+            "name": "c",
+            "routing_table": [],
+            "type": "router",
+            "x": -32.5,
+            "y": -74.0
+        }
+    ],
+    "time_stamp": 1570608663.4546306
+}

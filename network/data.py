@@ -120,3 +120,43 @@ class STP(Frame):
 
     def get_image(self):
         return resource.get_image('stp')
+
+
+class Hello(Packet):
+
+    def __init__(self, source, target=None, flag='echo'):
+        super().__init__(source, target, None, None)
+        self.flag = flag
+
+    def get_image(self):
+        return resource.get_image('mail' if self.flag == 'echo' else 'opened-mail')
+
+    def is_reply(self):
+        return self.flag == 'reply'
+
+    def reply(self, ip_address):
+        return Hello(ip_address, self.ip_source, 'reply')
+
+    def get_size(self):
+        return 70
+
+    def build(self, *args):
+        if len(args) == 1:
+            return BroadcastFrame(args[0], self)
+        else:
+            return Frame(args[0], args[1], self)
+
+
+class RIP(Packet):
+    def __init__(self, source, target, table):
+        super().__init__(source, target)
+        self.table = table
+
+    def get_size(self):
+        return 100
+
+    def build(self, *args):
+        return Frame(args[0], args[1], self)
+
+    def get_image(self):
+        return resource.get_image('rip')
