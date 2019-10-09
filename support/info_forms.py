@@ -101,7 +101,7 @@ class RouterInfo(RouterForm):
             row=4,
             column=0,
             columnspan=4,
-            rowspan = 6,
+            rowspan=6,
             sticky="we"
         )
         self.button(text="Modify", row=8, column=7, sticky="es", command=self.__trigger)

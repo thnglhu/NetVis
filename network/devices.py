@@ -250,7 +250,7 @@ class Switch:
                     value['status'] = 'designated'
                 frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
                 self.send_elect(None, frame, canvas)
-            time.sleep(30)
+            time.sleep(25)
 
     def disconnect(self, other, init=True):
         self.others.remove(other)
@@ -501,9 +501,6 @@ class Router:
             'interfaces': [
                 interface.json() for interface in self.interfaces
             ],
-            # 'routing_table': {
-            #     str(key): id(value) for key, value in self.routing_table.items()
-            # }
             'routing_table': [
                 {
                     'destination': str(key),

@@ -92,7 +92,6 @@ class Controller:
 
     def create(self, info):
         device_type = info['type']
-        g = self.__graph
 
         def my_create(x, y):
             from network import devices as dv
@@ -111,13 +110,31 @@ class Controller:
                     name=info['name']
                 )
             elif device_type == 'router':
-                interfaces = list(map(lambda interface_info: dv.Interface.load(interface_info), info['interfaces']))
+                print(info)
+                interfaces = list()
+                for interface in info['interfaces']:
+                    interfaces.append(dv.Interface.load(
+                        {
+                            'name': interface[0],
+                            'mac_address': interface[1],
+                            'ip_address': interface[2],
+                            'ip_network': interface[3],
+                            'default_gateway': interface[4],
+                        }))
                 device = self.__graph.add_vertex(
                     *interfaces,
                     type='router',
                     name=info['name']
                 )
-                device.set_routing_table(info.get('routing_table'))
+                routing_table = list()
+                for rule in info['routing_table']:
+                    routing_table.append({
+                        'destination': rule[0],
+                        'next_hop': rule[1],
+                        'interface': rule[2],
+                        'type': rule[3]
+                    })
+                device.set_routing_table(routing_table)
             if device:
                 device['x'], device['y'] = self.__canvas.invert_position(x, y)
                 device.display(self.__canvas)

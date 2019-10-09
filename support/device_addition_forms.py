@@ -118,7 +118,7 @@ class RouterForm(Form):
 
     def exclusive(self):
         self.label(text="Interface: ", row=2, column=0)
-        interface = self['interface'] = dict()
+        interface = dict()
         self.label(text="Name: ", row=4, column=0, padx=15)
         interface['name'] = self.entry(row=4, column=1)
         self.label(text="MAC address: ", row=5, column=0, padx=15)
@@ -129,6 +129,7 @@ class RouterForm(Form):
         interface['ip_network'] = self.entry(row=7, column=1)
         self.label(text="Default gateway: ", row=8, column=0, padx=15)
         interface['default_gateway'] = self.entry(row=8, column=1)
+
         def add_interface():
             Form.tree_append(
                 self['interfaces'],

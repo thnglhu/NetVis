@@ -419,6 +419,7 @@ def add_node():
         parent.add(switch_tab, text="Switch")
         parent.add(router_tab, text="Router")
         parent.pack(expand=1, fill='both')
+        windows.lift()
     # node_properties_popup_window()
 
 
