@@ -220,7 +220,7 @@ class Switch:
         for port, value in self.ports.items():
             if value['status'] == 'root':
                 continue
-            if self.ports[port]['interface'] is not source and canvas:
+            if port is not source and canvas:
                 my_device = self.device
                 other_device = value['interface'].device
                 if hasattr(my_device, 'link_edges'):
@@ -297,6 +297,8 @@ class Switch:
                 next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
                 self.send_elect(source, next_frame, canvas)
             elif root_id == self.root_id:
+                if bridge_id == self.root_id:
+                    self.ports[source]['status'] = 'root'
                 if self.cost < cost or self.cost == cost and id(self) > bridge_id:
                     self.ports[source]['status'] = 'designated'
                 elif self.ports[source]['status'] != 'root':

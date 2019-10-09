@@ -558,19 +558,36 @@ def context_menu(info):
 
 def router_connect(info):
     select_interface_popup = tk.Tk()
-    select_interface_popup.geometry("500x500")
+    # select_interface_popup.geometry("500x500")
     select_interface_popup.title("Select an Interface of Router " + info['type'])
     select_interface_popup.geometry("+%d+%d" % (
     (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
 
     # Combo box handling
     interfaces_combobox = ttk.Combobox(select_interface_popup, values=[])
-    interfaces_combobox.place(relx=0.02, rely=0.02)
+    interfaces_combobox.grid(row=1, column=0, padx=10, pady=10, sticky="nesw")
+    # interfaces_combobox.place(relx=0.02, rely=0.02)
     print(info)
     for interface in map(lambda each: each['name'], info['interfaces']):
         interfaces_combobox['values'] += (interface,)
-    interfaces_combobox.current(0)
+    # interfaces_combobox.current(0)
+    # interface info label
+    info_label = tk.Label(select_interface_popup)
+    info_label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+    # info_label.configure(bg="#f0f0f0")
+    # info_label.place(relx=0.02, rely=0.1)
 
+    def update_info_label(event):
+        current_interface = interfaces_combobox.get()
+        for interface in info['interfaces']:
+            if interface['name'] == current_interface:
+                info_label['text'] = "MAC Address: " + interface['mac_address'] \
+                                     + "\nIP Address: " + str(interface['ip_address']) \
+                                     + "\nIP Network: " + str(interface['ip_network']) \
+                                     + "\nDefault Gateway: " + str(interface['default_gateway'])
+                break
+
+    interfaces_combobox.bind("<<ComboboxSelected>>", update_info_label)
     # OK & Cancel buttons
     def close_popup():
         select_interface_popup.destroy()
@@ -580,9 +597,11 @@ def router_connect(info):
         close_popup()
 
     ok_button = tk.Button(select_interface_popup, text="OK", command=select_interface)
-    ok_button.pack(side='bottom')
+    ok_button.grid(row=3)
+    # ok_button.pack(side='bottom')
     cancel_button = tk.Button(select_interface_popup, text="Cancel", command=close_popup)
-    cancel_button.pack(side='bottom')
+    cancel_button.grid(row=4)
+    # cancel_button.pack(side='bottom')
 
 
 def add_interface(info):
