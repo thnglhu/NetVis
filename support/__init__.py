@@ -28,7 +28,7 @@ class Form:
     def label(self, root=None, **kwargs):
         if root is None:
             root = self.head
-        label = tk.Label(root, text=kwargs.get('text'), font=("Rockwell",13))
+        label = tk.Label(root, text=kwargs.get('text'), font=("Helvetica",12))
         Form.grid(label, **kwargs)
         return label
 

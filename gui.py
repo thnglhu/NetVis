@@ -256,54 +256,6 @@ class top_level:
             foreground="#000000",
             label="Find")
 
-        # ---------------------------Toolbar: Network-------------------------#
-        self.menubar.add_cascade(
-            menu=self.sub_menu_network,
-            background="#ffffff",
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Network")
-
-        # ---------------------------Toolbar: Filter-------------------------#
-        self.menubar.add_cascade(
-            menu=self.sub_menu_filter,
-            background="#ffffff",
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Filter")
-
-        # ---------------------------Toolbar: Analyze-------------------------#
-        self.menubar.add_cascade(
-            menu=self.sub_menu_analyze,
-            background="#ffffff",
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Analyze")
-
-        # ---------------------------Toolbar: Options-------------------------#
-        self.menubar.add_cascade(
-            menu=self.sub_menu_options,
-            background="#ffffff",
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Options")
-
-        # ---------------------------Toolbar: Settings-------------------------#
-        self.menubar.add_cascade(
-            menu=self.sub_menu_settings,
-            background="#ffffff",
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Settings")
-
-        # ---------------------------Toolbar: Help-------------------------#
-        self.menubar.add_cascade(
-            menu=self.sub_menu_help,
-            background="#ffffff",
-            font="TkMenuFont",
-            foreground="#000000",
-            label="Help")
-
         # ---------------------------Canvas-------------------------#
 
         self.main_canvas = tk.Canvas(top)
@@ -503,44 +455,24 @@ class top_level:
 
         zoom_out_tooltip = CreateToolTip(self.zoom_out_button, "Zoom out")
 
-        # ---------------------------Top Panel: Settings-------------------------#
-        self.settings_image = ImageTk.PhotoImage(file="resource/icons/settings.png")
-        self.settings_button = tk.Button(self.top_panel)
-        self.settings_button.place(
-            anchor=tk.CENTER,
-            relx=0.9,
-            rely=0.5,
-            height=55,
-            width=55)
-        self.settings_button.configure(
-            image=self.settings_image,
-            command=settings_popup_window,
-            borderwidth=0,
-            bg="#ffffff")
-
-        self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
-        self.separator.place(relx=0.94, rely=0.2, width=4, height=42)
-
-        settings_tooltip = CreateToolTip(self.settings_button, "Settings")
-
-        # ---------------------------Top Panel: Help-------------------------#
-        self.help_image = ImageTk.PhotoImage(file="resource/icons/help.png")
-        self.help_button = tk.Button(self.top_panel)
-        self.help_button.place(
+        # ---------------------------Top Panel: About-------------------------#
+        self.about_image = ImageTk.PhotoImage(file="resource/icons/about.png")
+        self.about_button = tk.Button(self.top_panel)
+        self.about_button.place(
             anchor=tk.CENTER,
             relx=0.98,
             rely=0.5,
             height=55,
             width=55)
-        self.help_button.configure(
-            image=self.help_image,
+        self.about_button.configure(
+            image=self.about_image,
             borderwidth=0,
             bg="#ffffff")
 
-        help_tooltip = CreateToolTip(self.help_button, "Help")
+        help_tooltip = CreateToolTip(self.about_button, "About")
 
         # ---------------------------Data Panel: Title-------------------------#
-        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Rockwell", 12, "bold"))
+        self.data_panel_title = tk.Label(self.data_panel, text="Information", font=("Helvetica", 12, "bold"))
         self.data_panel_title.place(
             anchor=tk.CENTER,
             relx=0.15,
@@ -550,22 +482,11 @@ class top_level:
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=590, height=3)
 
-        # ---------------------------Data Panel: Node Title-------------------------#
-        self.node_data_title = tk.Label(self.data_panel, text="Data", font=("Rockwell", 12, "bold"))
-        self.node_data_title.place(
-            anchor=tk.CENTER,
-            relx=0.15,
-            rely=0.1)
-        self.node_data_title.configure(bg="#ffffff")
-
-        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
-        self.separator.place(relx=0.05, rely=0.12, width=590, height=3)
-
         # ---------------------------Data Panel: Node Data Panel-------------------------#
         self.node_data_panel = tk.Frame(self.data_panel)
         self.node_data_panel.place(
-            relx=0.05,
-            rely=0.13,
+            relx=0.06,
+            rely=0.1,
             relheight=0.8,
             relwidth=0.95)
         self.node_data_panel.configure(background="#fafafa")
