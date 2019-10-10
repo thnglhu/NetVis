@@ -14,6 +14,7 @@ image_paths['mail'] = "resource/images/mail.png"
 image_paths['icmp'] = "resource/images/icmp.png"
 image_paths['icmp-reply'] = "resource/images/icmp-reply.png"
 image_paths['icmp-unreachable'] = "resource/images/icmp-unreachable.png"
+image_paths['about'] = "resource/images/about.gif"
 # image_paths['abc'] = "D:/Users/thngl/Documents/GitHub/NetVis/resource/images/pc-on.gif"
 
 image_cache = dict()

@@ -23,7 +23,7 @@ except ImportError:
     py3 = True
 
 import gui_support
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, GifImagePlugin
 from tkinter import StringVar
 from tkinter import font
 
@@ -55,18 +55,6 @@ def destroy_top_level():
     global w
     w.destroy()
     w = None
-
-
-def settings_popup_window():
-    settings_popup = tk.Tk()
-
-    settings_popup.geometry("300x500")
-    settings_popup.title("Settings")
-
-    button = ttk.Button(settings_popup, text="Okay")
-    button.grid(row=1, column=0)
-
-    settings_popup.mainloop()
 
 
 class CreateToolTip(object):
@@ -456,6 +444,14 @@ class top_level:
         zoom_out_tooltip = CreateToolTip(self.zoom_out_button, "Zoom out")
 
         # ---------------------------Top Panel: About-------------------------#
+        def about_popup_window():
+            self.about_popup = tk.Tk()
+
+            self.about_popup.geometry("619x660")
+            self.about_popup.title("About")
+
+            self.about_popup.mainloop()
+
         self.about_image = ImageTk.PhotoImage(file="resource/icons/about.png")
         self.about_button = tk.Button(self.top_panel)
         self.about_button.place(
@@ -466,8 +462,10 @@ class top_level:
             width=55)
         self.about_button.configure(
             image=self.about_image,
+            command=about_popup_window,
             borderwidth=0,
             bg="#ffffff")
+
 
         help_tooltip = CreateToolTip(self.about_button, "About")
 
