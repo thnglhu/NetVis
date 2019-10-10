@@ -224,6 +224,7 @@ class Canvas(tk.Canvas):
 
     def __edge_button(self, event, button, link):
         self.__button_object(button, link)
+        self.__button_empty(button, link)
 
     def __resize(self, event):
         self.__size[0] = event.width
