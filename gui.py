@@ -25,8 +25,7 @@ except ImportError:
 
 import gui_support
 from PIL import ImageTk, Image
-from tkinter import StringVar
-from tkinter import font
+from time import strftime, localtime, time
 
 def vp_start_gui():
 
@@ -593,6 +592,16 @@ class top_level:
             borderwidth=0,
             bg="#ffffff")
 
+        self.timer = tk.Label(self.top_panel)
+        self.timer.place(
+            relx=0.8,
+            rely=0.5
+        )
+
+        def change_time():
+            self.timer.configure(text=strftime('%H:%M:%S', localtime(time())))
+            self.top_panel.after(500, change_time)
+        change_time()
         help_tooltip = CreateToolTip(self.help_button, "Help")
 
         # ---------------------------Control Panel: Title-------------------------#

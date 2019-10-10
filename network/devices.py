@@ -92,9 +92,16 @@ class Interface:
                 is_inverted = not edge.points[0] == my_device
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
-                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image, speed=speed, name=frame.get_name())
-                f.display(canvas)
-                f.start_animation()
+                f = vn.Frame(
+                    edge,
+                    self.other.receive,
+                    (self, frame, canvas),
+                    is_inverted,
+                    image=image,
+                    speed=speed,
+                    name=frame.get_name(),
+                    canvas=canvas
+                )
         else:
             self.other.receive(self, frame, canvas)
 
@@ -161,7 +168,7 @@ class Host:
             self.arp_table[frame.packet.ip_source] = {
                 'type': 'dynamic',
                 'mac_address': frame.mac_source,
-                'time_stamp': time.time() + 30
+                'time_stamp': time.time() + 10
             }
 
     def cache_contains(self, ip_address):
@@ -199,9 +206,17 @@ class Host:
             'type': 'host',
             'name': self.name,
             'interface': self.interface.json(),
-            'arp_table': {
-                str(key): value for key, value in self.arp_table.items()
-            },
+            # 'arp_table': {
+            #     str(key): value for key, value in self.arp_table.items()
+            # },
+            'arp_table': [
+                {
+                    'ip_address': str(ip_address),
+                    'mac_address': info['mac_address'],
+                    'expire_time': info['time_stamp']
+                } for ip_address, info in self.arp_table.items()
+            ]
+
         }
 
 
@@ -228,7 +243,7 @@ class Switch:
         for port, value in self.ports.items():
             if value['status'] == 'root':
                 continue
-            self.mac_table = dict()
+            # self.mac_table = dict()
             if port is not source and canvas:
                 my_device = self.device
                 other_device = value['interface'].device
@@ -312,7 +327,8 @@ class Switch:
 
                 if bridge_id == self.root_id:
                     self.ports[source]['status'] = 'root'
-                if self.cost < cost or self.cost == cost and id(self) > bridge_id:
+                elif (self.cost < cost or self.cost == cost and id(self) > bridge_id) \
+                        and self.ports[source]['status'] != 'designated':
                     self.ports[source]['status'] = 'designated'
                 elif self.ports[source]['status'] != 'root' and self.ports[source]['status'] != 'blocked':
                     self.ports[source]['status'] = 'blocked'
@@ -333,7 +349,6 @@ class Switch:
             ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
         else:
             if frame.mac_target in self.mac_table:
-                # print(self.name, frame.mac_target, 'is cached')
                 self.send(frame, self.mac_table[frame.mac_target], canvas)
 
     def send(self, frame, target=None, canvas=None):
@@ -364,10 +379,9 @@ class Switch:
                     is_inverted,
                     image=image,
                     speed=speed,
-                    name=frame.get_name()
+                    name=frame.get_name(),
+                    canvas=canvas
                 )
-                f.display(canvas)
-                f.start_animation()
             return
         target.receive(self, frame, canvas)
 
@@ -453,6 +467,9 @@ class Router:
         time.sleep(uniform(1, 10))
         while True and not self.__getattribute__('is_destroyed'):
             for interface in self.interfaces:
+                if hasattr(self, 'is_destroyed'):
+                    if self.is_destroyed:
+                        return
                 hello_frame = data.Hello(interface.ip_address).build(interface.mac_address)
                 interface.send(hello_frame, canvas)
             time.sleep(10)
@@ -462,6 +479,9 @@ class Router:
         time.sleep(uniform(1, 10))
         while True and not self.__getattribute__('is_destroyed'):
             for neighbor in self.neighbors.values():
+                if hasattr(self, 'is_destroyed'):
+                    if self.is_destroyed:
+                        return
                 ip_address = neighbor['ip_address']
                 mac_address = neighbor['mac_address']
                 via = neighbor['via']
