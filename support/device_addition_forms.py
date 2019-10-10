@@ -42,6 +42,7 @@ class HostForm(Form):
 
 class SwitchForm(Form):
     data = dict()
+
     def __init__(self, root, trigger):
         self.head = root
         self.trigger = trigger

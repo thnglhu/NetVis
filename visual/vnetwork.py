@@ -226,7 +226,6 @@ class Router(VVertex, dv.Router):
         canvas.remove(self)
 
 
-
 class Frame(vg.CanvasItem):
     __thread = None
 
@@ -241,17 +240,30 @@ class Frame(vg.CanvasItem):
         self.params = params
         self['image'] = kwargs.get('image')
         self.speed = kwargs.get('speed', 10)
+        self.name = kwargs.get('name')
 
     def __animate(self, canvas):
+        from visual import visible
         att = self.attributes
-        while att['percent'] < 100.0 and self.active and not self['edge'].is_destroyed and not self.is_destroyed:
+        while att['percent'] < 100.0 \
+                and self.active \
+                and not self['edge'].is_destroyed \
+                and not self.is_destroyed \
+                and visible.get(self.name):
             att['percent'] += self.speed
             if att['percent'] > 100.0:
                 att['percent'] = 100
             self.load()
             self.reallocate(canvas)
             time.sleep(0.05)
+
         if self.active and not self['edge'].is_destroyed and not self.is_destroyed:
+            if not visible.get(self.name):
+                time.sleep(0.05)
+                if self.func:
+                    self.func(*self.params)
+                canvas.remove(self)
+                return
             if att['percent'] > 100.0:
                 att['percent'] = 100.0
                 self.load()

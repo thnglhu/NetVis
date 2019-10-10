@@ -54,7 +54,8 @@ def static(router, frame, packet, **kwargs):
 
 def hub_broadcast_handler(hub, frame, **kwargs):
     source = kwargs.get('source')
-    print(hub.others)
+    if hub.mac_address == 'sddddddd' and frame.packet and isinstance(frame.packet, dt.STP):
+        pass
     for other in hub.others:
         if other is not source:
             hub.send(frame, other, kwargs.get('canvas'))

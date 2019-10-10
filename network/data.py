@@ -30,6 +30,9 @@ class Packet:
     def get_image(self):
         return resource.get_image('mail')
 
+    def get_name(self):
+        return "Unknown"
+
 
 class ARP(Packet):
     def __init__(self, source, target, func=None):
@@ -56,6 +59,8 @@ class ARP(Packet):
             else 'arp'
         )
 
+    def get_name(self):
+        return "ARP"
 
 class Frame:
     def __init__(self, source, target, packet):
@@ -76,6 +81,8 @@ class Frame:
     def get_image(self):
         return self.packet.get_image()
 
+    def get_name(self):
+        return self.packet.get_name()
 
 class BroadcastFrame(Frame):
     def __init__(self, source, packet):
@@ -104,6 +111,9 @@ class ICMP(Packet):
     def get_size(self):
         return 74
 
+    def get_name(self):
+        return "ICMP"
+
 
 class STP(Frame):
     def __init__(self, source, root_id, bridge_id, path_cost):
@@ -120,6 +130,9 @@ class STP(Frame):
 
     def get_image(self):
         return resource.get_image('stp')
+
+    def get_name(self):
+        return "STP"
 
 
 class Hello(Packet):
@@ -146,6 +159,9 @@ class Hello(Packet):
         else:
             return Frame(args[0], args[1], self)
 
+    def get_name(self):
+        return "Hello"
+
 
 class RIP(Packet):
     def __init__(self, source, target, table):
@@ -160,3 +176,6 @@ class RIP(Packet):
 
     def get_image(self):
         return resource.get_image('rip')
+
+    def get_name(self):
+        return "RIP"

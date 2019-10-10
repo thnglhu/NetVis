@@ -92,7 +92,7 @@ class Interface:
                 is_inverted = not edge.points[0] == my_device
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
-                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
+                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image, speed=speed, name=frame.get_name())
                 f.display(canvas)
                 f.start_animation()
         else:
@@ -228,6 +228,7 @@ class Switch:
         for port, value in self.ports.items():
             if value['status'] == 'root':
                 continue
+            self.mac_table = dict()
             if port is not source and canvas:
                 my_device = self.device
                 other_device = value['interface'].device
@@ -245,7 +246,9 @@ class Switch:
                         (self, frame, canvas),
                         is_inverted,
                         image=image,
-                        speed=speed)
+                        speed=speed,
+                        name=frame.get_name()
+                    )
                     f.display(canvas)
                     f.start_animation()
 
@@ -354,7 +357,15 @@ class Switch:
                 is_inverted = not edge.points[0] == my_device
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
-                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
+                f = vn.Frame(
+                    edge,
+                    target.receive,
+                    (self, frame, canvas),
+                    is_inverted,
+                    image=image,
+                    speed=speed,
+                    name=frame.get_name()
+                )
                 f.display(canvas)
                 f.start_animation()
             return
