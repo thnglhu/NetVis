@@ -255,7 +255,6 @@ class Vertex(CanvasItem, ABC):
             edge.reallocate(canvas)
         if self.__focus_circle:
             self.__focus_circle.reallocate(canvas)
-
     def subscribe(self, edge):
         self.link_edges.add(edge)
 
