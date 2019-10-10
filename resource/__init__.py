@@ -24,6 +24,7 @@ ig['rip'] = "rip.png"
 ig['open-file'] = "open-file.png"
 ig['save-file'] = "save-file.png"
 ig['new-file'] = "new-file.png"
+ig['about'] = "about.gif"
 # image_paths['abc'] = "D:/Users/thngl/Documents/GitHub/NetVis/resource/images/pc-on.gif"
 
 image_cache = dict()

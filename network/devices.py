@@ -134,9 +134,12 @@ class Host:
         self.interface = interface
         interface.attach_device(self)
         interface.attachment = self.__receive
-        self.arp_table = kwargs.get('arp_table') or dict()
         self.arp_table = {
-            ipa.ip_address(key): value for key, value in self.arp_table.items()
+            #ipa.ip_address(key): value for key, value in self.arp_table.items()
+            ipa.ip_address(info['ip_address']): {
+                'mac_address': info['mac_address'],
+                'time_stamp': info['expire_time'],
+            } for info in kwargs.get('arp_table')
         }
         self.name = kwargs.get('name')
         self.__buffer = set()
@@ -178,7 +181,6 @@ class Host:
     def cache_arp(self, frame):
         if frame.mac_target == self.interface.mac_address:
             self.arp_table[frame.packet.ip_source] = {
-                'type': 'dynamic',
                 'mac_address': frame.mac_source,
                 'time_stamp': time.time() + 10
             }
@@ -186,7 +188,7 @@ class Host:
     def cache_contains(self, ip_address):
         if ip_address in self.arp_table:
             info = self.arp_table[ip_address]
-            if info['type'] == 'static' or time.time() <= info['time_stamp']:
+            if time.time() <= info['time_stamp']:
                 return True
             else:
                 self.arp_table.pop(ip_address)
@@ -195,7 +197,7 @@ class Host:
     def clean_cache(self):
         for ip_address in self.arp_table.copy():
             info = self.arp_table[ip_address]
-            if info['type'] == 'dynamic' and time.time() > info['time_stamp']:
+            if time.time() > info['time_stamp']:
                 self.arp_table.pop(ip_address)
 
     def fix_time_stamp(self, root_time_stamp):
@@ -348,19 +350,12 @@ class Switch:
                     return
                 next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
                 self.send_elect(source, next_frame, canvas)
-                """
-            elif id(self) > bridge_id:
-                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost + 1)
-                self.send_elect(source, next_frame, canvas)
-            elif id(self) < bridge_id and id(self) != self.root_id:
-                pass
-                """
             return
 
         elif isinstance(frame, data.BroadcastFrame) and not isinstance(frame, data.STP):
             ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
         else:
-            if frame.mac_target in self.mac_table:
+            if frame.mac_target in self.mac_table and source != self.mac_table[frame.mac_target]:
                 self.send(frame, self.mac_table[frame.mac_target], canvas)
 
     def send(self, frame, target=None, canvas=None):
