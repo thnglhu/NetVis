@@ -39,6 +39,7 @@ def init(top, gui, *args, **kwargs):
     controller.subscribe_coords(update_canvas_coords)
     controller.subscribe_property(context_menu)
     existed = True
+    setup_filter()
 
 
 def open_file():
@@ -96,291 +97,12 @@ def save_popup_window():
 
     save_popup.mainloop()
 
-
-class node_properties_popup_window():
-
-    def create_node_type(self):
-        self.node_type_label = tk.Label(self.node_popup, text="Type:")
-        self.node_type_label.place(relx=0.05, rely=0.03)
-        self.node_type_label.configure(bg="#ffffff")
-
-        self.box_value = StringVar()
-        self.node_type_combobox = ttk.Combobox(self.node_popup, values=self.box_value)
-        self.node_type_combobox['values'] = ('Host', 'Switch', 'Router')
-        self.node_type_combobox.current(0)
-        self.node_type_combobox.place(relx=0.5, rely=0.03)
-
-    def create_node_name(self):
-        self.node_name_label = tk.Label(self.node_popup_frame, text="Name:")
-        self.node_name_label.place(relx=0.02, rely=0.01)
-        self.node_name_label.configure(bg="#ffffff")
-
-        self.node_name_textbox = tk.Entry(self.node_popup_frame)
-        self.node_name_textbox.place(relx=0.5, rely=0.01)
-        self.node_name_textbox.configure(bg="#efefef")
-
-    def create_node_interface(self):
-        self.node_interface_label = tk.Label(self.node_popup_frame, text="Interface name:")
-        self.node_interface_label.place(relx=0.02, rely=0.09)
-        self.node_interface_label.configure(bg="#ffffff")
-
-        self.node_interface_textbox = tk.Entry(self.node_popup_frame)
-        self.node_interface_textbox.place(relx=0.5, rely=0.09)
-        self.node_interface_textbox.configure(bg="#efefef")
-
-        self.ipaddress_interface_label = tk.Label(self.node_popup_frame, text="Interface IP address:")
-        self.ipaddress_interface_label.place(relx=0.02, rely=0.17)
-        self.ipaddress_interface_label.configure(bg="#ffffff")
-
-        self.ipaddress_interface_textbox = tk.Entry(self.node_popup_frame)
-        self.ipaddress_interface_textbox.place(relx=0.5, rely=0.17)
-        self.ipaddress_interface_textbox.configure(bg="#efefef")
-
-        self.ipnetwork_interface_label = tk.Label(self.node_popup_frame, text="Interface IP network:")
-        self.ipnetwork_interface_label.place(relx=0.02, rely=0.26)
-        self.ipnetwork_interface_label.configure(bg="#ffffff")
-
-        self.ipnetwork_interface_textbox = tk.Entry(self.node_popup_frame)
-        self.ipnetwork_interface_textbox.place(relx=0.5, rely=0.26)
-        self.ipnetwork_interface_textbox.configure(bg="#efefef")
-
-        self.default_gateway_interface_label = tk.Label(self.node_popup_frame, text="Interface default gateway:")
-        self.default_gateway_interface_label.place(relx=0.02, rely=0.34)
-        self.default_gateway_interface_label.configure(bg="#ffffff")
-
-        self.default_gateway_interface_textbox = tk.Entry(self.node_popup_frame)
-        self.default_gateway_interface_textbox.place(relx=0.5, rely=0.34)
-        self.default_gateway_interface_textbox.configure(bg="#efefef")
-
-    def create_router_interface_table(self):
-        def add_interface():
-            global num
-            num = 0
-            while num in router_interface_dict_child:
-                num += 1
-            else:
-                router_interface_dict_child[num] = self.router_interface_textbox.get()
-            self.router_interface_textbox.delete('0', tk.END)
-
-        self.interface_label = tk.Label(self.node_popup_frame, text="Router Interface:")
-        self.interface_label.place(relx=0.02, rely=0.09)
-        self.interface_label.configure(bg="#ffffff")
-
-        self.router_interface_textbox = tk.Entry(self.node_popup_frame)
-        self.router_interface_textbox.place(relx=0.5, rely=0.09)
-        self.router_interface_textbox.configure(bg="#efefef")
-
-        self.router_interface_button = tk.Button(self.node_popup_frame, text="+", command=add_interface)
-        self.router_interface_button.place(relx=0.87, rely=0.09)
-
-    def create_arp_table(self):
-        def add_arp():
-            global num
-            num = 0
-            while num in arp_table_dict_child:
-                num += 1
-            else:
-                arp_table_dict_child[num] = self.arp_textbox.get()
-            self.arp_textbox.delete('0', tk.END)
-
-        self.arp_label = tk.Label(self.node_popup_frame, text="Static ARP table:")
-        self.arp_label.place(relx=0.02, rely=0.42)
-        self.arp_label.configure(bg="#ffffff")
-
-        self.arp_textbox = tk.Entry(self.node_popup_frame)
-        self.arp_textbox.place(relx=0.5, rely=0.42)
-        self.arp_textbox.configure(bg="#efefef")
-
-        self.arp_button = tk.Button(self.node_popup_frame, text="+", command=add_arp)
-        self.arp_button.place(relx=0.87, rely=0.42)
-
-    def create_router_arp_table(self):
-        def add_router_arp():
-            global num
-            num = 0
-            while num in arp_table_dict_child:
-                num += 1
-            else:
-                arp_table_dict_child[num] = self.router_arp_textbox.get()
-            self.router_arp_textbox.delete('0', tk.END)
-
-        self.arp_label = tk.Label(self.node_popup_frame, text="Static ARP table:")
-        self.arp_label.place(relx=0.02, rely=0.17)
-        self.arp_label.configure(bg="#ffffff")
-
-        self.router_arp_textbox = tk.Entry(self.node_popup_frame)
-        self.router_arp_textbox.place(relx=0.5, rely=0.17)
-        self.router_arp_textbox.configure(bg="#efefef")
-
-        self.router_arp_button = tk.Button(self.node_popup_frame, text="+", command=add_router_arp)
-        self.router_arp_button.place(relx=0.87, rely=0.173)
-
-    def create_mac_table(self):
-        def add_mac():
-            global num
-            num = 0
-            while num in node_info_dict_child:
-                num += 1
-            else:
-                node_info_dict_child[num] = self.mac_textbox.get()
-            self.mac_textbox.delete('0', tk.END)
-
-        self.mac_label = tk.Label(self.node_popup_frame, text="Static MAC table:")
-        self.mac_label.place(relx=0.02, rely=0.09)
-        self.mac_label.configure(bg="#ffffff")
-
-        self.mac_textbox = tk.Entry(self.node_popup_frame)
-        self.mac_textbox.place(relx=0.5, rely=0.09)
-        self.mac_textbox.configure(bg="#efefef")
-
-        self.mac_button = tk.Button(self.node_popup_frame, text="+", command=add_mac)
-        self.mac_button.place(relx=0.87, rely=0.09)
-
-    def create_routing_table(self):
-
-        def add_routing():
-            node_info_dict_child[self.routing_address_textbox.get()] = self.routing_interface_textbox.get()
-            self.routing_address_textbox.delete('0', tk.END)
-            self.routing_interface_textbox.delete('0', tk.END)
-
-        self.routing_label = tk.Label(self.node_popup_frame, text="Static routing Table: ")
-        self.routing_label.place(relx=0.02, rely=0.25)
-        self.routing_label.configure(bg="#ffffff")
-
-        self.routing_ipv4_address = tk.Label(self.node_popup_frame, text="IP address: ")
-        self.routing_ipv4_address.place(relx=0.025, rely=0.33)
-        self.routing_ipv4_address.configure(bg="#ffffff")
-
-        self.routing_address_textbox = tk.Entry(self.node_popup_frame)
-        self.routing_address_textbox.place(relx=0.23, rely=0.33)
-        self.routing_address_textbox.configure(bg="#efefef", width=15)
-
-        self.routing_interface_address = tk.Label(self.node_popup_frame, text="Interface name")
-        self.routing_interface_address.place(relx=0.51, rely=0.33)
-        self.routing_interface_address.configure(bg="#ffffff")
-
-        self.routing_interface_textbox = tk.Entry(self.node_popup_frame)
-        self.routing_interface_textbox.place(relx=0.65, rely=0.33)
-        self.routing_interface_textbox.configure(bg="#efefef", width=14)
-
-        self.routing_button = tk.Button(self.node_popup_frame, text="+", command=add_routing)
-        self.routing_button.place(relx=0.92, rely=0.33)
-
-    def node_info_passing(self):
-
-        node_info_dict["type"] = self.node_type_combobox.get()
-        node_info_dict["name"] = self.node_name_textbox.get()
-
-        if self.node_type_combobox.get() == "Host":
-            node_info_dict["interface"] = node_info_dict_child
-            node_info_dict_child["name"] = self.node_interface_textbox.get()
-            node_info_dict_child["ip_address"] = self.ipaddress_interface_textbox.get()
-            node_info_dict_child["ip_network"] = self.ipnetwork_interface_textbox.get()
-            node_info_dict_child["default_gateway"] = self.default_gateway_interface_textbox.get()
-            node_info_dict["arp table"] = arp_table_dict_child
-            print(node_info_dict)
-            node_info_dict.clear()
-            node_info_dict_child.clear()
-            arp_table_dict_child.clear()
-        elif self.node_type_combobox.get() == "Switch":
-            node_info_dict["mac table"] = node_info_dict_child
-            print(node_info_dict)
-            node_info_dict.clear()
-            node_info_dict_child.clear()
-        elif self.node_type_combobox.get() == "Router":
-            node_info_dict["arp table"] = arp_table_dict_child
-            node_info_dict["interface"] = router_interface_dict_child
-            node_info_dict["routing table"] = node_info_dict_child
-            print(node_info_dict)
-            node_info_dict.clear()
-            node_info_dict_child.clear()
-            arp_table_dict_child.clear()
-            router_interface_dict_child.clear()
-
-        # controller.create(node_info_dict)
-        self.node_popup.destroy()
-
-    def draw(self, event):
-        if self.node_type_combobox.get() == "Host":
-            for child in self.node_popup_frame.winfo_children():
-                child.destroy()
-            self.create_node_name()
-            self.create_node_interface()
-            self.create_arp_table()
-            self.apply_button()
-
-        elif self.node_type_combobox.get() == "Switch":
-            for child in self.node_popup_frame.winfo_children():
-                child.destroy()
-            self.create_node_name()
-            self.create_mac_table()
-            self.apply_button()
-
-        elif self.node_type_combobox.get() == "Router":
-            for child in self.node_popup_frame.winfo_children():
-                child.destroy()
-            self.create_node_name()
-            self.create_router_interface_table()
-            self.create_router_arp_table()
-            self.create_routing_table()
-            self.apply_button()
-
-    def apply_button(self):
-        self.node_button = tk.Button(self.node_popup_frame, text="Apply", command=self.node_info_passing)
-        self.node_button.place(relx=0.70, rely=0.55)
-
-    def __init__(self):
-        '''
-        self.router_arp_textbox = None
-        self.mac_textbox = None
-        self.arp_textbox = None
-        self.ipaddress_interface_textbox = None
-        self.ipnetwork_interface_textbox = None
-        self.default_gateway_interface_textbox = None
-        self.node_interface_textbox = None
-        '''
-        self.node_popup = tk.Tk()
-
-        self.node_popup_frame = tk.Frame(self.node_popup)
-        self.node_popup_frame.place(relx=0.05, rely=0.1)
-        self.node_popup_frame.configure(width=470, height=300, bg="#fafafa")
-
-        self.node_popup.geometry("500x350")
-        self.node_popup.title("Node Properties")
-
-        x = (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2
-        y = (root.winfo_screenheight() - root.winfo_reqheight()) / 2
-        self.node_popup.geometry("+%d+%d" % (x, y))
-
-        self.create_node_type()
-
-        self.node_type_combobox.bind('<<ComboboxSelected>>', self.draw)
-
-def enable(child_list):
-    # TODO fix this childList ??
-    for child in childList:
-        child.configure(state='enable')
-
-
 def create_new_file():
     save_popup_window()
 
 
 def open_recent_file():
     print("Recent")
-
-
-def save_file_as():
-    global filename
-    filename = filedialog.asksaveasfile(mode='w')
-    # TODO fix this ??
-    file_save()
-    '''
-    file = filedialog.asksaveasfilename(
-        initialdir="/", title="Select file",
-        filetypes=(("jpeg files", "*.jpg"), ("Text files", "*.txt")))
-    print(file, file.__class__)
-    '''
 
 
 def close():
@@ -394,7 +116,7 @@ def close():
             child.configure(state=tk.DISABLED)
 
 def zoom_in():
-    w.main_canvas.zoom((450, 450), potential=0.8)
+    w.main_canvas.zoom((450, 450), potential=1/1.2)
 
 
 def zoom_out():
@@ -419,10 +141,12 @@ def add_node():
         parent.add(switch_tab, text="Switch")
         parent.add(router_tab, text="Router")
         parent.pack(expand=1, fill='both')
+        windows.lift()
     # node_properties_popup_window()
 
 
 def remove_node():
+    controller.delete()
     pass
 
 
@@ -469,8 +193,8 @@ def update_node_info(info):
     for widget in w.node_data_panel.winfo_children():
         widget.destroy()
     from support import extension as ex
+    print(info.get('name'), info.get('status'))
     frame = ex.HorizontalScrollable(w.node_data_panel)
-    print(info['type'])
     if info['type'] == 'host':
         info_forms.HostInfo(frame, info, node_modify)
     elif info['type'] == 'switch':
@@ -480,42 +204,26 @@ def update_node_info(info):
     pass
 
     frame.update()
-    """
-    # print('Do something with this info', info)
-    # update_log(info)
-    # clear the data panel
-    global dy
-    dy = 0
-    node_info.clear()
-    for widget in w.node_data_panel.winfo_children():
-        widget.destroy()
 
-    def add_node_info(key, value=None):
-        global dy
-        if value is not None:
-            node_info[add_widget("label", key, 0.04)] = add_widget("entry", value, 0.5)
-            dy += 0.1
-        else:
-            return add_widget("label", key, 0.04)
+def setup_filter():
+    from visual import visible
+    from resource import get_image
+    from functools import partial
 
-    def add_table_info(key, value):
-        table_label = add_node_info(key)
-        global dy
-        dy += 0.09
-        table_info = []
-        for k, v in value.items():
-            table_info.append([add_widget("entry", k, 0.04), add_widget("entry", v, 0.5)])
-            dy += 0.15
-        node_info[table_label] = table_info
+    def switch(label, name, event):
+        print("Hello")
+        visible[name] ^= True
+        _on = visible[name]
+        _image = get_image(name if _on else name + '-off')
+        label.configure(image=_image.get_image())
 
-    for key, value in info.items():
-        if value[0]:
-            if isinstance(value[1], dict):
-                add_table_info(key, value[1])
-            else:
-                add_node_info(key, value[1])
-"""
-
+    count = 0
+    for name, on in visible.items():
+        image = get_image(name if on else name + '-off')
+        label = tk.Label(w.filter_panel, image=image.get_image())
+        label.grid(row=0, column=count)
+        label.bind('<Button-1>', partial(switch, label, name))
+        count += 1
 
 def node_modify(info):
     if existed:
@@ -533,6 +241,7 @@ def context_menu(info):
         'switch': {
             'Connect': controller.prepare_connecting,
             'Disable': controller.disable_device,
+            'Activate STP': controller.activate_stp,
         },
         'router': {
             'Connect': router_connect,
@@ -556,19 +265,36 @@ def context_menu(info):
 
 def router_connect(info):
     select_interface_popup = tk.Tk()
-    select_interface_popup.geometry("500x500")
+    # select_interface_popup.geometry("500x500")
     select_interface_popup.title("Select an Interface of Router " + info['type'])
     select_interface_popup.geometry("+%d+%d" % (
     (root.winfo_screenwidth() - root.winfo_reqwidth()) / 2, (root.winfo_screenheight() - root.winfo_reqheight()) / 2))
 
     # Combo box handling
     interfaces_combobox = ttk.Combobox(select_interface_popup, values=[])
-    interfaces_combobox.place(relx=0.02, rely=0.02)
+    interfaces_combobox.grid(row=1, column=0, padx=10, pady=10, sticky="nesw")
+    # interfaces_combobox.place(relx=0.02, rely=0.02)
     print(info)
     for interface in map(lambda each: each['name'], info['interfaces']):
         interfaces_combobox['values'] += (interface,)
-    interfaces_combobox.current(0)
+    # interfaces_combobox.current(0)
+    # interface info label
+    info_label = tk.Label(select_interface_popup)
+    info_label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+    # info_label.configure(bg="#f0f0f0")
+    # info_label.place(relx=0.02, rely=0.1)
 
+    def update_info_label(event):
+        current_interface = interfaces_combobox.get()
+        for interface in info['interfaces']:
+            if interface['name'] == current_interface:
+                info_label['text'] = "MAC Address: " + interface['mac_address'] \
+                                     + "\nIP Address: " + str(interface['ip_address']) \
+                                     + "\nIP Network: " + str(interface['ip_network']) \
+                                     + "\nDefault Gateway: " + str(interface['default_gateway'])
+                break
+
+    interfaces_combobox.bind("<<ComboboxSelected>>", update_info_label)
     # OK & Cancel buttons
     def close_popup():
         select_interface_popup.destroy()
@@ -578,15 +304,17 @@ def router_connect(info):
         close_popup()
 
     ok_button = tk.Button(select_interface_popup, text="OK", command=select_interface)
-    ok_button.pack(side='bottom')
+    ok_button.grid(row=3)
+    # ok_button.pack(side='bottom')
     cancel_button = tk.Button(select_interface_popup, text="Cancel", command=close_popup)
-    cancel_button.pack(side='bottom')
+    cancel_button.grid(row=4)
+    # cancel_button.pack(side='bottom')
 
 
 def add_interface(info):
     if info['type'] != "router":
         return
-
+    print(info)
     add_interface_popup = tk.Tk()
     add_interface_popup.geometry("1000x500")
     add_interface_popup.configure(bg="#ffffff")

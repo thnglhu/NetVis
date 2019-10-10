@@ -31,6 +31,9 @@ class Interface:
             json['default_gateway']
         )
 
+    def __str__(self):
+        return self.name
+
     def info(self):
         return {
             'name': self.name,
@@ -38,10 +41,11 @@ class Interface:
             'ip_address': self.ip_address,
             'ip_network': self.ip_network,
             'default_gateway': self.default_gateway,
-
         }
 
     def modify(self, info):
+        self.name = info['name']
+        self.mac_address = info['mac_address']
         self.ip_address = ipa.ip_address(info['ip_address'])
         self.ip_network = ipa.ip_network(info['ip_network'])
         self.default_gateway = info['default_gateway']
@@ -53,13 +57,12 @@ class Interface:
     def attach(self, other):
         self.other = other
 
-    def disconnect(self, init=True):
-        if init:
-            if isinstance(self.other, Interface):
-                self.other.disconnect(False)
+    def disconnect(self, other, init=True):
+        if other and other is self.other:
+            if init:
+                self.other.disconnect(self, False)
             else:
-                self.other.disconnect(self, True)
-        self.other = None
+                self.other = None
 
     def attach_device(self, device):
         self.device = device
@@ -70,6 +73,7 @@ class Interface:
                 return
         except AttributeError:
             pass
+
         self.attachment(source, frame, canvas, *self.params)
 
     def send(self, frame, canvas=None):
@@ -79,18 +83,16 @@ class Interface:
         except AttributeError:
             pass
         if self.other is None:
-            print('Connection is not available')
             return
         if canvas:
             my_device = self.device
             other_device = self.other.device
             edges = my_device.link_edges.intersection(other_device.link_edges)
             for edge in edges:
-                from resource import get_image
                 is_inverted = not edge.points[0] == my_device
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
-                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
+                f = vn.Frame(edge, self.other.receive, (self, frame, canvas), is_inverted, image=image, speed=speed, name=frame.get_name())
                 f.display(canvas)
                 f.start_animation()
         else:
@@ -106,6 +108,15 @@ class Interface:
             'default_gateway': str(self.default_gateway)
         }
 
+    def deep_destroy(self, **kwargs):
+        if self.other:
+            my_device = self.device
+            other_device = self.other.device
+            edges = my_device.link_edges.intersection(other_device.link_edges)
+            for edge in edges:
+                edge.deep_destroy(kwargs.get('canvas'))
+            self.disconnect(self.other)
+
 
 class Host:
     def __init__(self, interface, **kwargs):
@@ -120,9 +131,6 @@ class Host:
         }
         self.name = kwargs.get('name')
 
-    def disconnect(self, other):
-        self.interface.disconnect(other)
-
     def send(self, canvas, ip_target, segment=None):
         try:
             if not self.__getattribute__('active'):
@@ -132,7 +140,6 @@ class Host:
         if not self.interface:
             print('No connection')
             return
-
         if self.cache_contains(ip_target):
             packet = data.ICMP(self.interface.ip_address, ip_target, self.interface, segment)
             frame = data.Frame(self.interface.mac_address, self.arp_table[ip_target]['mac_address'], packet)
@@ -141,7 +148,8 @@ class Host:
             frame = data.BroadcastFrame(self.interface.mac_address, packet)
         elif self.cache_contains(self.interface.default_gateway):
             packet = data.ICMP(self.interface.ip_address, ip_target, self.interface, segment)
-            frame = data.Frame(self.interface.mac_address, self.arp_table[self.interface.default_gateway]['mac_address'], packet)
+            frame = data.Frame(self.interface.mac_address,
+                               self.arp_table[self.interface.default_gateway]['mac_address'], packet)
         else:
             function = partial(self.send, canvas, ip_target, segment)
             packet = data.ARP(self.interface.ip_address, self.interface.default_gateway, function)
@@ -197,20 +205,87 @@ class Host:
         }
 
 
-class Hub:
-    def __init__(self, **kwargs):
+class Switch:
+    def __init__(self, mac_address, **kwargs):
+        self.mac_table = kwargs.get('mac_table') or dict()
+        self.mac_address = mac_address
         self.device = self
         self.name = kwargs.get('name')
+        self.ports = dict()
         self.others = set()
+        self.stp = kwargs.get('stp', True)
+        self.thread = None
+        self.root_id = id(self)
+        self.cost = 0
+
+    def activate_stp(self, canvas):
+        self.stp = True
+        self.thread = Thread(target=self.__elect, args=(canvas,))
+        self.thread.start()
+
+    def send_elect(self, source, frame, canvas):
+
+        for port, value in self.ports.items():
+            if value['status'] == 'root':
+                continue
+            self.mac_table = dict()
+            if port is not source and canvas:
+                my_device = self.device
+                other_device = value['interface'].device
+                if hasattr(my_device, 'link_edges'):
+                    edges = my_device.link_edges.intersection(other_device.link_edges)
+                else:
+                    return
+                for edge in edges:
+                    is_inverted = not edge.points[0] == my_device
+                    image = frame.get_image()
+                    speed = edge['bandwidth'] / frame.get_size() * 8
+                    f = vn.Frame(
+                        edge,
+                        value['interface'].receive,
+                        (self, frame, canvas),
+                        is_inverted,
+                        image=image,
+                        speed=speed,
+                        name=frame.get_name()
+                    )
+                    f.display(canvas)
+                    f.start_animation()
+
+    def __elect(self, canvas):
+        from random import uniform
+        time.sleep(uniform(1, 5))
+        flag = "topology change"
+        while True and not self.__getattribute__('is_destroyed'):
+            if self.root_id == id(self):
+                frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
+                self.send_elect(None, frame, canvas)
+            time.sleep(25)
 
     def disconnect(self, other, init=True):
-        self.others.remove(other)
+        if other in self.others:
+            self.others.remove(other)
+            interface = None
+            for key, value in self.ports.items():
+                if value['interface'] == other:
+                    interface = key
+            if interface:
+                other.disconnect(self, False)
+                self.ports.pop(interface)
 
     def attach(self, other):
         self.others.add(other)
+        self.ports[other] = {
+            'interface': other,
+            'status': 'designated'
+        }
 
     def connect(self, other):
         self.others.add(other)
+        self.ports[other] = {
+            'interface': other,
+            'status': 'designated'
+        }
         other.attach(self)
 
     def receive(self, source, frame, canvas=None):
@@ -219,21 +294,57 @@ class Hub:
                 return
         except AttributeError:
             pass
-        ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
-        """
-        for other in self.others:
-            if other is not source:
-                self.send(frame, other, canvas)
-        """
+        if self.ports[source]['status'] == 'blocked':
+            return
+        # print(self.name, 'update mac table')
+        self.mac_table[frame.mac_source] = source
+        if isinstance(frame, data.STP) and self.stp:
+            root_id, bridge_id, cost = frame.get_bpdu()
+            if root_id < self.root_id:
+                for port in self.ports.values():
+                    port['status'] = 'designated'
+                self.ports[source]['status'] = 'root'
+                self.root_id = root_id
+                self.cost = cost + 1
+                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
+                self.send_elect(source, next_frame, canvas)
+            elif root_id == self.root_id:
 
-    def send(self, frame, target, canvas=None):
+                if bridge_id == self.root_id:
+                    self.ports[source]['status'] = 'root'
+                if self.cost < cost or self.cost == cost and id(self) > bridge_id:
+                    self.ports[source]['status'] = 'designated'
+                elif self.ports[source]['status'] != 'root' and self.ports[source]['status'] != 'blocked':
+                    self.ports[source]['status'] = 'blocked'
+                elif id(self) < bridge_id:
+                    return
+                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
+                self.send_elect(source, next_frame, canvas)
+                """
+            elif id(self) > bridge_id:
+                next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost + 1)
+                self.send_elect(source, next_frame, canvas)
+            elif id(self) < bridge_id and id(self) != self.root_id:
+                pass
+                """
+            return
+
+        elif isinstance(frame, data.BroadcastFrame) and not isinstance(frame, data.STP):
+            ph.hub_broadcast_handler(self, frame, source=source, canvas=canvas)
+        else:
+            if frame.mac_target in self.mac_table:
+                # print(self.name, frame.mac_target, 'is cached')
+                self.send(frame, self.mac_table[frame.mac_target], canvas)
+
+    def send(self, frame, target=None, canvas=None):
         try:
             if not self.__getattribute__('active'):
                 return
         except AttributeError:
             pass
-        if target is None:
-            print('Connection is not available')
+        if target is None or target not in self.ports:
+            return
+        if self.ports[target]['status'] == 'blocked' and not isinstance(frame, data.STP):
             return
         if canvas:
             my_device = self.device
@@ -244,10 +355,17 @@ class Hub:
                 return
             for edge in edges:
                 is_inverted = not edge.points[0] == my_device
-                from resource import get_image
                 image = frame.packet.get_image()
                 speed = edge['bandwidth'] / frame.get_size() * 8
-                f = vn.Frame(edge, target.receive, (self, frame, canvas), is_inverted, image=image, speed=speed)
+                f = vn.Frame(
+                    edge,
+                    target.receive,
+                    (self, frame, canvas),
+                    is_inverted,
+                    image=image,
+                    speed=speed,
+                    name=frame.get_name()
+                )
                 f.display(canvas)
                 f.start_animation()
             return
@@ -255,34 +373,17 @@ class Hub:
 
     def json(self):
         return {
-            'type': 'hub',
+            'type': 'switch',
             'id': id(self),
-            'name': self.name
+            'name': self.name,
+            'mac_address': self.mac_address,
+            'mac_table': {
+                key: id(value) for key, value in self.mac_table.items()
+            }
         }
-
-
-class Switch(Hub):
-    def __init__(self, **kwargs):
-        self.mac_table = kwargs.get('mac_table') or dict()
-        super().__init__(**kwargs)
 
     def set_mac_table(self, mac_table):
         self.mac_table = mac_table
-
-    def receive(self, source, frame, canvas=None):
-        try:
-            if not self.__getattribute__('active'):
-                return
-        except AttributeError:
-            pass
-        # print(self.name, 'update mac table')
-        self.mac_table[frame.mac_source] = source
-        if isinstance(frame, data.BroadcastFrame):
-            super().receive(source, frame, canvas)
-        else:
-            if frame.mac_target in self.mac_table:
-                # print(self.name, frame.mac_target, 'is cached')
-                self.send(frame, self.mac_table[frame.mac_target], canvas)
 
     def cache_mac_address(self, frame, source):
         self.mac_table[frame.mac_source] = {
@@ -306,17 +407,11 @@ class Switch(Hub):
             if info['type'] == 'dynamic' and time.time() > info['time_stamp']:
                 self.mac_address.pop(mac_address)
 
-    def json(self):
-        json = super().json()
-        json['type'] = 'switch'
-        json['mac_table'] = {
-            key: id(value) for key, value in self.mac_table.items()
-        }
-        return json
-
 
 class Router:
+
     def __init__(self, *interfaces, **kwargs):
+        self.extend = dict()
         self.interfaces = list(interfaces)
         for interface in interfaces:
             interface.attach_device(self)
@@ -326,7 +421,7 @@ class Router:
         self.arp_table = kwargs.get('arp_table') or dict()
         self.routing_table = kwargs.get('routing_table') or dict()
         self.name = kwargs.get('name')
-
+        self.neighbors = dict()
 
     def set_routing_table(self, info):
         self.routing_table = {
@@ -337,11 +432,43 @@ class Router:
             } for sub in info
         }
 
+    def start_sending_hello(self, canvas):
+        self.extend['RIP'] = {
+            'hello_thread': None,
+            'table': {
+                interface.ip_network: {
+                    'ip_network': interface.ip_network,
+                    'via': None,
+                    'hop': 0,
+                } for interface in self.interfaces
+            }
+        }
+        self.extend['RIP']['hello_thread'] = Thread(target=self.__hello, args=(canvas,))
+        self.extend['RIP']['advertise_thread'] = Thread(target=self.__advertise, args=(canvas,))
+        self.extend['RIP']['hello_thread'].start()
+        self.extend['RIP']['advertise_thread'].start()
 
-    def __hello(self):
-        for interface in self.interfaces:
-            hello_packet = data.Hello()
-            interface.send()
+    def __hello(self, canvas):
+        from random import uniform
+        time.sleep(uniform(1, 10))
+        while True and not self.__getattribute__('is_destroyed'):
+            for interface in self.interfaces:
+                hello_frame = data.Hello(interface.ip_address).build(interface.mac_address)
+                interface.send(hello_frame, canvas)
+            time.sleep(10)
+
+    def __advertise(self, canvas):
+        from random import uniform
+        time.sleep(uniform(1, 10))
+        while True and not self.__getattribute__('is_destroyed'):
+            for neighbor in self.neighbors.values():
+                ip_address = neighbor['ip_address']
+                mac_address = neighbor['mac_address']
+                via = neighbor['via']
+                frame = data.RIP(via.ip_address, ip_address, self.extend['RIP']['table']).build(via.mac_address,
+                                                                                                mac_address)
+                via.send(frame, canvas)
+            time.sleep(5)
 
     """
     def set_routing_table(self, routing_table):
@@ -368,6 +495,10 @@ class Router:
         self.cache_arp(frame, receiver)
         if ph.interface_arp_handler(receiver, frame, source=source, canvas=canvas):
             return
+        if ph.router_hello_handler(self, frame, canvas=canvas, receiver=receiver):
+            return
+        if ph.router_rip_handler(self, frame, receiver=receiver):
+            return
         ph.router_forward_handler(self, frame, source=source, receiver=receiver, canvas=canvas)
 
     def send(self, interface, frame, canvas=None):
@@ -389,7 +520,8 @@ class Router:
         if packet:
             next_hop = ipa.ip_address(rule['next_hop'])
             if self.arp_table.get(interface) and packet.ip_target in self.arp_table[interface]:
-                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface][frame.packet.ip_target], packet)
+                forward_frame = data.Frame(interface.mac_address, self.arp_table[interface][frame.packet.ip_target],
+                                           packet)
                 interface.send(forward_frame, canvas)
             elif packet.ip_target in interface.ip_network:
                 function = partial(self.forward, interface, frame, rule, canvas)
@@ -424,16 +556,12 @@ class Router:
                 return interface
 
     def json(self):
-        print(self.routing_table)
-        return {
+        result = {
             'type': 'router',
             'name': self.name,
             'interfaces': [
                 interface.json() for interface in self.interfaces
             ],
-            # 'routing_table': {
-            #     str(key): id(value) for key, value in self.routing_table.items()
-            # }
             'routing_table': [
                 {
                     'destination': str(key),
@@ -442,6 +570,6 @@ class Router:
                     'type': value['type']
                 }
                 for key, value in self.routing_table.items()
-            ]
+            ],
         }
-
+        return result

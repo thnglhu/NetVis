@@ -50,7 +50,7 @@ class Host(VVertex, dv.Host):
 
     def info(self):
         self.clean_cache()
-        return {
+        result = {
             'type': 'host',
             'name': self.name,
             'interface': self.interface.info(),
@@ -58,15 +58,20 @@ class Host(VVertex, dv.Host):
                 key: value['mac_address'] for key, value in self.arp_table.items()
             },
         }
+        return result
 
     def focus(self, canvas):
         if self.active:
+            self['image'].unsubscribe(self)
             self['image'] = self['activate']
+            self['image'].subscribe(self, self.reconfigure, canvas)
             self.reconfigure(canvas)
 
     def unfocus(self, canvas):
         if self.active:
+            self['image'].unsubscribe(self)
             self['image'] = self['deactivate']
+            self['image'].subscribe(self, self.reconfigure, canvas)
             self.reconfigure(canvas)
 
     def modify(self, info):
@@ -89,22 +94,42 @@ class Host(VVertex, dv.Host):
         json['y'] = self['y']
         return json
 
+    def deep_destroy(self, canvas):
+        self.is_destroyed = True
+        self['image'].unsubscribe(self)
+        if self.interface:
+            self.interface.deep_destroy(canvas=canvas)
+        canvas.remove(self)
+
 
 class Switch(VVertex, dv.Switch):
-    def __init__(self, ig_vertex, **kwargs):
+    def __init__(self, ig_vertex, mac_address, **kwargs):
         VVertex.__init__(self, ig_vertex)
-        dv.Switch.__init__(self, **kwargs)
+        dv.Switch.__init__(self, mac_address, **kwargs)
 
     def _set_image(self):
         att = self.attributes
         att['image'] = resource.get_image("switch")
 
     def info(self):
-        return {
+        result = {
             'type': 'switch',
+            'mac_address': self.mac_address,
             'name': self.name,
-            'mac_table': self.__get_mac_table()
+            'mac_table': self.__get_mac_table(),
+            'root_id': self.root_id,
+            'bridge_id': id(self),
+            'status': {
+                key.name: value['status'] for key, value in self.ports.items()
+            }
         }
+        if self.stp:
+            result['STP'] = {
+                'id': id(self),
+                'root_id': self.root_id,
+                'cost': self.cost,
+            }
+        return result
 
     def __get_mac_table(self):
         return {str(k): v.name for k, v in self.mac_table.items()}
@@ -118,6 +143,27 @@ class Switch(VVertex, dv.Switch):
         json['y'] = self['y']
         return json
 
+    def deep_destroy(self, canvas):
+        self.is_destroyed = True
+        self['image'].unsubscribe(self)
+        print(self.others)
+        for other in self.others.copy():
+            my_device = self.device
+            other_device = other.device
+            edges = my_device.link_edges.intersection(other_device.link_edges)
+            for edge in edges:
+                edge.deep_destroy(canvas)
+        canvas.remove(self)
+
+        """
+            if self.other:
+            my_device = self.device
+            other_device = self.other.device
+            edges = my_device.link_edges.intersection(other_device.link_edges)
+            for edge in edges:
+                edge.deep_destroy(kwargs.get('canvas'))
+            self.disconnect(self.other)
+        """
 
 class Router(VVertex, dv.Router):
     def __init__(self, ig_vertex, *interfaces, **kwargs):
@@ -129,16 +175,31 @@ class Router(VVertex, dv.Router):
         att['image'] = resource.get_image("router")
 
     def info(self):
-        return {
+        result = {
             'type': 'router',
             'name': self.name,
-            'arp_table': self.arp_table,
+            # 'arp_table': self.arp_table,
+            'arp_table': [
+                {
+                    'ip_address': str(ip_address),
+                    'mac_address': mac_address
+                } for value in self.arp_table.values() for ip_address, mac_address in value.items()
+            ],
             # 'interfaces': dict(enumerate(map(lambda interface: interface.name, self.interfaces))),
             'interfaces': [interface.info() for interface in self.interfaces],
             'routing_table': {
                 str(key): value for key, value in self.routing_table.items()
             }
         }
+        if self.extend.get('RIP'):
+            result['RIP_routing_table'] = [
+                {
+                    'ip_network': network,
+                    'via': info['via'],
+                    'hop': info['hop'],
+                } for network, info in self.extend['RIP']['table'].items()
+            ]
+        return result
 
     def modify(self, info):
         import ipaddress as ipa
@@ -157,6 +218,13 @@ class Router(VVertex, dv.Router):
         json['y'] = self['y']
         return json
 
+    def deep_destroy(self, canvas):
+        self.is_destroyed = True
+        self['image'].unsubscribe(self)
+        for interface in self.interfaces:
+            interface.deep_destroy(canvas=canvas)
+        canvas.remove(self)
+
 
 class Frame(vg.CanvasItem):
     __thread = None
@@ -172,17 +240,30 @@ class Frame(vg.CanvasItem):
         self.params = params
         self['image'] = kwargs.get('image')
         self.speed = kwargs.get('speed', 10)
+        self.name = kwargs.get('name')
 
     def __animate(self, canvas):
+        from visual import visible
         att = self.attributes
-        while att['percent'] < 100.0 and self.active:
+        while att['percent'] < 100.0 \
+                and self.active \
+                and not self['edge'].is_destroyed \
+                and not self.is_destroyed \
+                and visible.get(self.name):
             att['percent'] += self.speed
             if att['percent'] > 100.0:
                 att['percent'] = 100
             self.load()
             self.reallocate(canvas)
             time.sleep(0.05)
-        if self.active:
+
+        if self.active and not self['edge'].is_destroyed and not self.is_destroyed:
+            if not visible.get(self.name):
+                time.sleep(0.05)
+                if self.func:
+                    self.func(*self.params)
+                canvas.remove(self)
+                return
             if att['percent'] > 100.0:
                 att['percent'] = 100.0
                 self.load()
@@ -200,7 +281,6 @@ class Frame(vg.CanvasItem):
         att['position'] = att['start'] + (att['end'] - att['start']) * att['percent'] / 100.0
 
     def display(self, canvas):
-        att = self.attributes
         self.__thread = Thread(target=self.__animate, args=(canvas,))
         canvas.create_mapped_image(self, *self['position'], image=self['image'].get_image(), tag='frame')
         self['image'].subscribe(self, self.reconfigure, canvas)
@@ -224,7 +304,12 @@ class Frame(vg.CanvasItem):
 
     def destroy(self, canvas):
         self.active = False
-        self['image'].unsubscribe()
+        self['image'].unsubscribe(self)
+
+    def deep_destroy(self, canvas):
+        self.destroy(canvas)
+        self.is_destroyed = True
+        canvas.remove(self)
 
     def info(self):
         return {

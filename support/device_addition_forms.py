@@ -31,6 +31,7 @@ class HostForm(Form):
         self.button(text="Submit", row=11, column=8, command=self.__trigger)
 
     def __trigger(self):
+        print(self)
         self.trigger(self.get_info())
 
     def get_info(self):
@@ -41,17 +42,21 @@ class HostForm(Form):
 
 class SwitchForm(Form):
     data = dict()
+
     def __init__(self, root, trigger):
         self.head = root
         self.trigger = trigger
         self.label(text="Name: ", row=0, column=1)
         self['name'] = self.entry(row=0, column=2)
+        self.label(text="Mac address: ", row=1, column=1)
+        self['mac_address'] = self.entry(row=1, column=2)
         self.exclusive()
 
     def exclusive(self):
         self.button(text="Submit", row=11, column=8, command=self.__trigger)
 
     def __trigger(self):
+        print(self)
         self.trigger(self.get_info())
 
     def get_info(self):
@@ -68,6 +73,7 @@ class RouterForm(Form):
         self.trigger = trigger
         self.label(text="Name: ", row=0, column=1)
         self['name'] = self.entry(row=0, column=2)
+        self.label(text="Interfaces:", row=1, column=0)
         self['interfaces'] = self.tree_view(
             headers=("Name", "Mac address", "IP address", "IP network", "Default gateway"),
             row=3,
@@ -77,7 +83,7 @@ class RouterForm(Form):
             sticky="we",
             stretch=0
         )
-
+        self.label(text="Static routing table:", row=1, column=5)
         self['routing_table'] = self.tree_view(
             headers=("Destination", "Next hop", "Interface", "Type"),
             row=3,
@@ -87,15 +93,15 @@ class RouterForm(Form):
             sticky="we",
             stretch=0
         )
-        self.label(text="Destination: ", row=4, column=5)
+        self.label(text="Destination: ", row=5, column=5)
         routing_table = dict()
-        routing_table['destination'] = self.entry(row=4, column=6, columnspan=3)
-        self.label(text="Next hop: ", row=5, column=5)
-        routing_table['next_hop'] = self.entry(row=5, column=6,columnspan=3)
-        self.label(text="Interface: ", row=6, column=5)
-        routing_table['interface'] = self.entry(row=6, column=6,columnspan=3)
-        self.label(text="Type: ", row=7, column=5)
-        routing_table['type'] = self.entry(row=7, column=6,columnspan=3)
+        routing_table['destination'] = self.entry(row=5, column=6, columnspan=3)
+        self.label(text="Next hop: ", row=6, column=5)
+        routing_table['next_hop'] = self.entry(row=6, column=6,columnspan=3)
+        self.label(text="Interface: ", row=7, column=5)
+        routing_table['interface'] = self.entry(row=7, column=6,columnspan=3)
+        self.label(text="Type: ", row=8, column=5)
+        routing_table['type'] = self.entry(row=8, column=6,columnspan=3)
 
         def add_rule():
             Form.tree_append(
@@ -109,12 +115,12 @@ class RouterForm(Form):
             Form.entry_set(routing_table['next_hop'], '')
             Form.entry_set(routing_table['interface'], '')
             Form.entry_set(routing_table['type'], '')
-        self.button(text="Append", row=8, sticky="es", column=8, command=add_rule)
+        self.button(text="Append", row=9, sticky="es", column=8, command=add_rule)
         self.exclusive()
 
     def exclusive(self):
         self.label(text="Interface: ", row=2, column=0)
-        interface = self['interface'] = dict()
+        interface = dict()
         self.label(text="Name: ", row=4, column=0, padx=15)
         interface['name'] = self.entry(row=4, column=1)
         self.label(text="MAC address: ", row=5, column=0, padx=15)
@@ -125,6 +131,7 @@ class RouterForm(Form):
         interface['ip_network'] = self.entry(row=7, column=1)
         self.label(text="Default gateway: ", row=8, column=0, padx=15)
         interface['default_gateway'] = self.entry(row=8, column=1)
+
         def add_interface():
             Form.tree_append(
                 self['interfaces'],
@@ -139,6 +146,7 @@ class RouterForm(Form):
         self.button(text="Submit", row=50, column=9, command=self.__trigger)
 
     def __trigger(self):
+        print(self)
         self.trigger(self.get_info())
 
     def get_info(self):

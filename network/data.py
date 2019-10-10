@@ -1,6 +1,7 @@
 import ipaddress as ipa
 import resource
 
+
 class Segment:
     def __init__(self, data=None):
         self.data = data
@@ -29,6 +30,9 @@ class Packet:
     def get_image(self):
         return resource.get_image('mail')
 
+    def get_name(self):
+        return "Unknown"
+
 
 class ARP(Packet):
     def __init__(self, source, target, func=None):
@@ -55,6 +59,8 @@ class ARP(Packet):
             else 'arp'
         )
 
+    def get_name(self):
+        return "arp"
 
 class Frame:
     def __init__(self, source, target, packet):
@@ -72,6 +78,11 @@ class Frame:
     def build(self):
         return self
 
+    def get_image(self):
+        return self.packet.get_image()
+
+    def get_name(self):
+        return self.packet.get_name()
 
 class BroadcastFrame(Frame):
     def __init__(self, source, packet):
@@ -100,6 +111,9 @@ class ICMP(Packet):
     def get_size(self):
         return 74
 
+    def get_name(self):
+        return "icmp"
+
 
 class STP(Frame):
     def __init__(self, source, root_id, bridge_id, path_cost):
@@ -110,3 +124,58 @@ class STP(Frame):
 
     def get_bpdu(self):
         return self.root_id, self.bridge_id, self.path_cost
+
+    def get_size(self):
+        return 100
+
+    def get_image(self):
+        return resource.get_image('stp')
+
+    def get_name(self):
+        return "stp"
+
+
+class Hello(Packet):
+
+    def __init__(self, source, target=None, flag='echo'):
+        super().__init__(source, target, None, None)
+        self.flag = flag
+
+    def get_image(self):
+        return resource.get_image('hello' if self.flag == 'echo' else 'hello-reply')
+
+    def is_reply(self):
+        return self.flag == 'reply'
+
+    def reply(self, ip_address):
+        return Hello(ip_address, self.ip_source, 'reply')
+
+    def get_size(self):
+        return 70
+
+    def build(self, *args):
+        if len(args) == 1:
+            return BroadcastFrame(args[0], self)
+        else:
+            return Frame(args[0], args[1], self)
+
+    def get_name(self):
+        return "hello"
+
+
+class RIP(Packet):
+    def __init__(self, source, target, table):
+        super().__init__(source, target)
+        self.table = table
+
+    def get_size(self):
+        return 100
+
+    def build(self, *args):
+        return Frame(args[0], args[1], self)
+
+    def get_image(self):
+        return resource.get_image('rip')
+
+    def get_name(self):
+        return "rip"

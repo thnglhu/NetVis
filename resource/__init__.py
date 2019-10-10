@@ -1,19 +1,29 @@
 from PIL import ImageTk, Image
 from threading import Thread
 from time import sleep
+root_paths = "resource/images/"
 image_paths = dict()
-image_paths['hub'] = "resource/images/hub.png"
-image_paths['pc-on'] = "resource/images/pc-on.gif"
-image_paths['pc-on-focus'] = "resource/images/pc-on-focus.gif"
-image_paths['pc-off'] = "resource/images/pc-off.gif"
-image_paths['router'] = "resource/images/router.png"
-image_paths['switch'] = "resource/images/switch.gif"
-image_paths['arp'] = "resource/images/arp.png"
-image_paths['arp-reply'] = "resource/images/arp-reply.png"
-image_paths['mail'] = "resource/images/mail.png"
-image_paths['icmp'] = "resource/images/icmp.png"
-image_paths['icmp-reply'] = "resource/images/icmp-reply.png"
-image_paths['icmp-unreachable'] = "resource/images/icmp-unreachable.png"
+ig = image_paths
+ig['hub'] = "hub.png"
+ig['pc-on'] = "pc-on.gif"
+ig['pc-on-focus'] = "pc-on-focus.gif"
+ig['pc-off'] = "pc-off.gif"
+ig['router'] = "router.png"
+ig['switch'] = "switch.gif"
+ig['arp'] = "arp.png"
+ig['arp-reply'] = "arp-reply.png"
+ig['mail'] = "mail.png"
+ig['opened-mail'] = "opened-mail.png"
+ig['stp'] = "stp.png"
+ig['icmp'] = "icmp.png"
+ig['icmp-reply'] = "icmp-reply.png"
+ig['icmp-unreachable'] = "icmp-unreachable.png"
+ig['hello-reply'] = "hello-reply.png"
+ig['hello'] = "hello.png"
+ig['rip'] = "rip.png"
+ig['open-file'] = "open-file.png"
+ig['save-file'] = "save-file.png"
+ig['new-file'] = "new-file.png"
 # image_paths['abc'] = "D:/Users/thngl/Documents/GitHub/NetVis/resource/images/pc-on.gif"
 
 image_cache = dict()
@@ -22,7 +32,8 @@ image_cache = dict()
 def get_image(name):
     item = image_cache.get(name)
     if not item:
-        # item = image_cache[name] = ImageTk.PhotoImage(file=image_paths[name]))
+        if image_paths.get(name) is None:
+            image_paths[name] = name + ".png"
         item = image_cache[name] = StaticImage.factory(image_paths[name])
     return item
 
@@ -47,6 +58,7 @@ class StaticImage:
 
     @staticmethod
     def factory(file_name, **kwargs):
+        file_name = root_paths + file_name
         extension = file_name.split('.')[-1]
         if extension == 'gif':
             return AnimatedImage(file_name)
@@ -80,7 +92,7 @@ class AnimatedImage(StaticImage):
                 if len(self.subscribers) > 0:
                     self.index = (self.index + 1) % len(self.data)
                     for subscriber, pack in self.subscribers.items():
-                        pack[0](pack[1])
+                            pack[0](pack[1])
                 sleep(self.time)
         except RuntimeError:
             pass
@@ -92,5 +104,7 @@ class AnimatedImage(StaticImage):
         self.subscribers[target] = (function, canvas)
 
     def unsubscribe(self, target):
+        print(len(self.subscribers))
         if target in self.subscribers:
             self.subscribers.pop(target)
+        print(len(self.subscribers))

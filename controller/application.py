@@ -38,7 +38,7 @@ class Controller:
                     vertex = self.__graph.add_vertex(interface, type='host', name=device['name'], arp_table=device['arp_table'])
                     vertex.fix_time_stamp(time_stamp)
                 elif device['type'] == 'switch':
-                    vertex = self.__graph.add_vertex(type='switch', name=device['name'])
+                    vertex = self.__graph.add_vertex(device['mac_address'], type='switch', name=device['name'])
                     connectable[device['id']] = vertex
                     switches[vertex] = device
                 elif device['type'] == 'router':
@@ -57,8 +57,10 @@ class Controller:
                 switch.set_mac_table({
                     key: connectable[value] for key, value in device['mac_table'].items()
                 })
+                switch.activate_stp(self.__canvas)
             for router, device in routers.items():
                 router.set_routing_table(device['routing_table'])
+                router.start_sending_hello(self.__canvas)
 
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(
@@ -76,9 +78,6 @@ class Controller:
     def exit(self):
         pass
 
-    def test(self):
-        self.__controller.inspect()
-
     def subscribe_inspection(self, func):
         self.__subscribe(func, 'inspect', 'button-1', 'object')
 
@@ -92,10 +91,21 @@ class Controller:
         self.__cache[name] = func
         self.__canvas.subscribe(func, *args)
 
+    def delete(self):
+        inspect = self.__cache['inspect']
+        self.__canvas.unsubscribe(inspect, 'button-1', 'object')
+
+        def my_delete():
+            self.__canvas.cache[self.__cache['delete']].get_variable().deep_destroy(self.__canvas)
+            self.__canvas.unsubscribe(my_delete, 'button-1', 'empty')
+            self.__canvas.subscribe(inspect, 'button-1', 'object')
+
+        self.__subscribe(my_delete, 'delete', 'button-1', 'empty')
+
+
+
     def create(self, info):
         device_type = info['type']
-        print(device_type)
-        g = self.__graph
 
         def my_create(x, y):
             from network import devices as dv
@@ -109,17 +119,36 @@ class Controller:
                 )
             elif device_type == 'switch':
                 device = self.__graph.add_vertex(
+                    info['mac_address'],
                     type='switch',
                     name=info['name']
                 )
             elif device_type == 'router':
-                interfaces = list(map(lambda interface_info: dv.Interface.load(interface_info), info['interfaces']))
+                print(info)
+                interfaces = list()
+                for interface in info['interfaces']:
+                    interfaces.append(dv.Interface.load(
+                        {
+                            'name': interface[0],
+                            'mac_address': interface[1],
+                            'ip_address': interface[2],
+                            'ip_network': interface[3],
+                            'default_gateway': interface[4],
+                        }))
                 device = self.__graph.add_vertex(
                     *interfaces,
                     type='router',
                     name=info['name']
                 )
-                device.set_routing_table(info.get('routing_table'))
+                routing_table = list()
+                for rule in info['routing_table']:
+                    routing_table.append({
+                        'destination': rule[0],
+                        'next_hop': rule[1],
+                        'interface': rule[2],
+                        'type': rule[3]
+                    })
+                device.set_routing_table(routing_table)
             if device:
                 device['x'], device['y'] = self.__canvas.invert_position(x, y)
                 device.display(self.__canvas)
@@ -167,15 +196,6 @@ class Controller:
                         edge.destroy(self.__canvas)
                 interface.other = None
         return
-        """
-        elif isinstance(device, vn.Switch):
-            for other in device.others.copy():
-                intersection = device.link_edges.intersection(other.device.link_edges)
-                for edge in intersection.copy():
-                    if interface in edge.interfaces:
-                        edge.destroy(self.__canvas)
-                device.others.remove(other)"""
-
 
     def __connect_with(self):
 
@@ -234,6 +254,11 @@ class Controller:
             self.__canvas.unsubscribe(trigger_message, 'button-1', 'empty')
 
         self.__canvas.subscribe(trigger_message, 'button-1', 'empty')
+
+    def activate_stp(self, *args):
+        device = self.right_click().get_variable()
+        if device['type'] == 'switch':
+            device.activate_stp(self.__canvas)
 
     def disable_device(self, *args):
         device = self.right_click().get_variable()

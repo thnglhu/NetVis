@@ -76,9 +76,11 @@ class Form:
             return item.get()
         elif isinstance(item, ttk.Treeview):
             result = list()
-            for child in item.get_children():
-                result.append([item.item(child)['text']] + item.item(child)['values'])
-            return result
+            try:
+                for child in item.get_children():
+                    result.append([item.item(child)['text']] + item.item(child)['values'])
+            finally:
+                return result
         elif isinstance(item, dict):
             return {
                 key: Form.extract(value) for key, value in item.items()

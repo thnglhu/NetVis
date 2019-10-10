@@ -184,6 +184,7 @@ class ItemSequence:
 
 class CanvasItem(ABC):
     active = True
+    is_destroyed = False
 
     def __init__(self):
         self.attributes = dict()
@@ -217,6 +218,8 @@ class CanvasItem(ABC):
 
     @abstractmethod
     def destroy(self, canvas): pass
+
+    def deep_destroy(self, canvas): pass
 
     # @abstractmethod
     def disable(self, canvas):
@@ -275,6 +278,7 @@ class Vertex(CanvasItem, ABC):
     def destroy(self, canvas):
         pass
 
+
 class Edge(CanvasItem):
 
     def __init__(self, ig_edge, interface_1, interface_2):
@@ -305,7 +309,7 @@ class Edge(CanvasItem):
     def display(self, canvas):
         att = self.attributes
         canvas.create_mapped_line(self,
-                                  *self.packed_points(),
+                                                  *self.packed_points(),
                                   width=att['width'],
                                   fill=att['color'],
                                   tag=tuple(att['tag']),
@@ -347,6 +351,12 @@ class Edge(CanvasItem):
         a.unsubscribe(self)
         b.unsubscribe(self)
         canvas.remove(self)
+
+    def deep_destroy(self, canvas):
+        self.is_destroyed = True
+        a, b = self.interfaces
+        a.disconnect(b)
+        self.destroy(canvas)
 
     def disable(self, canvas):
         self.active = False

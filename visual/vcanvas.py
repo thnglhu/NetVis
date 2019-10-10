@@ -45,7 +45,10 @@ class Canvas(tk.Canvas):
         self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
+        for canvas_object in self.__graph_objects.copy():
+            canvas_object.deep_destroy(self)
         self.delete("all")
+
         self.__graph_objects = dict()
 
     def create_mapped_circle(self, base, *args, **kw):
@@ -110,16 +113,11 @@ class Canvas(tk.Canvas):
             else:
                 raise ValueError
             self.coords(canvas_object, *position)
-        else:
-            print(canvas_object)
-            raise TypeError
 
     def itemconfig_mapped(self, base, **kwargs):
         canvas_object = self.__graph_objects.get(base)
         if canvas_object is not None:
             self.itemconfigure(canvas_object, **kwargs)
-        else:
-            raise TypeError
 
     def remove(self, base):
         canvas_object = self.__graph_objects.get(base)

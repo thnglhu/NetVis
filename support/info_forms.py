@@ -4,6 +4,7 @@ from support.device_addition_forms import *
 class HostInfo(HostForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
+        self.trigger = trigger
         Form.entry_set(self['name'], info['name'])
         interface = self['interface']
         interface_info = info['interface']
@@ -38,6 +39,7 @@ class HostInfo(HostForm):
         self.button(text="Append", row=43, column=2, sticky="nes", command=append)
         self.button(text="Modify", row=43, column=1, sticky="nes", command=self.__trigger)
 
+
     def __trigger(self):
         self.trigger(self.get_info())
 
@@ -45,15 +47,26 @@ class HostInfo(HostForm):
 class SwitchInfo(SwitchForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
+        self.trigger = trigger
         Form.entry_set(self['name'], info['name'])
+        Form.entry_set(self['mac_address'], info['mac_address'])
         for mac_address, interface in info['mac_table'].items():
             Form.tree_append(self['mac_table'], mac_address, interface)
 
+        if info.get('STP'):
+            self.label(text='STP:', row=0, column=15)
+            self.label(text='id: ', row=1, column=15)
+            self.label(text=str(info['STP']['id']), row=1, column=16)
+            self.label(text='root_id: ', row=2, column=15)
+            self.label(text=str(info['STP']['root_id']), row=2, column=16)
+            self.label(text='cost: ', row=3, column=15)
+            self.label(text=str(info['STP']['cost']), row=3, column=16)
+
     def exclusive(self):
-        self.label(text="Mac table: ", row=1, column=1)
+        self.label(text="Mac table: ", row=5, column=1)
         self['mac_table'] = self.tree_view(
             headers=("MAC address", "interface"),
-            row=2,
+            row=6,
             column=0,
             columnspan=4,
             padx=10,
@@ -69,6 +82,7 @@ class SwitchInfo(SwitchForm):
 class RouterInfo(RouterForm):
     def __init__(self, master, info, trigger=None):
         super().__init__(master, trigger)
+        self.trigger = trigger
         Form.entry_set(self['name'], info['name'])
         for interface in info['interfaces']:
             Form.tree_append(
@@ -79,8 +93,8 @@ class RouterInfo(RouterForm):
                 interface['ip_network'],
                 interface['default_gateway']
             )
-        for ip_address, mac_address in info['arp_table'].items():
-            Form.tree_append(self['arp_table'], ip_address, mac_address)
+        for row in info['arp_table']:
+            Form.tree_append(self['arp_table'], row['ip_address'], row['mac_address'])
         for rule, detail in info['routing_table'].items():
             Form.tree_append(
                 self['routing_table'],
@@ -89,17 +103,38 @@ class RouterInfo(RouterForm):
                 str(detail['interface'].ip_address),
                 str(detail['type']),
             )
+        if info.get('RIP_routing_table'):
+            self.label(text='RIP table:', row=0, column=15)
+            self['RIP_routing_table'] = self.tree_view(
+                headers=('IP Network', 'Via', 'Hop'),
+                row=1,
+                column=15,
+                columnspan=4,
+                rowspan=6,
+                sticky="we",
+                padx=10
+            )
+            for rule in info['RIP_routing_table']:
+                Form.tree_append(
+                    self['RIP_routing_table'],
+                    str(rule['ip_network']),
+                    str(rule['via']),
+                    str(rule['hop']),
+                )
 
     def exclusive(self):
+        self.label(text='ARP table:', row=4, column=0)
         self['arp_table'] = self.tree_view(
             headers=('IP address', 'MAC address'),
-            row=4,
+            row=5,
             column=0,
             columnspan=4,
-            rowspan = 6,
-            sticky="we"
+            rowspan=6,
+            sticky="we",
+            padx=10
         )
-        self.button(text="Modify", row=8, column=7, sticky="es", command=self.__trigger)
+
+        self.button(text="Modify", row=11, column=7, sticky="es", command=self.__trigger)
 
     def __trigger(self):
         self.trigger(self.get_info())
