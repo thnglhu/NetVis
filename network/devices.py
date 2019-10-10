@@ -6,6 +6,7 @@ from functools import partial
 from threading import Thread
 import time
 
+NIC = set()
 
 class Interface:
     device = None
@@ -20,6 +21,7 @@ class Interface:
         self.ip_address = ipa.ip_address(ip_address)
         self.ip_network = ipa.ip_network(ip_network)
         self.default_gateway = ipa.ip_address(default_gateway)
+        NIC.add(self)
 
     @staticmethod
     def load(json):

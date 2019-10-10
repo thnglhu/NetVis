@@ -123,8 +123,9 @@ def zoom_out():
     w.main_canvas.zoom((450, 450), potential=1.2)
 
 
-def find_node():
-    print("Find node")
+def find_device(*args):
+    print(args)
+    controller.find_device(w.search_box.get())
 
 def add_node():
     if existed:

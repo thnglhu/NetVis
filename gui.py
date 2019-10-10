@@ -26,6 +26,7 @@ except ImportError:
 import gui_support
 from PIL import ImageTk, Image
 from time import strftime, localtime, time
+from functools import partial
 
 def vp_start_gui():
 
@@ -412,15 +413,16 @@ class top_level:
         self.search_button.configure(
             image=resource.get_image('find').get_image(),
             borderwidth=0,
+            command=gui_support.find_device,
             bg="#ffffff")
-        self.search_box = tk.Text(self.top_panel)
+        self.search_box = tk.Entry(self.top_panel)
         self.search_box.place(
             anchor=tk.CENTER,
             relx=0.255,
             rely=0.5,
             heigh=25,
             width=150)
-        self.search_box.configure(bg="#DCDCDC")
+        self.search_box.bind('<Return>', gui_support.find_device)
 
         self.separator = ttk.Separator(self.top_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.32,rely=0.2,width=4, height=42)

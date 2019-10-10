@@ -175,6 +175,14 @@ class Controller:
     device_1 = None
     require = False
 
+    def find_device(self, ip_address):
+        ip_address = ipa.ip_address(ip_address.strip())
+        from network import devices
+        for interface in devices.NIC:
+            if interface.ip_address == ip_address:
+                device = interface.device
+                self.__canvas.center_to((device['x'], device['y']))
+
     def select_interface(self, name):
         self.name = name
         if self.require:
