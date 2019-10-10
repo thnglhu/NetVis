@@ -50,7 +50,7 @@ class Host(VVertex, dv.Host):
 
     def info(self):
         self.clean_cache()
-        return {
+        result = {
             'type': 'host',
             'name': self.name,
             'interface': self.interface.info(),
@@ -58,6 +58,7 @@ class Host(VVertex, dv.Host):
                 key: value['mac_address'] for key, value in self.arp_table.items()
             },
         }
+        return result
 
     def focus(self, canvas):
         if self.active:
@@ -111,7 +112,7 @@ class Switch(VVertex, dv.Switch):
         att['image'] = resource.get_image("switch")
 
     def info(self):
-        return {
+        result = {
             'type': 'switch',
             'mac_address': self.mac_address,
             'name': self.name,
@@ -122,6 +123,13 @@ class Switch(VVertex, dv.Switch):
                 key.name: value['status'] for key, value in self.ports.items()
             }
         }
+        if self.stp:
+            result['STP'] = {
+                'id': id(self),
+                'root_id': self.root_id,
+                'cost': self.cost,
+            }
+        return result
 
     def __get_mac_table(self):
         return {str(k): v.name for k, v in self.mac_table.items()}

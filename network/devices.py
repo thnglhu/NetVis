@@ -44,6 +44,7 @@ class Interface:
         }
 
     def modify(self, info):
+        self.name = info['name']
         self.mac_address = info['mac_address']
         self.ip_address = ipa.ip_address(info['ip_address'])
         self.ip_network = ipa.ip_network(info['ip_network'])
@@ -305,12 +306,15 @@ class Switch:
                 next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
                 self.send_elect(source, next_frame, canvas)
             elif root_id == self.root_id:
+
                 if bridge_id == self.root_id:
                     self.ports[source]['status'] = 'root'
                 if self.cost < cost or self.cost == cost and id(self) > bridge_id:
                     self.ports[source]['status'] = 'designated'
-                elif self.ports[source]['status'] != 'root':
+                elif self.ports[source]['status'] != 'root' and self.ports[source]['status'] != 'blocked':
                     self.ports[source]['status'] = 'blocked'
+                elif id(self) < bridge_id:
+                    return
                 next_frame = data.STP(self.mac_address, self.root_id, id(self), self.cost)
                 self.send_elect(source, next_frame, canvas)
                 """

@@ -53,6 +53,15 @@ class SwitchInfo(SwitchForm):
         for mac_address, interface in info['mac_table'].items():
             Form.tree_append(self['mac_table'], mac_address, interface)
 
+        if info.get('STP'):
+            self.label(text='STP:', row=0, column=15)
+            self.label(text='id: ', row=1, column=15)
+            self.label(text=str(info['STP']['id']), row=1, column=16)
+            self.label(text='root_id: ', row=2, column=15)
+            self.label(text=str(info['STP']['root_id']), row=2, column=16)
+            self.label(text='cost: ', row=3, column=15)
+            self.label(text=str(info['STP']['cost']), row=3, column=16)
+
     def exclusive(self):
         self.label(text="Mac table: ", row=5, column=1)
         self['mac_table'] = self.tree_view(
@@ -94,7 +103,24 @@ class RouterInfo(RouterForm):
                 str(detail['interface'].ip_address),
                 str(detail['type']),
             )
-        print(info.get('RIP_routing_table'))
+        if info.get('RIP_routing_table'):
+            self.label(text='RIP table:', row=0, column=15)
+            self['RIP_routing_table'] = self.tree_view(
+                headers=('IP Network', 'Via', 'Hop'),
+                row=1,
+                column=15,
+                columnspan=4,
+                rowspan=6,
+                sticky="we",
+                padx=10
+            )
+            for rule in info['RIP_routing_table']:
+                Form.tree_append(
+                    self['RIP_routing_table'],
+                    str(rule['ip_network']),
+                    str(rule['via']),
+                    str(rule['hop']),
+                )
 
     def exclusive(self):
         self.label(text='ARP table:', row=4, column=0)

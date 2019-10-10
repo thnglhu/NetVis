@@ -51,8 +51,10 @@ def static(router, frame, packet, **kwargs):
             reply = dt.Frame(receiver.mac_address, frame.mac_source, icmp)
             receiver.send(reply, kwargs.get('canvas'))
 
+
 def hub_broadcast_handler(hub, frame, **kwargs):
     source = kwargs.get('source')
+    print(hub.others)
     for other in hub.others:
         if other is not source:
             hub.send(frame, other, kwargs.get('canvas'))
@@ -61,7 +63,7 @@ def hub_broadcast_handler(hub, frame, **kwargs):
 def router_forward_handler(router, frame, **kwargs):
     packet = frame.packet
     if packet and kwargs.get('receiver').mac_address == frame.mac_target:
-
+        print(router.extend.get('RIP'))
         if router.extend.get('RIP'):
             for network, info in router.extend['RIP']['table'].items():
                 if packet.ip_target in network:
