@@ -39,6 +39,7 @@ def init(top, gui, *args, **kwargs):
     controller.subscribe_coords(update_canvas_coords)
     controller.subscribe_property(context_menu)
     existed = True
+    setup_filter()
 
 
 def open_file():
@@ -203,42 +204,26 @@ def update_node_info(info):
     pass
 
     frame.update()
-    """
-    # print('Do something with this info', info)
-    # update_log(info)
-    # clear the data panel
-    global dy
-    dy = 0
-    node_info.clear()
-    for widget in w.node_data_panel.winfo_children():
-        widget.destroy()
 
-    def add_node_info(key, value=None):
-        global dy
-        if value is not None:
-            node_info[add_widget("label", key, 0.04)] = add_widget("entry", value, 0.5)
-            dy += 0.1
-        else:
-            return add_widget("label", key, 0.04)
+def setup_filter():
+    from visual import visible
+    from resource import get_image
+    from functools import partial
 
-    def add_table_info(key, value):
-        table_label = add_node_info(key)
-        global dy
-        dy += 0.09
-        table_info = []
-        for k, v in value.items():
-            table_info.append([add_widget("entry", k, 0.04), add_widget("entry", v, 0.5)])
-            dy += 0.15
-        node_info[table_label] = table_info
+    def switch(label, name, event):
+        print("Hello")
+        visible[name] ^= True
+        _on = visible[name]
+        _image = get_image(name if _on else name + '-off')
+        label.configure(image=_image.get_image())
 
-    for key, value in info.items():
-        if value[0]:
-            if isinstance(value[1], dict):
-                add_table_info(key, value[1])
-            else:
-                add_node_info(key, value[1])
-"""
-
+    count = 0
+    for name, on in visible.items():
+        image = get_image(name if on else name + '-off')
+        label = tk.Label(w.filter_panel, image=image.get_image())
+        label.grid(row=0, column=count)
+        label.bind('<Button-1>', partial(switch, label, name))
+        count += 1
 
 def node_modify(info):
     if existed:

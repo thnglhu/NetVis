@@ -3,9 +3,9 @@ from . import vcanvas
 from . import vnetwork
 
 visible = {
-    'ARP': True,
-    'STP': True,
-    'ICMP': True,
-    'RIP': True,
-    'Hello': True,
+    'arp': True,
+    'stp': True,
+    'icmp': True,
+    'rip': True,
+    'hello': True,
 }

@@ -60,7 +60,7 @@ class ARP(Packet):
         )
 
     def get_name(self):
-        return "ARP"
+        return "arp"
 
 class Frame:
     def __init__(self, source, target, packet):
@@ -112,7 +112,7 @@ class ICMP(Packet):
         return 74
 
     def get_name(self):
-        return "ICMP"
+        return "icmp"
 
 
 class STP(Frame):
@@ -132,7 +132,7 @@ class STP(Frame):
         return resource.get_image('stp')
 
     def get_name(self):
-        return "STP"
+        return "stp"
 
 
 class Hello(Packet):
@@ -160,7 +160,7 @@ class Hello(Packet):
             return Frame(args[0], args[1], self)
 
     def get_name(self):
-        return "Hello"
+        return "hello"
 
 
 class RIP(Packet):
@@ -178,4 +178,4 @@ class RIP(Packet):
         return resource.get_image('rip')
 
     def get_name(self):
-        return "RIP"
+        return "rip"

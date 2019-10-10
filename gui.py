@@ -802,8 +802,8 @@ class top_level:
         self.sample_title.configure(bg="#F0F0F0")
         """
 
-        # ---------------------------Data Panel: Title-------------------------#
-        self.data_panel_title = tk.Label(self.data_panel, text="Data Panel", font=("Rockwell", 15))
+        # ---------------------------Data Panel: Node Title-------------------------#
+        self.data_panel_title = tk.Label(self.data_panel, text="Information", font=("Helvetica", 12, "bold"))
         self.data_panel_title.place(
             anchor=tk.CENTER,
             relx=0.15,
@@ -813,25 +813,22 @@ class top_level:
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
         self.separator.place(relx=0.05, rely=0.07, width=590, height=3)
 
-        # ---------------------------Data Panel: Node Title-------------------------#
-        self.node_data_title = tk.Label(self.data_panel, text="Data", font=("Rockwell", 15))
-        self.node_data_title.place(
-            anchor=tk.CENTER,
-            relx=0.15,
-            rely=0.1)
-        self.node_data_title.configure(bg="#ffffff")
-
-        self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
-        self.separator.place(relx=0.05, rely=0.12, width=590, height=3)
-
         # ---------------------------Data Panel: Node Data Panel-------------------------#
         self.node_data_panel = tk.Frame(self.data_panel)
         self.node_data_panel.place(
             relx=0.05,
-            rely=0.13,
+            rely=0.08,
             relheight=0.8,
-            relwidth=0.95)
+            relwidth=0.9)
         self.node_data_panel.configure(background="#fafafa")
+
+        self.filter_panel = tk.Frame(self.data_panel)
+        self.filter_panel.place(
+            relx=0.05,
+            rely=0.08 + 0.8,
+            relheight=0.15,
+            relwidth=0.9
+        )
         """
         # ---------------------------Data Panel: Edge Title-------------------------#
         self.separator = ttk.Separator(self.data_panel, orient=tk.VERTICAL)
