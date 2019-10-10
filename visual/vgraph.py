@@ -363,6 +363,10 @@ class Edge(CanvasItem):
         self.active = False
         self.reconfigure(canvas)
 
+    def enable(self, canvas):
+        self.active = True
+        self.reconfigure(canvas)
+
     def info(self):
         return {
             'type': (False, 'edge'),

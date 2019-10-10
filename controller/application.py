@@ -55,7 +55,7 @@ class Controller:
                 vertex['y'] = device['y']
             for switch, device in switches.items():
                 switch.set_mac_table({
-                    key: connectable[value] for key, value in device['mac_table'].items()
+                    key: connectable[value] for key, value in device['mac_table'].items() if connectable.get(value)
                 })
                 switch.activate_stp(self.__canvas)
             for router, device in routers.items():
@@ -268,9 +268,13 @@ class Controller:
         if device['type'] == 'switch':
             device.activate_stp(self.__canvas)
 
-    def disable_device(self, *args):
+    def disable_device(self, info, *args):
         device = self.right_click().get_variable()
-        device.disable(self.__canvas)
+        if info.get('active'):
+            device.disable(self.__canvas)
+        else:
+            device.enable(self.__canvas)
+
 
     def clear(self):
         self.__canvas.clear()

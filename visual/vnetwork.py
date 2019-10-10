@@ -33,6 +33,11 @@ class VVertex(vg.Vertex, ABC):
     def reconfigure(self, canvas):
         canvas.itemconfig_mapped(self, image=self['image'].get_image(), tag=tuple(self['tag']))
 
+    def deep_destroy(self, canvas):
+        graph = self.graph()
+        graph.vertices.remove(self)
+        canvas.remove(self)
+
 
 class Host(VVertex, dv.Host):
     def __init__(self, ig_vertex, interface, **kwargs):
@@ -59,6 +64,7 @@ class Host(VVertex, dv.Host):
                     'expire_time': info['time_stamp']
                 } for ip_address, info in self.arp_table.items()
             ],
+            'active': self.active,
         }
         return result
 
@@ -81,9 +87,12 @@ class Host(VVertex, dv.Host):
         self.interface.modify(info['interface'])
 
     def disable(self, canvas):
-        self.active = False
         self['image'] = self['offline']
-        self.reconfigure(canvas)
+        super().disable(canvas)
+
+    def enable(self, canvas):
+        self['image'] = self['deactivate']
+        super().enable(canvas)
 
     def json(self):
         json = super().json()
@@ -96,7 +105,7 @@ class Host(VVertex, dv.Host):
         self['image'].unsubscribe(self)
         if self.interface:
             self.interface.deep_destroy(canvas=canvas)
-        canvas.remove(self)
+        super().deep_destroy(canvas)
 
 
 class Switch(VVertex, dv.Switch):
@@ -118,7 +127,8 @@ class Switch(VVertex, dv.Switch):
             'bridge_id': id(self),
             'status': {
                 key.name: value['status'] for key, value in self.ports.items()
-            }
+            },
+            'active': self.active,
         }
         if self.stp:
             result['STP'] = {
@@ -150,7 +160,7 @@ class Switch(VVertex, dv.Switch):
             edges = my_device.link_edges.intersection(other_device.link_edges)
             for edge in edges:
                 edge.deep_destroy(canvas)
-        canvas.remove(self)
+        super().deep_destroy(canvas)
 
 
 class Router(VVertex, dv.Router):
@@ -177,7 +187,8 @@ class Router(VVertex, dv.Router):
             'interfaces': [interface.info() for interface in self.interfaces],
             'routing_table': {
                 str(key): value for key, value in self.routing_table.items()
-            }
+            },
+            'active': self.active,
         }
         if self.extend.get('RIP'):
             result['RIP_routing_table'] = [
@@ -211,7 +222,7 @@ class Router(VVertex, dv.Router):
         self['image'].unsubscribe(self)
         for interface in self.interfaces:
             interface.deep_destroy(canvas=canvas)
-        canvas.remove(self)
+        super().deep_destroy(canvas)
 
 
 class Frame(vg.CanvasItem):

@@ -237,17 +237,17 @@ def context_menu(info):
         'host': {
             'Connect': controller.prepare_connecting,
             'Send to': controller.send_message,
-            'Disable': controller.disable_device,
+            'Disable' if info.get('active', True) else 'Enable': controller.disable_device,
         },
         'switch': {
             'Connect': controller.prepare_connecting,
-            'Disable': controller.disable_device,
+            'Disable' if info.get('active', True) else 'Enable': controller.disable_device,
             'Activate STP': controller.activate_stp,
         },
         'router': {
             'Connect': router_connect,
             'Add an interface': add_interface,
-            'Disable': controller.disable_device,
+            'Disable' if info.get('active', True) else 'Enable': controller.disable_device,
         }
     }
     if info['type'] not in menu_dictionary:

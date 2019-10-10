@@ -254,7 +254,7 @@ class Switch:
 
     def send_elect(self, source, frame, canvas):
 
-        for port, value in self.ports.items():
+        for port, value in self.ports.copy().items():
             if value['status'] == 'root':
                 continue
             # self.mac_table = dict()
@@ -474,6 +474,12 @@ class Router:
         from random import uniform
         time.sleep(uniform(1, 10))
         while True and not self.__getattribute__('is_destroyed'):
+            try:
+                if not self.__getattribute__('active'):
+                    time.sleep(1)
+                    continue
+            except AttributeError:
+                pass
             for interface in self.interfaces:
                 if hasattr(self, 'is_destroyed'):
                     if self.is_destroyed:
@@ -486,6 +492,12 @@ class Router:
         from random import uniform
         time.sleep(uniform(1, 10))
         while True and not self.__getattribute__('is_destroyed'):
+            try:
+                if not self.__getattribute__('active'):
+                    time.sleep(1)
+                    continue
+            except AttributeError:
+                pass
             for neighbor in self.neighbors.values():
                 if hasattr(self, 'is_destroyed'):
                     if self.is_destroyed:

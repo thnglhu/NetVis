@@ -1,4 +1,5 @@
 from network import data as dt
+from time import time
 
 handler = dict()
 
@@ -93,7 +94,8 @@ def router_hello_handler(router, frame, **kwargs):
             router.neighbors[str(packet.ip_source)] = {
                 'ip_address': packet.ip_source,
                 'mac_address': frame.mac_source,
-                'via': kwargs.get('receiver')
+                'via': kwargs.get('receiver'),
+                'last_time': time(),
             }
         else:
             interface = kwargs.get('receiver')
