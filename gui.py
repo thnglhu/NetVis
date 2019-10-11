@@ -526,7 +526,7 @@ class top_level:
         self.filter_panel = tk.Frame(self.data_panel)
         self.filter_panel.place(
             relx=0.05,
-            rely=0.08 + 0.8,
+            rely=0.1 + 0.8,
             relheight=0.15,
             relwidth=0.9
         )

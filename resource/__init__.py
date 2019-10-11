@@ -1,6 +1,7 @@
 from PIL import ImageTk, Image
 from threading import Thread
 from time import sleep
+
 root_paths = "resource/images/"
 image_paths = dict()
 ig = image_paths
@@ -69,11 +70,12 @@ class StaticImage:
 
 class AnimatedImage(StaticImage):
     index = 0
-    subscribers = dict()
     thread = object
     time = 1
 
     def setup(self, file_name):
+        print('dasd')
+        self.subscribers = dict()
         self.data = list()
         source = Image.open(file_name)
         try:
@@ -93,7 +95,7 @@ class AnimatedImage(StaticImage):
                 if len(self.subscribers) > 0:
                     self.index = (self.index + 1) % len(self.data)
                     for subscriber, pack in self.subscribers.items():
-                            pack[0](pack[1])
+                        pack[0](pack[1])
                 sleep(self.time)
         except RuntimeError:
             pass

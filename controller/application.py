@@ -25,6 +25,11 @@ class Controller:
 
     def load_file(self, file):
         self.clear()
+        from resource import image_cache, AnimatedImage
+        for key, image in image_cache.copy().items():
+            if isinstance(image, AnimatedImage):
+                image.subscribers = dict()
+                image_cache.pop(key)
         with open(file.name) as json_file:
             data = json.load(json_file)
             time_stamp = data['time_stamp']
@@ -57,10 +62,10 @@ class Controller:
                 switch.set_mac_table({
                     key: connectable[value] for key, value in device['mac_table'].items() if connectable.get(value)
                 })
-                switch.activate_stp(self.__canvas)
+                # switch.activate_stp(self.__canvas)
             for router, device in routers.items():
                 router.set_routing_table(device['routing_table'])
-                router.activate_rip(self.__canvas)
+                # router.activate_rip(self.__canvas)
 
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(

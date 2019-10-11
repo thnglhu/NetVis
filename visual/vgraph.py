@@ -103,7 +103,12 @@ class Graph(ig.Graph):
         return edge
 
     def delete_edges(self, *args, **kwds):
-        return super().delete_edges(*args, **kwds)
+        result = None
+        try:
+            result = super().delete_edges(*args, **kwds)
+        finally:
+            return result
+
 
     def get_vs(self, **kwargs):
         seq = ItemSequence(self.vertices, *self.vertices)

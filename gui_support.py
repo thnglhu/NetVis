@@ -116,11 +116,11 @@ def close():
             child.configure(state=tk.DISABLED)
 
 def zoom_in():
-    w.main_canvas.zoom((450, 450), potential=1/1.2)
+    w.main_canvas.zoom((450, 450), potential=1.2)
 
 
 def zoom_out():
-    w.main_canvas.zoom((450, 450), potential=1.2)
+    w.main_canvas.zoom((450, 450), potential=1/1.2)
 
 
 def find_device(*args):

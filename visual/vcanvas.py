@@ -47,10 +47,13 @@ class Canvas(tk.Canvas):
     def clear(self, *args):
         try:
             for canvas_object in self.__graph_objects.copy():
-                canvas_object.deep_destroy(self)
+                try:
+                    canvas_object.deep_destroy(self)
+                except:
+                    pass
         finally:
             self.delete("all")
-            canvas_object = dict()
+            self.canvas_object = dict()
 
         self.__graph_objects = dict()
 

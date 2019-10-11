@@ -287,12 +287,11 @@ class Switch:
     def __elect(self, canvas):
         from random import uniform
         time.sleep(uniform(1, 5))
-        flag = "topology change"
         while True and not self.__getattribute__('is_destroyed'):
             if self.root_id == id(self):
                 frame = data.STP(self.mac_address, self.root_id, self.root_id, self.cost)
                 self.send_elect(None, frame, canvas)
-            time.sleep(25)
+            time.sleep(20)
 
     def disconnect(self, other, init=True):
         if other in self.others:

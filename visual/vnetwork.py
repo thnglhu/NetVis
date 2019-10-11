@@ -102,7 +102,9 @@ class Host(VVertex, dv.Host):
 
     def deep_destroy(self, canvas):
         self.is_destroyed = True
-        self['image'].unsubscribe(self)
+        self['deactivate'].unsubscribe(self)
+        self['activate'].unsubscribe(self)
+        self['offline'].unsubscribe(self)
         if self.interface:
             self.interface.deep_destroy(canvas=canvas)
         super().deep_destroy(canvas)

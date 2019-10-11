@@ -50,12 +50,12 @@ class SwitchInfo(SwitchForm):
 
         if info.get('STP'):
             self.label(text='STP:', row=0, column=15)
-            self.label(text='id: ', row=1, column=15)
-            self.label(text=str(info['STP']['id']), row=1, column=16)
-            self.label(text='root_id: ', row=2, column=15)
-            self.label(text=str(info['STP']['root_id']), row=2, column=16)
-            self.label(text='cost: ', row=3, column=15)
-            self.label(text=str(info['STP']['cost']), row=3, column=16)
+            self.label(text='id: ', row=2, column=15)
+            self.label(text=str(info['STP']['id']), row=2, column=16)
+            self.label(text='root_id: ', row=3, column=15)
+            self.label(text=str(info['STP']['root_id']), row=3, column=16)
+            self.label(text='cost: ', row=4, column=15)
+            self.label(text=str(info['STP']['cost']), row=4, column=16)
 
     def exclusive(self):
         self.label(text="Mac table: ", row=5, column=1)
@@ -99,10 +99,10 @@ class RouterInfo(RouterForm):
                 str(detail['type']),
             )
         if info.get('RIP_routing_table'):
-            self.label(text='RIP table:', row=0, column=15)
+            self.label(text='RIP table:', row=1, column=15)
             self['RIP_routing_table'] = self.tree_view(
                 headers=('IP Network', 'Via', 'Hop'),
-                row=1,
+                row=2,
                 column=15,
                 columnspan=4,
                 rowspan=6,
