@@ -45,9 +45,12 @@ class Canvas(tk.Canvas):
         self.bind("<Configure>", self.__resize)
 
     def clear(self, *args):
-        for canvas_object in self.__graph_objects.copy():
-            canvas_object.deep_destroy(self)
-        self.delete("all")
+        try:
+            for canvas_object in self.__graph_objects.copy():
+                canvas_object.deep_destroy(self)
+        finally:
+            self.delete("all")
+            canvas_object = dict()
 
         self.__graph_objects = dict()
 

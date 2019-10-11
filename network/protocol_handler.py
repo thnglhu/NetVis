@@ -63,24 +63,30 @@ def router_forward_handler(router, frame, **kwargs):
     packet = frame.packet
     if packet and kwargs.get('receiver').mac_address == frame.mac_target:
         if router.extend.get('RIP'):
+
             for network, info in router.extend['RIP']['table'].items():
                 if packet.ip_target in network:
                     if info['via'] is None:
-                        static(router, frame, packet, **kwargs)
+                        continue
                     else:
                         rule = {
                             'next_hop': info['via'],
                         }
-                        interface = router.neighbors[str(info['via'])]['via']
-                        router.forward(interface, frame, rule, kwargs.get('canvas'))
+                        neighbor = router.neighbors.get(str(info['via']))
+                        if neighbor:
+                            interface = neighbor['via']
+                            router.forward(interface, frame, rule, kwargs.get('canvas'))
+                        else:
+                            continue
                     break
             else:
-                if isinstance(packet, dt.ICMP):
-                    receiver = kwargs.get('receiver')
-                    icmp = packet.reply()
-                    icmp.unreachable = True
-                    reply = dt.Frame(receiver.mac_address, frame.mac_source, icmp)
-                    receiver.send(reply, kwargs.get('canvas'))
+                static(router, frame, packet, **kwargs)
+                # if isinstance(packet, dt.ICMP):
+                #     receiver = kwargs.get('receiver')
+                #     icmp = packet.reply()
+                #     icmp.unreachable = True
+                #     reply = dt.Frame(receiver.mac_address, frame.mac_source, icmp)
+                #     receiver.send(reply, kwargs.get('canvas'))
         else:
             static(router, frame, packet, **kwargs)
         return True
@@ -115,7 +121,7 @@ def router_rip_handler(router, frame, **kwargs):
                 my_table[network]['via'] = packet.ip_source
                 my_table[network]['hop'] += 1
             else:
-                if rule['hop'] + 1 < my_table[network]['hop']:
+                if my_table[network]['via'] == packet.ip_source or rule['hop'] + 1 < my_table[network]['hop']:
                     my_table[network]['hop'] = rule['hop'] + 1
                     my_table[network]['via'] = packet.ip_source
         return True

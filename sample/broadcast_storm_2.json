@@ -1,42 +1,42 @@
 {
     "connection": [
         {
-            "bandwidth": 50,
+            "bandwidth": 20,
             "link": [
                 2304199060424,
                 2304199058120
             ]
         },
         {
-            "bandwidth": 50,
+            "bandwidth": 20,
             "link": [
                 2304199058120,
                 2304199058056
             ]
         },
         {
-            "bandwidth": 50,
+            "bandwidth": 20,
             "link": [
                 2304199058120,
                 2304199058568
             ]
         },
         {
-            "bandwidth": 50,
+            "bandwidth": 20,
             "link": [
                 2304199058056,
                 2304199058312
             ]
         },
         {
-            "bandwidth": 50,
+            "bandwidth": 20,
             "link": [
                 2304199058312,
                 2304199058568
             ]
         },
         {
-            "bandwidth": 50,
+            "bandwidth": 20,
             "link": [
                 2304199097096,
                 2304199058312

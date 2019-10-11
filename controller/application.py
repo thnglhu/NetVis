@@ -60,7 +60,7 @@ class Controller:
                 switch.activate_stp(self.__canvas)
             for router, device in routers.items():
                 router.set_routing_table(device['routing_table'])
-                router.start_sending_hello(self.__canvas)
+                router.activate_rip(self.__canvas)
 
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(
@@ -236,7 +236,7 @@ class Controller:
                 self.__isolate(device_2)
                 edge = self.__graph.add_edge(self.device_1, device_2)
                 self.device_1.connect(device_2)
-                edge['bandwidth'] = 50
+                edge['bandwidth'] = 20
                 edge.display(self.__canvas)
                 self.__canvas.tag_lower('edge')
         self.device_1.device.unfocus(self.__canvas)
@@ -267,6 +267,11 @@ class Controller:
         device = self.right_click().get_variable()
         if device['type'] == 'switch':
             device.activate_stp(self.__canvas)
+
+    def activate_rip(self, *args):
+        device = self.right_click().get_variable()
+        if device['type'] == 'router':
+            device.activate_rip(self.__canvas)
 
     def disable_device(self, info, *args):
         device = self.right_click().get_variable()

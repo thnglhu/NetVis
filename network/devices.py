@@ -134,13 +134,16 @@ class Host:
         self.interface = interface
         interface.attach_device(self)
         interface.attachment = self.__receive
-        self.arp_table = {
-            #ipa.ip_address(key): value for key, value in self.arp_table.items()
-            ipa.ip_address(info['ip_address']): {
-                'mac_address': info['mac_address'],
-                'time_stamp': info['expire_time'],
-            } for info in kwargs.get('arp_table')
-        }
+        if kwargs.get('arp_table'):
+            self.arp_table = {
+                #ipa.ip_address(key): value for key, value in self.arp_table.items()
+                ipa.ip_address(info['ip_address']): {
+                    'mac_address': info['mac_address'],
+                    'time_stamp': info['expire_time'],
+                } for info in kwargs.get('arp_table')
+            }
+        else:
+            self.arp_table = dict()
         self.name = kwargs.get('name')
         self.__buffer = set()
 
@@ -182,7 +185,7 @@ class Host:
         if frame.mac_target == self.interface.mac_address:
             self.arp_table[frame.packet.ip_source] = {
                 'mac_address': frame.mac_source,
-                'time_stamp': time.time() + 10
+                'time_stamp': time.time() + 30
             }
 
     def cache_contains(self, ip_address):
@@ -454,7 +457,7 @@ class Router:
             } for sub in info
         }
 
-    def start_sending_hello(self, canvas):
+    def activate_rip(self, canvas):
         self.extend['RIP'] = {
             'hello_thread': None,
             'table': {
@@ -486,7 +489,7 @@ class Router:
                         return
                 hello_frame = data.Hello(interface.ip_address).build(interface.mac_address)
                 interface.send(hello_frame, canvas)
-            time.sleep(10)
+            time.sleep(20)
 
     def __advertise(self, canvas):
         from random import uniform
@@ -498,17 +501,25 @@ class Router:
                     continue
             except AttributeError:
                 pass
-            for neighbor in self.neighbors.values():
+            for key, neighbor in self.neighbors.copy().items():
                 if hasattr(self, 'is_destroyed'):
                     if self.is_destroyed:
                         return
+
                 ip_address = neighbor['ip_address']
                 mac_address = neighbor['mac_address']
                 via = neighbor['via']
-                frame = data.RIP(via.ip_address, ip_address, self.extend['RIP']['table']).build(via.mac_address,
-                                                                                                mac_address)
+                if time.time() - neighbor['last_time'] > 20:
+                    for rule in self.extend['RIP']['table'].copy().values():
+                        if rule['via'] == ip_address:
+                            rule['hop'] = float("inf")
+                    self.neighbors.pop(key)
+                    continue
+                frame = data.RIP(via.ip_address,
+                                 ip_address,
+                                 self.extend['RIP']['table']).build(via.mac_address, mac_address)
                 via.send(frame, canvas)
-            time.sleep(5)
+            time.sleep(20)
 
     """
     def set_routing_table(self, routing_table):
@@ -537,7 +548,7 @@ class Router:
             return
         if ph.router_hello_handler(self, frame, canvas=canvas, receiver=receiver):
             return
-        if ph.router_rip_handler(self, frame, receiver=receiver):
+        if self.extend.get('RIP') and ph.router_rip_handler(self, frame, receiver=receiver):
             return
         ph.router_forward_handler(self, frame, source=source, receiver=receiver, canvas=canvas)
 

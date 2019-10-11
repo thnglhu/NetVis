@@ -1,91 +1,91 @@
 {
     "connection": [
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220201224,
                 2516220258184
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220202312,
                 2516220258184
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220202760,
                 2516220258184
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220218760,
                 2516220258184
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220215880,
                 2516220258248
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220216520,
                 2516220258248
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220236872,
                 2516220258248
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220216968,
                 2516220258312
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220217608,
                 2516220258312
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220218056,
                 2516220239816
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220218888,
                 2516220237064
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220219272,
                 2516220256776
             ]
         },
         {
-            "bandwidth": 100,
+            "bandwidth": 20,
             "link": [
                 2516220237384,
                 2516220256456
