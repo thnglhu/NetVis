@@ -1,0 +1,86 @@
+{
+    "connection": [
+        {
+            "bandwidth": 20,
+            "link": [
+                18289040,
+                18289808
+            ]
+        },
+        {
+            "bandwidth": 20,
+            "link": [
+                18289296,
+                18289808
+            ]
+        },
+        {
+            "bandwidth": 20,
+            "link": [
+                18289520,
+                18289808
+            ]
+        }
+    ],
+    "devices": [
+        {
+            "arp_table": [],
+            "interface": {
+                "default_gateway": "192.0.0.1",
+                "id": 18289040,
+                "ip_address": "192.0.0.2",
+                "ip_network": "192.0.0.0/24",
+                "mac_address": "d0:c9:f2:d7:59:cd",
+                "name": "eth0"
+            },
+            "name": "pc2",
+            "type": "host",
+            "x": 0.3252274730522793,
+            "y": -0.31886384648908894
+        },
+        {
+            "arp_table": [],
+            "interface": {
+                "default_gateway": "192.0.0.1",
+                "id": 18289296,
+                "ip_address": "192.0.0.3",
+                "ip_network": "192.0.0.0/24",
+                "mac_address": "57:98:eb:54:58:f6",
+                "name": "eth0"
+            },
+            "name": "pc1",
+            "type": "host",
+            "x": -3.109441393258325,
+            "y": -0.33896145543260014
+        },
+        {
+            "arp_table": [],
+            "interface": {
+                "default_gateway": "192.0.0.1",
+                "id": 18289520,
+                "ip_address": "192.0.0.4",
+                "ip_network": "192.0.0.0/24",
+                "mac_address": "cf:19:0b:2f:d0:9e",
+                "name": "eth0"
+            },
+            "name": "pc0",
+            "type": "host",
+            "x": -1.4554027364242785,
+            "y": -3.6143749944507704
+        },
+        {
+            "id": 18289808,
+            "mac_address": "asdasd123asdasd",
+            "mac_table": {
+                "57:98:eb:54:58:f6": 18289296,
+                "cf:19:0b:2f:d0:9e": 18289520,
+                "d0:c9:f2:d7:59:cd": 18289040
+            },
+            "name": "S1",
+            "type": "switch",
+            "x": -1.451704886597399,
+            "y": -1.978643407271854
+        }
+    ],
+    "time_stamp": 1570765549.7125132
+}
