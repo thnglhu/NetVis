@@ -1,8 +1,6 @@
 from . import vgraph as vg
 import resource
-import tkinter as tk
 import numpy as np
-import itertools as it
 from abc import ABC, abstractmethod
 from threading import Thread
 from network import devices as dv
@@ -35,6 +33,11 @@ class VVertex(vg.Vertex, ABC):
     def reconfigure(self, canvas):
         canvas.itemconfig_mapped(self, image=self['image'].get_image(), tag=tuple(self['tag']))
 
+    def deep_destroy(self, canvas):
+        graph = self.graph()
+        graph.vertices.remove(self)
+        canvas.remove(self)
+
 
 class Host(VVertex, dv.Host):
     def __init__(self, ig_vertex, interface, **kwargs):
@@ -54,9 +57,14 @@ class Host(VVertex, dv.Host):
             'type': 'host',
             'name': self.name,
             'interface': self.interface.info(),
-            'arp_table': {
-                key: value['mac_address'] for key, value in self.arp_table.items()
-            },
+            'arp_table': [
+                {
+                    'ip_address': ip_address,
+                    'mac_address': info['mac_address'],
+                    'expire_time': info['time_stamp']
+                } for ip_address, info in self.arp_table.items()
+            ],
+            'active': self.active,
         }
         return result
 
@@ -79,14 +87,12 @@ class Host(VVertex, dv.Host):
         self.interface.modify(info['interface'])
 
     def disable(self, canvas):
-        self.active = False
         self['image'] = self['offline']
-        self.reconfigure(canvas)
+        super().disable(canvas)
 
-    def get_edge(self):
-        if self.other:
-            graph = self.get_graph()
-        return None
+    def enable(self, canvas):
+        self['image'] = self['deactivate']
+        super().enable(canvas)
 
     def json(self):
         json = super().json()
@@ -99,7 +105,7 @@ class Host(VVertex, dv.Host):
         self['image'].unsubscribe(self)
         if self.interface:
             self.interface.deep_destroy(canvas=canvas)
-        canvas.remove(self)
+        super().deep_destroy(canvas)
 
 
 class Switch(VVertex, dv.Switch):
@@ -121,7 +127,8 @@ class Switch(VVertex, dv.Switch):
             'bridge_id': id(self),
             'status': {
                 key.name: value['status'] for key, value in self.ports.items()
-            }
+            },
+            'active': self.active,
         }
         if self.stp:
             result['STP'] = {
@@ -153,17 +160,8 @@ class Switch(VVertex, dv.Switch):
             edges = my_device.link_edges.intersection(other_device.link_edges)
             for edge in edges:
                 edge.deep_destroy(canvas)
-        canvas.remove(self)
+        super().deep_destroy(canvas)
 
-        """
-            if self.other:
-            my_device = self.device
-            other_device = self.other.device
-            edges = my_device.link_edges.intersection(other_device.link_edges)
-            for edge in edges:
-                edge.deep_destroy(kwargs.get('canvas'))
-            self.disconnect(self.other)
-        """
 
 class Router(VVertex, dv.Router):
     def __init__(self, ig_vertex, *interfaces, **kwargs):
@@ -189,7 +187,8 @@ class Router(VVertex, dv.Router):
             'interfaces': [interface.info() for interface in self.interfaces],
             'routing_table': {
                 str(key): value for key, value in self.routing_table.items()
-            }
+            },
+            'active': self.active,
         }
         if self.extend.get('RIP'):
             result['RIP_routing_table'] = [
@@ -223,7 +222,7 @@ class Router(VVertex, dv.Router):
         self['image'].unsubscribe(self)
         for interface in self.interfaces:
             interface.deep_destroy(canvas=canvas)
-        canvas.remove(self)
+        super().deep_destroy(canvas)
 
 
 class Frame(vg.CanvasItem):
@@ -241,6 +240,14 @@ class Frame(vg.CanvasItem):
         self['image'] = kwargs.get('image')
         self.speed = kwargs.get('speed', 10)
         self.name = kwargs.get('name')
+        canvas = kwargs.get('canvas')
+        if canvas:
+            from visual import visible
+            if not visible.get(self.name):
+                self.trigger()
+            else:
+                self.display(canvas)
+                self.start_animation()
 
     def __animate(self, canvas):
         from visual import visible
@@ -250,27 +257,29 @@ class Frame(vg.CanvasItem):
                 and not self['edge'].is_destroyed \
                 and not self.is_destroyed \
                 and visible.get(self.name):
-            att['percent'] += self.speed
+            att['percent'] += self.speed / 2
             if att['percent'] > 100.0:
                 att['percent'] = 100
             self.load()
             self.reallocate(canvas)
-            time.sleep(0.05)
+            time.sleep(0.025)
 
         if self.active and not self['edge'].is_destroyed and not self.is_destroyed:
             if not visible.get(self.name):
                 time.sleep(0.05)
-                if self.func:
-                    self.func(*self.params)
+                self.trigger()
                 canvas.remove(self)
                 return
             if att['percent'] > 100.0:
                 att['percent'] = 100.0
                 self.load()
                 self.reallocate(canvas)
-            if self.func:
-                self.func(*self.params)
+            self.trigger()
         canvas.remove(self)
+
+    def trigger(self):
+        if self.func:
+            self.func(*self.params)
 
     def load(self):
         att = self.attributes

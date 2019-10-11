@@ -123,8 +123,9 @@ def zoom_out():
     w.main_canvas.zoom((450, 450), potential=1.2)
 
 
-def find_node():
-    print("Find node")
+def find_device(*args):
+    print(args)
+    controller.find_device(w.search_box.get())
 
 def add_node():
     if existed:
@@ -232,27 +233,30 @@ def node_modify(info):
 
 def context_menu(info):
     menu = tk.Menu(w.main_canvas, tearoff=0)
-    menu_dictionary = {
-        'host': {
+    info_type = info.get('type')
+    if info_type == 'host':
+        context = {
             'Connect': controller.prepare_connecting,
             'Send to': controller.send_message,
-            'Disable': controller.disable_device,
-        },
-        'switch': {
+            'Disable' if info.get('active', True) else 'Enable': controller.disable_device,
+        }
+    elif info_type == 'switch':
+        context = {
             'Connect': controller.prepare_connecting,
-            'Disable': controller.disable_device,
+            'Disable' if info.get('active', True) else 'Enable': controller.disable_device,
             'Activate STP': controller.activate_stp,
-        },
-        'router': {
+        }
+    elif info_type == 'router':
+        context = {
             'Connect': router_connect,
             'Add an interface': add_interface,
-            'Disable': controller.disable_device,
+            'Disable' if info.get('active', True) else 'Enable': controller.disable_device,
+            'Activate RIP': controller.activate_rip,
         }
-    }
-    if info['type'] not in menu_dictionary:
+    else:
         raise KeyError
     from functools import partial
-    for text, function in menu_dictionary[info['type']].items():
+    for text, function in context.items():
         menu.add_command(label=text, command=partial(function, info) if function is not None else None)
 
     try:

@@ -1,4 +1,5 @@
 from network import data as dt
+from time import time
 
 handler = dict()
 
@@ -34,7 +35,6 @@ def interface_icmp_handler(interface, frame, **kwargs):
 
 
 def static(router, frame, packet, **kwargs):
-    check = True
     for network in router.routing_table:
         rule = router.routing_table[network]
         interface = rule['interface']
@@ -42,8 +42,8 @@ def static(router, frame, packet, **kwargs):
                 and packet.ip_target != interface.ip_address \
                 and kwargs.get('source') != rule:
             router.forward(interface, frame, rule, kwargs.get('canvas'))
-            check = False
-    if check:
+            break
+    else:
         if isinstance(packet, dt.ICMP):
             receiver = kwargs.get('receiver')
             icmp = packet.reply()
@@ -54,8 +54,6 @@ def static(router, frame, packet, **kwargs):
 
 def hub_broadcast_handler(hub, frame, **kwargs):
     source = kwargs.get('source')
-    if hub.mac_address == 'sddddddd' and frame.packet and isinstance(frame.packet, dt.STP):
-        pass
     for other in hub.others:
         if other is not source:
             hub.send(frame, other, kwargs.get('canvas'))
@@ -64,23 +62,34 @@ def hub_broadcast_handler(hub, frame, **kwargs):
 def router_forward_handler(router, frame, **kwargs):
     packet = frame.packet
     if packet and kwargs.get('receiver').mac_address == frame.mac_target:
-        print(router.extend.get('RIP'))
         if router.extend.get('RIP'):
+
             for network, info in router.extend['RIP']['table'].items():
                 if packet.ip_target in network:
-                    pass
                     if info['via'] is None:
-                        static(router, frame, packet, **kwargs)
+                        continue
                     else:
                         rule = {
                             'next_hop': info['via'],
                         }
-                        interface = router.neighbors[str(info['via'])]['via']
-                        router.forward(interface, frame, rule, kwargs.get('canvas'))
+                        neighbor = router.neighbors.get(str(info['via']))
+                        if neighbor:
+                            interface = neighbor['via']
+                            router.forward(interface, frame, rule, kwargs.get('canvas'))
+                        else:
+                            continue
                     break
-            return True
-
-        static(router, frame, packet, **kwargs)
+            else:
+                static(router, frame, packet, **kwargs)
+                # if isinstance(packet, dt.ICMP):
+                #     receiver = kwargs.get('receiver')
+                #     icmp = packet.reply()
+                #     icmp.unreachable = True
+                #     reply = dt.Frame(receiver.mac_address, frame.mac_source, icmp)
+                #     receiver.send(reply, kwargs.get('canvas'))
+        else:
+            static(router, frame, packet, **kwargs)
+        return True
     return False
 
 
@@ -91,7 +100,8 @@ def router_hello_handler(router, frame, **kwargs):
             router.neighbors[str(packet.ip_source)] = {
                 'ip_address': packet.ip_source,
                 'mac_address': frame.mac_source,
-                'via': kwargs.get('receiver')
+                'via': kwargs.get('receiver'),
+                'last_time': time(),
             }
         else:
             interface = kwargs.get('receiver')
@@ -111,7 +121,7 @@ def router_rip_handler(router, frame, **kwargs):
                 my_table[network]['via'] = packet.ip_source
                 my_table[network]['hop'] += 1
             else:
-                if rule['hop'] + 1 < my_table[network]['hop']:
+                if my_table[network]['via'] == packet.ip_source or rule['hop'] + 1 < my_table[network]['hop']:
                     my_table[network]['hop'] = rule['hop'] + 1
                     my_table[network]['via'] = packet.ip_source
         return True

@@ -55,12 +55,12 @@ class Controller:
                 vertex['y'] = device['y']
             for switch, device in switches.items():
                 switch.set_mac_table({
-                    key: connectable[value] for key, value in device['mac_table'].items()
+                    key: connectable[value] for key, value in device['mac_table'].items() if connectable.get(value)
                 })
                 switch.activate_stp(self.__canvas)
             for router, device in routers.items():
                 router.set_routing_table(device['routing_table'])
-                router.start_sending_hello(self.__canvas)
+                router.activate_rip(self.__canvas)
 
             for json_info in data['connection']:
                 edge = self.__graph.connect_interface(
@@ -175,6 +175,14 @@ class Controller:
     device_1 = None
     require = False
 
+    def find_device(self, ip_address):
+        ip_address = ipa.ip_address(ip_address.strip())
+        from network import devices
+        for interface in devices.NIC:
+            if interface.ip_address == ip_address:
+                device = interface.device
+                self.__canvas.center_to((device['x'], device['y']))
+
     def select_interface(self, name):
         self.name = name
         if self.require:
@@ -228,7 +236,7 @@ class Controller:
                 self.__isolate(device_2)
                 edge = self.__graph.add_edge(self.device_1, device_2)
                 self.device_1.connect(device_2)
-                edge['bandwidth'] = 50
+                edge['bandwidth'] = 20
                 edge.display(self.__canvas)
                 self.__canvas.tag_lower('edge')
         self.device_1.device.unfocus(self.__canvas)
@@ -260,9 +268,18 @@ class Controller:
         if device['type'] == 'switch':
             device.activate_stp(self.__canvas)
 
-    def disable_device(self, *args):
+    def activate_rip(self, *args):
         device = self.right_click().get_variable()
-        device.disable(self.__canvas)
+        if device['type'] == 'router':
+            device.activate_rip(self.__canvas)
+
+    def disable_device(self, info, *args):
+        device = self.right_click().get_variable()
+        if info.get('active'):
+            device.disable(self.__canvas)
+        else:
+            device.enable(self.__canvas)
+
 
     def clear(self):
         self.__canvas.clear()
