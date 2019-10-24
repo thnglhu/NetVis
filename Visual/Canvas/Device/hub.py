@@ -33,7 +33,7 @@ class Hub(Vertex):
             'type': self.type,
             'status': self.active,
             'name': self.name,
-            'position': self.position,
+            'position': tuple(self.position),
             'ports': [
                 port.save() for port in self.ports
             ]

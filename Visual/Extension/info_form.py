@@ -264,6 +264,12 @@ class InfoForm:
         self['StaticRoutingTable treeview'] = self.tree_view(self.frame, ['Network', 'Next hop', 'Interface'])
         self['StaticRoutingTable treeview'].grid(row=26, column=0, padx=10, sticky="WE", columnspan=4)
 
+        self['RIP'] = tkinter.Label(self.frame, text="RIP Table:")
+        self['RIP'].grid(row=35, column=0, sticky="W")
+
+        self['RIP treeview'] = self.tree_view(self.frame, ['Network', 'Hop', 'Via', 'Interface'])
+        self['RIP treeview'].grid(row=36, column=0, padx=10, sticky="WE", columnspan=4)
+
     def write_router(self, router):
         self.set_entry_text(self['Name entry'], router.name)
         self.set_treeview(self['Interface treeview'], [
@@ -275,6 +281,10 @@ class InfoForm:
         ])
         self.set_treeview(self['StaticRoutingTable treeview'], [
             [str(rule['network']), rule['next_hop'] if rule['next_hop'] else '-', rule['interface'].port.name] for rule in router.routing_table
+        ])
+        self.set_treeview(self['RIP treeview'], [] if not router.attributes.get('rip') else [
+            [network, info['hop'], info['via'], info['interface'].port.name]
+            for network, info in router['rip']['table'].items()
         ])
 
     def unlock_router(self, state='normal'):

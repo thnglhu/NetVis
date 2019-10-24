@@ -49,7 +49,7 @@ class Router(Vertex):
             'type': self.type,
             'status': self.active,
             'name': self.name,
-            'position': self.position,
+            'position': tuple(self.position),
             'interfaces': [
                 interface.save() for interface in self.interfaces
             ],
@@ -90,6 +90,7 @@ class Router(Vertex):
                         return True
                 elif isinstance(frame.packet, rip.RIP):
                     info = frame.packet.info
+                    has = False
                     for rule in info:
                         if rule['network'] not in self['rip']['table'] \
                                 or self['rip']['table'][rule['network']]['hop'] > rule['hop'] + 1:
@@ -98,6 +99,9 @@ class Router(Vertex):
                                 'via': str(frame.packet.source),
                                 'interface': port.device
                             }
+                            has = True
+                    if has:
+                        self.update()
                     return True
             if frame.packet.destination == port.device.ip_interface.ip:
                 return True

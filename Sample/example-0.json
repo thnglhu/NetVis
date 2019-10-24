@@ -1,0 +1,49 @@
+{
+  "devices": [
+    {
+      "type": "host",
+      "status": true,
+      "name": "pc0",
+      "default_gateway": "192.168.0.1",
+      "position": [
+        -7.843382020483988,
+        -9.89202657807309
+      ],
+      "interface": {
+        "mac_address": "ad:c7:d6:85:38:c1",
+        "ip_interface": "192.168.0.2/24",
+        "port": {
+          "id": 2792912164360,
+          "name": "eth0"
+        }
+      }
+    },
+    {
+      "type": "host",
+      "status": true,
+      "name": "pc1",
+      "default_gateway": "192.168.0.1",
+      "position": [
+        4.214354518469007,
+        -9.931048379170017
+      ],
+      "interface": {
+        "mac_address": "60:4e:0e:c7:5e:f4",
+        "ip_interface": "192.168.0.3/24",
+        "port": {
+          "id": 2792912183816,
+          "name": "eth0"
+        }
+      }
+    }
+  ],
+  "links": [
+    {
+      "ids": [
+        2792912183816,
+        2792912164360
+      ],
+      "bandwidth": 20
+    }
+  ]
+}

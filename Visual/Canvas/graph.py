@@ -41,6 +41,7 @@ class Graph:
                     link.save() for link in self.links
                 ],
             }
+            print(info)
             dump(info, json)
 
     def add_device(self, info):

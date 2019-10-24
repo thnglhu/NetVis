@@ -5,5 +5,6 @@ time_scale = object
 visible = {
     'arp': True,
     'stp': True,
-    'icmp': True,
+    'hello': True,
+    'rip': True,
 }

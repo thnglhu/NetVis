@@ -38,7 +38,7 @@ class Host(Vertex):
             'status': self.active,
             'name': self.name,
             'default_gateway': self.default_gateway,
-            'position': self.position,
+            'position': tuple(self.position),
             'interface': self.interface.save(),
         }
 

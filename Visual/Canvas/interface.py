@@ -93,7 +93,6 @@ class Interface:
                             arp_frame = Frame(self.mac_address, frame.source, arp_reply)
                             self.port.send(arp_frame)
                         else:
-                            print('???')
                             return False
                     else:
                         for each in self.buffer.copy():
@@ -105,7 +104,6 @@ class Interface:
                                     self.send(*each[1:])
                                 except KeyError:
                                     pass
-                    print('???')
                     return True
             return self.device.receive(frame, port)
         return False
