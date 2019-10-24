@@ -1,5 +1,6 @@
 import tkinter
 import tkinter.ttk
+import time
 
 
 class InfoForm:
@@ -212,7 +213,7 @@ class InfoForm:
         self['MACTable'] = tkinter.Label(self.frame, text="MAC Table: ")
         self['MACTable'].grid(row=24, column=0, padx=10, sticky="W")
 
-        self['MACTable treeview'] = self.tree_view(self.frame, ['MAC address', 'Port'])
+        self['MACTable treeview'] = self.tree_view(self.frame, ['MAC address', 'Port', 'Last Time'])
         self['MACTable treeview'].grid(row=25, column=0, padx=10, sticky="WE", columnspan=4)
 
     def write_switch(self, switch):
@@ -221,7 +222,7 @@ class InfoForm:
             [port.name, port.mac_address, not bool(port.link), 'designated' if not switch.attributes.get('stp') else switch.ports[port]['state']] for port in switch.ports
         ])
         self.set_treeview(self['MACTable treeview'], [
-            [key, value.name] for key, value in switch.mac_table.items()
+            [key, value['port'].name, time.strftime('%H:%M:%S', time.localtime(value['time']))] for key, value in switch.mac_table.items()
         ])
 
     def unlock_switch(self, state='normal'):

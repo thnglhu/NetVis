@@ -39,6 +39,20 @@ class Switch(Hub):
     # endregion
 
     # region Logical
+    def __checker(self):
+        wait_time = 10
+        start_time = time()
+        while not self.destroyed and self.active:
+            for key, value in self.mac_table.copy().items():
+                if value['time'] - time() > wait_time:
+                    self.mac_table.pop(key)
+            while not self.destroyed and self.active:
+                if setting.time_scale.get() == 0 or time() - start_time < wait_time * 100 / setting.time_scale.get():
+                    sleep(0.01)
+                else:
+                    start_time = time()
+                    break
+
     def __stp_thread(self):
         wait_time = 2
         start_time = time()
@@ -77,25 +91,28 @@ class Switch(Hub):
                 self.stp_handling(port, frame)
                 return True
             return False
+        if self.ports[port]['state'] == 'blocked':
+            return False
         if frame:
-            self.mac_table[frame.source] = port
+            self.mac_table[frame.source] = {
+                'port': port,
+                'time': time(),
+            }
             self.update()
         if isinstance(frame, BroadcastFrame) or frame.destination not in self.mac_table:
-            if self.ports[port]['state'] == 'blocked':
-                return False
             for other in self.ports:
                 if other != port and self.ports[other]['state'] != 'blocked':
                     other.send(frame)
             return True
-        elif frame.destination in self.mac_table:
-            self.mac_table[frame.destination].send(frame)
+        elif frame.destination in self.mac_table and self.mac_table[frame.destination]['port'] != port:
+            self.mac_table[frame.destination]['port'].send(frame)
         else:
             return False
         return True
 
     def disconnect(self, port):
         for key, value in self.mac_table.copy().items():
-            if value == port:
+            if value['port'] == port:
                 self.mac_table.pop(key)
         self.update()
         pass
