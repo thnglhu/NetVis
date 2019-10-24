@@ -64,6 +64,10 @@ class ContextMenu:
         menu.add_command(
             label='Disable' if router.active else 'Enable',
             command=partial(self.__disable if router.active else self.__enable, router))
+        menu.add_command(
+            label='Activate RIP' if not router.attributes.get('rip') else 'Deactivate RIP',
+            command=partial(self.__activate_rip if not router.attributes.get('rip') else self.__deactivate_rip, router)
+        )
         self.__finalize(menu)
 
     def __finalize(self, menu):
@@ -152,3 +156,8 @@ class ContextMenu:
     def __deactivate_stp(self, switch):
         switch.deactivate_stp()
 
+    def __activate_rip(self, router):
+        router.activate_rip()
+
+    def __deactivate_rip(self, router):
+        router.deactivate_rip()

@@ -73,6 +73,10 @@ class Interface:
             arp_frame = BroadcastFrame(self.mac_address, arp_request)
             self.port.send(arp_frame)
 
+    def broadcast(self, packet):
+        frame = BroadcastFrame(self.mac_address, packet)
+        self.port.send(frame)
+
     def receive(self, frame, port):
         if frame.destination == self.mac_address or isinstance(frame, BroadcastFrame):
             if frame.packet:
@@ -89,6 +93,7 @@ class Interface:
                             arp_frame = Frame(self.mac_address, frame.source, arp_reply)
                             self.port.send(arp_frame)
                         else:
+                            print('???')
                             return False
                     else:
                         for each in self.buffer.copy():
@@ -100,6 +105,7 @@ class Interface:
                                     self.send(*each[1:])
                                 except KeyError:
                                     pass
+                    print('???')
                     return True
             return self.device.receive(frame, port)
         return False
