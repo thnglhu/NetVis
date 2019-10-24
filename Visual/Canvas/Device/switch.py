@@ -28,6 +28,7 @@ class Switch(Hub):
         self.mac_table = dict()
         self.type = 'switch'
         self['image'] = self['on-image'] if self.active else self['off-image']
+        Thread(target=self.__checker).start()
 
     def _set_image(self):
         self['on-image'] = get_image('_switch-on')
@@ -40,18 +41,17 @@ class Switch(Hub):
 
     # region Logical
     def __checker(self):
-        wait_time = 10
-        start_time = time()
+        wait_time = 5
         while not self.destroyed and self.active:
-            for key, value in self.mac_table.copy().items():
-                if value['time'] - time() > wait_time:
-                    self.mac_table.pop(key)
-            while not self.destroyed and self.active:
-                if setting.time_scale.get() == 0 or time() - start_time < wait_time * 100 / setting.time_scale.get():
-                    sleep(0.01)
-                else:
-                    start_time = time()
-                    break
+            if setting.time_scale.get() != 0:
+                has = False
+                for key, value in self.mac_table.copy().items():
+                    if time() - value['time'] > wait_time * 100 / setting.time_scale.get():
+                        self.mac_table.pop(key)
+                        has = True
+                if has:
+                    self.update()
+            sleep(0.1)
 
     def __stp_thread(self):
         wait_time = 2

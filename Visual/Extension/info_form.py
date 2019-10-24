@@ -130,7 +130,7 @@ class InfoForm:
         self['ARPTable'] = tkinter.Label(self.frame, text="ARP Table")
         self['ARPTable'].grid(row=6, column=0, sticky="W")
 
-        self['ARPTable treeview'] = self.tree_view(self.frame, ['IP address', 'MAC address'])
+        self['ARPTable treeview'] = self.tree_view(self.frame, ['IP address', 'MAC address', 'Last Time'])
         self['ARPTable treeview'].grid(row=7, column=0, padx=10, sticky="WE", columnspan=2)
 
     def write_host(self, host):
@@ -140,7 +140,7 @@ class InfoForm:
         self.set_entry_text(self['MacAddress entry'], host.interface.mac_address)
         self.set_entry_text(self['IpInterface entry'], str(host.interface.ip_interface))
         self.set_treeview(self['ARPTable treeview'], [
-            [key, value] for key, value in host.interface.arp_table.items()
+            [key, value['mac_address'], time.strftime('%H:%M:%S', time.localtime(value['time']))] for key, value in host.interface.arp_table.items()
         ])
 
     def unlock_host(self, state='normal'):
@@ -255,7 +255,7 @@ class InfoForm:
         self['ARPTable'] = tkinter.Label(self.frame, text="ARP Table: ")
         self['ARPTable'].grid(row=13, column=0, sticky="W")
 
-        self['ARPTable treeview'] = self.tree_view(self.frame, ['Interface', 'IP Interface',  'MAC Address'])
+        self['ARPTable treeview'] = self.tree_view(self.frame, ['Interface', 'IP Interface',  'MAC Address', 'Last Time'])
         self['ARPTable treeview'].grid(row=14, column=0, padx=10, sticky="WE", columnspan=4)
 
         self['StaticRoutingTable'] = tkinter.Label(self.frame, text="Static Routing Table:")
@@ -270,7 +270,7 @@ class InfoForm:
             [interface.port.name, interface.mac_address, str(interface.ip_interface)] for interface in router.interfaces
         ])
         self.set_treeview(self['ARPTable treeview'], [
-            [interface.port.name, key, value]
+            [interface.port.name, key, value['mac_address'], time.strftime('%H:%M:%S', time.localtime(value['time']))]
             for interface in router.interfaces for key, value in interface.arp_table.items()
         ])
         self.set_treeview(self['StaticRoutingTable treeview'], [

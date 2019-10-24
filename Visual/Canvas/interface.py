@@ -1,6 +1,7 @@
 from ipaddress import ip_interface as ipi, ip_address as ipa
 from .port import Port
 from .Frame.Data import ARP, BroadcastFrame, Frame
+from time import time
 
 
 class Interface:
@@ -55,7 +56,7 @@ class Interface:
         if packet.destination not in self.ip_interface.network:
             if alternative and ipa(alternative) in self.ip_interface.network:
                 if alternative in self.arp_table:
-                    frame = Frame(self.mac_address, self.arp_table[alternative], packet)
+                    frame = Frame(self.mac_address, self.arp_table[alternative]['mac_address'], packet)
                     self.port.send(frame)
                 else:
                     self.buffer.add(("ARP", packet, alternative))
@@ -64,7 +65,7 @@ class Interface:
                     self.port.send(arp_frame)
             return
         if str(packet.destination) in self.arp_table:
-            frame = Frame(self.mac_address, self.arp_table[str(packet.destination)], packet)
+            frame = Frame(self.mac_address, self.arp_table[str(packet.destination)]['mac_address'], packet)
             self.port.send(frame)
         else:
             self.buffer.add(("ARP", packet))
@@ -76,7 +77,10 @@ class Interface:
         if frame.destination == self.mac_address or isinstance(frame, BroadcastFrame):
             if frame.packet:
                 if ipa(frame.packet.source) in self.ip_interface.network:
-                    self.arp_table[str(frame.packet.source)] = frame.source
+                    self.arp_table[str(frame.packet.source)] = {
+                        'mac_address': frame.source,
+                        'time': time(),
+                    }
                     self.update()
                 if isinstance(frame.packet, ARP):
                     if frame.packet.request:
