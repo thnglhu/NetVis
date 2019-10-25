@@ -160,6 +160,23 @@ class Router(Vertex):
                     start_time = time()
                     break
 
+    def __hello_checker(self):
+        wait_time = 5
+        while not self.destroyed and self.active:
+            if setting.time_scale.get() != 0 and self.attributes.get('rip'):
+                has = False
+                for key, value in self['rip']['neighbor'].copy().items():
+                    if time() - value['time'] > wait_time * 100 / setting.time_scale.get():
+                        self['rip']['neighbor'].pop(key)
+                        for rule in self['rip']['table'].values():
+                            print(rule['interface'], value['port'].device)
+                            if rule['interface'] == value['port'].device:
+                                rule['hop'] = float('inf')
+                        has = True
+                if has:
+                    self.update()
+            sleep(0.1)
+
     def __rip(self):
         wait_time = 3
         start_time = time()
@@ -191,6 +208,7 @@ class Router(Vertex):
             },
         }
         Thread(target=self.__hello).start()
+        Thread(target=self.__hello_checker).start()
         Thread(target=self.__rip).start()
 
     def deactivate_rip(self):

@@ -9,7 +9,7 @@ class RIP(Packet):
         self.info = [
             {
                 'network': str(key),
-                'hop': int(value['hop']),
+                'hop': value['hop'] if not value['hop'] == float('inf') else 'inf',
                 'via': str(value['via'])
             } for key, value in info.items()
         ]

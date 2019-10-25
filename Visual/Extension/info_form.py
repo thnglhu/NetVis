@@ -353,7 +353,10 @@ class InfoForm:
     @staticmethod
     def set_treeview(treeview, data):
         for child in treeview.get_children():
-            treeview.delete(child)
+            try:
+                treeview.delete(child)
+            except:
+                pass
         for datum in data:
             InfoForm.insert_treeview(treeview, datum)
 
