@@ -1,9 +1,12 @@
 import tkinter
 import tkinter.ttk
 import time
+from threading import Lock
 
 
 class InfoForm:
+
+    lock = Lock()
 
     def __getitem__(self, item):
         return self.data[item]
@@ -23,6 +26,7 @@ class InfoForm:
         self.apply['state'] = 'disabled'
         self.removed_object = None
         self.remove = False
+
 
         modify_button.config(command=self.__trigger)
         apply_button.config(command=self.__modify)
@@ -350,13 +354,15 @@ class InfoForm:
             tree.bind("<Delete>", delete)
         return tree
 
-    @staticmethod
-    def set_treeview(treeview, data):
+    @classmethod
+    def set_treeview(cls, treeview, data):
+        cls.lock.acquire()
         for child in treeview.get_children():
             try:
                 treeview.delete(child)
             except:
                 pass
+        cls.lock.release()
         for datum in data:
             InfoForm.insert_treeview(treeview, datum)
 
