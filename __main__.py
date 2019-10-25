@@ -1,6 +1,5 @@
 import tkinter
 from Visual.Canvas import Canvas
-from Visual.Canvas import Device
 from Visual.Extension import VerticalScrollable
 from controller import Controller
 from functools import partial

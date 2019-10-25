@@ -92,10 +92,11 @@ class Router(Vertex):
                     info = frame.packet.info
                     has = False
                     for rule in info:
-                        if rule['network'] not in self['rip']['table'] \
-                                or self['rip']['table'][rule['network']]['hop'] > rule['hop'] + 1:
+                        if rule['network'] not in self['rip']['table'] or \
+                                self['rip']['table'][rule['network']]['hop'] > float(rule['hop']) + 1 or \
+                                self['rip']['table'][rule['network']]['via'] == str(frame.packet.source):
                             self['rip']['table'][rule['network']] = {
-                                'hop': rule['hop'] + 1,
+                                'hop': float(rule['hop']) + 1,
                                 'via': str(frame.packet.source),
                                 'interface': port.device
                             }
@@ -169,7 +170,6 @@ class Router(Vertex):
                     if time() - value['time'] > wait_time * 100 / setting.time_scale.get():
                         self['rip']['neighbor'].pop(key)
                         for rule in self['rip']['table'].values():
-                            print(rule['interface'], value['port'].device)
                             if rule['interface'] == value['port'].device:
                                 rule['hop'] = float('inf')
                         has = True
