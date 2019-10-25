@@ -362,9 +362,9 @@ class InfoForm:
                 treeview.delete(child)
             except:
                 pass
-        cls.lock.release()
         for datum in data:
             InfoForm.insert_treeview(treeview, datum)
+        cls.lock.release()
 
     @staticmethod
     def insert_treeview(treeview, datum):
