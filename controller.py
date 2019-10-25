@@ -22,12 +22,14 @@ class Controller:
         application.canvas.subscribe(self.context_menu.second_load, 'Button-1', 'object')
         application.canvas.subscribe(self.addition_form.load, 'Button-1', 'location')
         self.setup_filter(application.filter_frame)
+        self.about_image = None
 
     def new(self):
         self.graph.destroy()
 
-    def load(self):
-        filename = fd.askopenfilename(title="Select file", filetypes=(("json files", "*.json"), ))
+    def load(self, filename=None):
+        if not filename:
+            filename = fd.askopenfilename(title="Select file", filetypes=(("json files", "*.json"), ))
         if filename:
             self.graph.destroy()
             self.graph.load(filename)
@@ -73,3 +75,28 @@ class Controller:
 
     def zoom_out(self):
         self.application.canvas.zoom((self.application.canvas.winfo_width() / 2, self.application.canvas.winfo_height() / 2), potential=1/1.2)
+
+    def about(self):
+        import Resource
+        from PIL import ImageTk, Image
+        def about_popup_window():
+
+            about_popup = tkinter.Toplevel()
+            about_popup.title("About")
+
+            if not self.about_image:
+                self.about_image = Resource.get_image('_about')
+
+            image = self.about_image
+            label = tkinter.Label(about_popup, image=image.get_image())
+            label.pack()
+
+            def update_gif():
+                if tkinter.Toplevel.winfo_exists(about_popup):
+                    label.configure(image=image.get_image())
+                else:
+                    self.about_image.unsubscribe(self.about_image)
+
+            self.about_image.subscribe(self.about_image, update_gif)
+
+        about_popup_window()
