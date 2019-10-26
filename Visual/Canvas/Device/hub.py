@@ -52,6 +52,12 @@ class Hub(Vertex):
                 other.send(frame)
         return True
 
+    def port_disconnect(self, _):
+        pass
+
+    def port_connect(self, _):
+        pass
+
     def enable(self):
         self.active = True
         for port in self.ports:

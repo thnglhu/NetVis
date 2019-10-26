@@ -51,6 +51,12 @@ class Switch(Hub):
                         has = True
                 if has:
                     self.update()
+                if self.attributes.get('stp') and self['stp']['id'] != self['stp']['root_id']:
+                    if time() - self['stp']['time'] > 2 * wait_time * 100 / setting.time_scale.get():
+                        print('reset')
+                        self['stp']['root_id'] = self['stp']['id']
+                        self['stp']['path_cost'] = 0
+                        self['stp']['time'] = time()
             sleep(0.1)
 
     def __stp_thread(self):
@@ -59,7 +65,8 @@ class Switch(Hub):
         while not self.destroyed and self.active:
             if self.attributes.get('stp'):
                 try:
-                    if self['stp']['id'] == self['stp']['root_id'] and isinstance(self.ports, dict):
+                    if self['stp']['id'] == self['stp']['root_id']:
+                        self['stp']['time'] = time()
                         for port, info in self.ports.items():
                             frame = BPDU(
                                 port.mac_address,
@@ -85,26 +92,26 @@ class Switch(Hub):
         if not self.active and not self.destroyed:
             self.deactivate_stp()
 
-    def receive(self, frame, port):
+    def receive(self, frame, receive_port):
         if isinstance(frame, MulticastFrame):
             if self.attributes.get('stp') and frame.destination == "01:80:C2:00:00:00" and isinstance(frame, BPDU):
-                self.stp_handling(port, frame)
+                self.stp_handling(receive_port, frame)
                 return True
             return False
-        if self.ports[port]['state'] == 'blocked':
+        if self.ports[receive_port]['state'] == 'blocked':
             return False
         if frame:
             self.mac_table[frame.source] = {
-                'port': port,
+                'port': receive_port,
                 'time': time(),
             }
             self.update()
         if isinstance(frame, BroadcastFrame) or frame.destination not in self.mac_table:
             for other in self.ports:
-                if other != port and self.ports[other]['state'] != 'blocked':
+                if other != receive_port and self.ports[other]['state'] != 'blocked':
                     other.send(frame)
             return True
-        elif frame.destination in self.mac_table and self.mac_table[frame.destination]['port'] != port:
+        elif frame.destination in self.mac_table and self.mac_table[frame.destination]['port'] != receive_port:
             self.mac_table[frame.destination]['port'].send(frame)
         else:
             return False
@@ -115,7 +122,10 @@ class Switch(Hub):
             if value['port'] == port:
                 self.mac_table.pop(key)
         self.update()
-        pass
+        if self.attributes.get('stp'):
+            if self.ports[port]['state'] == 'root':
+                self['stp']['root_id'] = self['stp']['root_id']
+            self.ports[port]['state'] = 'designated'
 
     def activate_stp(self):
         self.ports = {
@@ -168,9 +178,10 @@ class Switch(Hub):
                         ))
             elif self['stp']['path_cost'] > cost:
                 self.ports[sender_port]['state'] = 'root'
+                self['stp']['path_cost'] = cost
                 for port in self.ports:
                     if port != sender_port:
-                        self.ports[sender_port]['state'] = 'designated'
+                        self.ports[port]['state'] = 'designated'
                         port.send(BPDU(
                             port.mac_address,
                             self['stp']['root_id'],
@@ -183,4 +194,6 @@ class Switch(Hub):
                 if self['stp']['id'] > bpdu.sender_switch:
                     self.ports[sender_port]['state'] = 'blocked'
                     self.update()
+        if self.ports[sender_port]['state'] == 'root':
+            self['stp']['time'] = time()
     # endregion

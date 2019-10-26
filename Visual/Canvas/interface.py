@@ -1,7 +1,9 @@
 from ipaddress import ip_interface as ipi, ip_address as ipa
 from .port import Port
 from .Frame.Data import ARP, BroadcastFrame, Frame
-from time import time
+from time import time, sleep
+import setting
+from threading import Thread
 
 
 class Interface:
@@ -14,6 +16,7 @@ class Interface:
         self.port = Port(info['port']['name'], self, info['port'].get('id'))
         self.buffer = set()
         self.arp_table = dict()
+        Thread(target=self.__checker).start()
 
     def __getattr__(self, item):
         return getattr(self.device, item)
@@ -49,6 +52,19 @@ class Interface:
     # endregion
 
     # region Logical
+    def __checker(self):
+        wait_time = 5
+        while not self.destroyed and self.active:
+            if setting.time_scale.get() != 0:
+                has = False
+                for key, value in self.arp_table.copy().items():
+                    if time() - value['time'] > wait_time * 100 / setting.time_scale.get():
+                        self.arp_table.pop(key)
+                        has = True
+                if has:
+                    self.update()
+            sleep(0.1)
+
     def disconnect(self, _):
         pass
 

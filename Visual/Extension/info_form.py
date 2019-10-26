@@ -80,7 +80,8 @@ class InfoForm:
                 self.frame.update()
             else:
                 return
-        getattr(self, "write_" + category)(objective)
+        if hasattr(self, "write_" + category):
+            getattr(self, "write_" + category)(objective)
 
     def delete(self, objective):
         if self.remove:

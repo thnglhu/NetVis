@@ -36,7 +36,10 @@ class Link(CanvasObject, ABC):
         self.subscribers.add(frame)
 
     def unsubscribe(self, frame):
-        self.subscribers.remove(frame)
+        try:
+            self.subscribers.remove(frame)
+        except KeyError:
+            pass
 
     def save(self):
         return {
